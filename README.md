@@ -37,23 +37,26 @@ Follow these steps to get your development environment set up:
    git clone https://github.com/your-username/budget-tracker.git
    cd budget-tracker
 # If using pipenv
-pipenv shell  
+    ```bash
+      pipenv shell  
 
 # Or using venv
-python -m venv venv
+    ```bash
+      python -m venv venv
 source venv/bin/activate  # On Unix/macOS
 source venv/Scripts/activate  # On Windows
 
 2. **Install dependencies:**
-
-pip install -r requirements.txt
+    ```bash
+   pip install -r requirements.txt
 
 3. **Initialize the database:**
-
-python manage.py migrate
-
+    ```bash
+   python manage.py migrate
+    
 4. **Run the server:**
-python manage.py runserver
+    ```bash
+   python manage.py runserver
 
 ## API Integration
 This project consumes external APIs to fetch financial data. You'll need to obtain API keys and configure them in your settings. Please refer to the documentation of the respective APIs for guidance.

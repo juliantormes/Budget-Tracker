@@ -36,12 +36,11 @@ Follow these steps to get your development environment set up:
    ```bash
    git clone https://github.com/your-username/budget-tracker.git
    cd budget-tracker
+   
 # If using pipenv
-    ```bash
       pipenv shell  
 
 # Or using venv
-    ```bash
       python -m venv venv
 source venv/bin/activate  # On Unix/macOS
 source venv/Scripts/activate  # On Windows

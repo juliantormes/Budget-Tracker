@@ -5,9 +5,11 @@
 </head>
 <body>
     <h1>Expense List</h1>
+    <!-- Add Expense Button -->
+    <a href="{% url 'add_expense' %}" style="padding: 10px; background-color: blue; color: white; text-decoration: none; border-radius: 5px;">Add New Expense</a>
     <ul>
         {% for expense in expenses %}
-            <li>{{ expense.description }}: ${{ expense.amount }} on {{ expense.date }}</li>
+            <li>{{ expense.date }} - {{ expense.category.name }} - ${{ expense.amount }} - {{ expense.description }}</li>
         {% endfor %}
     </ul>
 </body>

@@ -1,7 +1,10 @@
+from django.contrib import admin
 from django.urls import include, path
-from tracker.views import expense_list  # Import the view
+from tracker import views
 
 urlpatterns = [
+    path('admin/', admin.site.urls),
     path('tracker/', include('tracker.urls')),
-    path('', expense_list, name='home'),  # Use expense_list for the root URL
+    path('', views.expense_list, name='home'),
+    path('hello/<str:username>', views.expense_list, name='hello'),
 ]

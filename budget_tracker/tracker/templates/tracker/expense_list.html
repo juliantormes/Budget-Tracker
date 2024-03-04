@@ -12,6 +12,14 @@
             <li>{{ expense.date }}: {{ expense.description }} - ${{ expense.amount }}</li>
         {% endfor %}
     </ul>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <a href="{% url 'home' %}">Return Home</a>
+    <script src="{% static 'tracker/js/script.js' %}"></script>
 </body>
 </html>

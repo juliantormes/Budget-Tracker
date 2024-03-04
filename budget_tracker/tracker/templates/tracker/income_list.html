@@ -8,10 +8,19 @@
 <body>
     <h1>Incomes</h1>
     <ul>
-        {% for income in income %}
-            <li>{{ income.date }}: {{ income.description }} - ${{ income.amount }}</li>
-        {% endfor %}
+        {% for item in income %}
+            <li>{{ item.date }}: {{ item.description }} - ${{ item.amount }}</li>
+        {% endfor %} 
     </ul>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <a href="{% url 'home' %}">Return Home</a>
+
+    <script src="{% static 'tracker/js/script.js' %}"></script>
 </body>
 </html>

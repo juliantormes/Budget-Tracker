@@ -9,6 +9,7 @@ def expense_list(request):
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
 def income_list(request):
+    print('Messages to display:', list(messages.get_messages(request)))
     income = Income.objects.all()
     return render(request, 'tracker/income_list.html', {'income': income})
 
@@ -40,12 +41,14 @@ def add_income_category(request):
         if form.is_valid():
             form.save()
             messages.success(request, 'Income category added successfully!')
-            return redirect('income_list')
+            return redirect('home')
     else:
         form = IncomeCategoryForm()
     return render(request, 'tracker/add_category.html', {'form': form, 'type': 'Income'})
 
 def add_income(request):
+    messages.success(request, 'Income added successfully!')
+    print('Message added:', messages.get_messages(request))
     if request.method == 'POST':
         form = IncomeForm(request.POST)
         if form.is_valid():

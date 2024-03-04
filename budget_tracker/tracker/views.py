@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Expense
+from django.db.models import Sum
+from .models import Expense, Category
 from .forms import ExpenseForm, CategoryForm
 
 def expense_list(request):
@@ -26,4 +27,19 @@ def add_category(request):
     else:
         form = CategoryForm()
     return render(request, 'tracker/add_category.html', {'form': form})
+
+def home(request):
+    total_expenses = Expense.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
+    categories = Category.objects.annotate(total_expense=Sum('expenses__amount'))
+    
+    total_income = 0  # Assuming you don't have an Income model; adjust as needed
+
+    context = {
+        'total_expenses': total_expenses,
+        'total_income': total_income,
+        'categories': categories,
+        'net': total_income - total_expenses,
+    }
+    return render(request, 'tracker/home.html', context)
+
 

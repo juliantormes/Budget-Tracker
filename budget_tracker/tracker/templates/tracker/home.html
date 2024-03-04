@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Budget</title>
+</head>
+<body>
+    <h1>My Budget Overview</h1>
+    <p>Total Expenses: ${{ total_expenses }}</p>
+    <p>Total Income: ${{ total_income }}</p>
+    <p>Net: ${{ net }}</p>
+    <h2>Expenses by Category</h2>
+    <ul>
+        {% for category in categories %}
+            <li>{{ category.name }}: ${{ category.total_expense }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'add_expense' %}">Add Expense</a> | 
+    <a href="{% url 'add_category' %}">Add Category</a>
+</body>
+</html>

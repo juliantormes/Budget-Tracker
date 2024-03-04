@@ -13,5 +13,6 @@
             <li>{{ expense.date }} - {{ expense.category.name }} - ${{ expense.amount }} - {{ expense.description }}</li>
         {% endfor %}
     </ul>
+    <a href="{% url 'home' %}" class="btn">Return Home</a>
 </body>
 </html>

@@ -2,104 +2,102 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     margin: 0;
     padding: 20px;
-    color: #333;
     background-color: #f7f7f7;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
 }
 
-h1, h2 {
-    color: #1d1d1f; /* Darker gray for better contrast */
-    font-weight: normal;
+.site-header, .site-footer {
+    width: 100%;
+    background-color: #fafafa;
+    color: #1d1d1f;
+    padding: 1rem 0;
     text-align: center;
 }
 
-ul {
-    list-style-type: none;
-    padding: 0;
-    margin: 20px 0;
-}
-
-li {
-    margin: 10px 0;
-    padding: 10px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
-    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth transitions for interaction */
-}
-
-li:hover {
-    transform: translateY(-2px); /* Slight lift effect on hover */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-}
-
-form {
+.main-content, .container, .financial-summary, .navigation-links, form {
     background-color: #fff;
     padding: 20px;
-    margin: 20px auto; /* Center form on the page */
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin: 20px auto;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 10px;
     width: 100%;
-    max-width: 500px; /* Maximum width for the form */
-    border-radius: 8px; /* Slightly rounded corners for a softer look */
+    box-sizing: border-box;
 }
 
-input[type="text"], input[type="date"], input[type="number"], select {
-    width: 100%;
-    padding: 10px;
-    margin: 8px 0;
-    display: inline-block;
-    border: 1px solid #ccc;
-    border-radius: 4px; /* Rounded corners for input fields */
-    box-sizing: border-box; /* Box-sizing to ensure padding does not affect width */
+.financial-summary h2, .navigation-links h2 {
+    margin-bottom: 20px;
 }
 
-button[type="submit"] {
-    width: 100%;
-    background-color: #007aff; /* Blue color for the primary action */
-    color: white;
-    padding: 14px 20px;
-    margin: 8px 0;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
+.summary-item strong, .amount {
+    font-weight: 600;
 }
 
-button[type="submit"]:hover {
-    background-color: #005ecb; /* Darker blue on hover for button */
+.navigation-links, .financial-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
 }
 
-a {
-    color: #007aff; /* Blue color for links to match the submit button */
+.navigation-links a, a {
+    color: #007aff;
+    text-decoration: none;
+    padding: 10px 20px;
+    border: 1px solid #007aff;
+    border-radius: 20px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.navigation-links a:hover, a:hover {
+    background-color: #007aff;
+    color: #fff;
     text-decoration: none;
 }
 
-a:hover {
-    text-decoration: underline;
+input[type="text"], input[type="date"], input[type="number"], select, button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-/* Utility class for centering content */
-.center {
+button[type="submit"] {
+    background-color: #007aff;
+    color: white;
+    cursor: pointer;
+    border: none;
+}
+
+button[type="submit"]:hover {
+    background-color: #005ecb;
+}
+
+.alert, .error, .success {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
     text-align: center;
 }
-.success {
-    color: green;
+
+.alert, .success {
+    display: none; /* Hide by default, display via JS */
+    background-color: #4CAF50; /* Green for success */
+    color: white;
 }
 
 .error {
-    color: red;
-}
-.messages div {
-    margin: 10px 0;
-    padding: 5px;
-    border: 1px solid #ccc;
-}
-.messages .success {
-    background-color: #dff0d8;
-    color: #3c763d;
-}
-.financial-summary {
-    margin-bottom: 20px;
-}
-.amount {
-    font-weight: bold;
+    background-color: #ff3b30; /* Apple's error color */
+    color: white;
 }
 
-
+@media (max-width: 768px) {
+    .container, .financial-summary, form, .navigation-links {
+        width: calc(100% - 40px);
+    }
+}

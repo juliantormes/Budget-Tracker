@@ -24,8 +24,10 @@
     </form>    
     {% if type == "Expense" %}
         <a href="{% url 'expense_list' %}">Back to Expenses</a>
+        <br>
     {% else %}
         <a href="{% url 'income_list' %}">Back to Incomes</a>
+        <br>
     {% endif %}
      <a href="{% url 'home' %}">Return Home</a>
 </body>

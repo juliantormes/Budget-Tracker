@@ -79,3 +79,27 @@ a:hover {
 .center {
     text-align: center;
 }
+.success {
+    color: green;
+}
+
+.error {
+    color: red;
+}
+.messages div {
+    margin: 10px 0;
+    padding: 5px;
+    border: 1px solid #ccc;
+}
+.messages .success {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+.financial-summary {
+    margin-bottom: 20px;
+}
+.amount {
+    font-weight: bold;
+}
+
+

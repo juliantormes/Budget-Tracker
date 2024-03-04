@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.db.models import Sum
+from django.contrib import messages
 from .models import Expense, ExpensesCategory,IncomeCategory, Income
 from .forms import ExpenseForm, IncomeForm, ExpensesCategoryForm, IncomeCategoryForm
 def expense_list(request):
@@ -12,12 +13,13 @@ def income_list(request):
 
 def add_expenses_category(request):
     if request.method == 'POST':
-        form = ExpensesCategoryForm(request.POST)  # Assuming your form is named ExpensesCategoryForm
+        form = ExpensesCategoryForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Expense added successfully!')
             return redirect()
     else:
-        form = ExpensesCategoryForm()  # Use the form class here, not the model class
+        form = ExpensesCategoryForm()
     return render(request, 'tracker/add_category.html', {'form': form, 'type': 'Expense'})
 
 
@@ -26,9 +28,10 @@ def add_expense(request):
         form = ExpenseForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('expense_list')  # Redirect to the expense list view after saving
+            messages.success(request, 'Expense added successfully!')
+            return redirect('expense_list')
     else:
-        form = ExpenseForm()  # An empty form instance for GET request
+        form = ExpenseForm()
 
     return render(request, 'tracker/add_expense.html', {'form': form})
 
@@ -37,6 +40,7 @@ def add_income_category(request):
         form = IncomeCategoryForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Expense added successfully!')
             return redirect('income_list')
     else:
         form = IncomeCategoryForm()
@@ -48,9 +52,10 @@ def add_income(request):
         form = IncomeForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('income_list')  # Redirect to the expense list view after saving
+            messages.success(request, 'Expense added successfully!')
+            return redirect('income_list')
     else:
-        form = IncomeForm()  # An empty form instance for GET request
+        form = IncomeForm()
 
     return render(request, 'tracker/add_income.html', {'form': form})
 

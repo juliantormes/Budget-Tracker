@@ -1,17 +1,52 @@
 {% load static %}
+{% load i18n %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Budget Tracker Home</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Budget Tracker Home{% endblock title %}</title>
     <link rel="stylesheet" href="{% static 'tracker/css/style.css' %}" type="text/css">
 </head>
 <body>
-    <h1>Welcome to the Budget Tracker</h1>
-    <div>Total Income: $ {{ total_income }}</div>
-    <div>Total Expenses: $ {{ total_expenses }}</div>
-    <div>Net: $ {{ net }}</div>
-    <a href="{% url 'expense_list' %}">View Expenses</a> | <a href="{% url 'add_expense' %}">Add Expense</a> | <a href="{% url 'add_expenses_category' %}">Add Expense Category</a>
-    <div>
-    <a href="{% url 'income_list' %}">View Incomes</a>| <a href="{% url 'add_income' %}">Add Income</a> | <a href="{% url 'add_income_category' %}">Add Income Category</a>
+    <header>
+        <h1>{% block header %}Welcome to the Budget Tracker{% endblock header %}</h1>
+    </header>
+    
+    <main>
+        {% block content %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+
+        <section class="financial-summary">
+            <h2>Financial Summary</h2>
+            <p>Total Income: <span class="amount">$ {{ total_income }}</span></p>
+            <p>Total Expenses: <span class="amount">$ {{ total_expenses }}</span></p>
+            <p>Net: <span class="amount">$ {{ net }}</span></p>
+        </section>
+
+        <section class="links">
+            <h2>Navigation</h2>
+            <a href="{% url 'expense_list' %}">View Expenses</a> | 
+            <a href="{% url 'add_expense' %}">Add Expense</a> | 
+            <a href="{% url 'add_expenses_category' %}">Add Expense Category</a>
+            <div>
+                <a href="{% url 'income_list' %}">View Incomes</a> | 
+                <a href="{% url 'add_income' %}">Add Income</a> | 
+                <a href="{% url 'add_income_category' %}">Add Income Category</a>
+            </div>
+        </section>
+        {% endblock content %}
+    </main>
+
+    <footer>
+        {% block footer %}
+        <!-- Footer content can go here -->
+        {% endblock footer %}
+    </footer>
 </body>
 </html>

@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Expense</title>
+    <title>Add Income</title>
 </head>
 <body>
-    <h1>Add New Expense</h1>
+    <h1>Add New Income</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save</button>
     </form>
-    <a href="{% url 'expense_list' %}">Back to Expenses</a> | <a href="{% url 'home' %}">Return Home</a>
+    <a href="{% url 'income_list' %}">Back to Income</a> | <a href="{% url 'home' %}">Return Home</a>
 </body>
 </html>

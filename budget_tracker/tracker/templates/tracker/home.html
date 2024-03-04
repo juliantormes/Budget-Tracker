@@ -1,21 +1,14 @@
-{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>My Budget</title>
+    <title>Budget Tracker Home</title>
 </head>
 <body>
-    <h1>My Budget Overview</h1>
-    <p>Total Expenses: ${{ total_expenses }}</p>
-    <p>Total Income: ${{ total_income }}</p>
-    <p>Net: ${{ net }}</p>
-    <h2>Expenses by Category</h2>
-    <ul>
-        {% for category in categories %}
-            <li>{{ category.name }}: ${{ category.total_expense }}</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'add_expense' %}">Add Expense</a> | 
-    <a href="{% url 'add_category' %}">Add Category</a>
+    <h1>Welcome to the Budget Tracker</h1>
+    <div>Total Expenses: {{ total_expenses }}</div>
+    <div>Total Income: {{ total_income }}</div>
+    <div>Net: {{ net }}</div>
+    <a href="{% url 'expense_list' %}">View Expenses</a> | <a href="{% url 'add_expense' %}">Add Expense</a> | <a href="{% url 'add_expenses_category' %}">Add Expense Category</a>
+     <a href="{% url 'income_list' %}">View Incomes</a>| <a href="{% url 'add_income' %}">Add Income</a> | <a href="{% url 'add_income_category' %}">Add Income Category</a>
 </body>
 </html>

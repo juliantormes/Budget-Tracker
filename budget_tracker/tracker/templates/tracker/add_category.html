@@ -1,16 +1,20 @@
-{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Add Category</title>
+    <title>Add {{ type }} Category</title>
 </head>
 <body>
-    <h1>Add New Category</h1>
+    <h1>Add New {{ type }} Category</h1>
     <form method="post">
         {% csrf_token %}
         {{ form.as_p }}
         <button type="submit">Save Category</button>
     </form>
-    <a href="{% url 'home' %}" class="btn">Return Home</a>
+    {% if type == "Expense" %}
+        <a href="{% url 'expense_list' %}">Back to Expenses</a>
+    {% else %}
+        <a href="{% url 'income_list' %}">Back to Incomes</a>
+    {% endif %}
+    | <a href="{% url 'home' %}">Return Home</a>
 </body>
 </html>

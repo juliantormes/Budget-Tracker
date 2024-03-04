@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Incomes List</title>
+</head>
+<body>
+    <h1>Incomes</h1>
+    <ul>
+        {% for income in income %}
+            <li>{{ income.date }}: {{ income.description }} - ${{ income.amount }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'home' %}">Return Home</a>
+</body>
+</html>

@@ -25,6 +25,7 @@ body {
     box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     border-radius: 10px;
     width: 100%;
+    max-width: 100%;
     box-sizing: border-box;
 }
 
@@ -126,9 +127,25 @@ h2 {
 }
 
 /* Enhancing form elements for a more modern appearance */
-input[type="text"], input[type="date"], input[type="number"], select {
+input[type="text"], input[type="date"], input[type="number"] {
     background-color: #f0f0f0; /* Light background for input fields */
-    border: 2px solid transparent; /* Hide border by default */
+    width: calc(100% - 24px); /* Adjust based on padding to ensure elements fit within the container */
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 8px; /* Adjusted to add bottom margin for spacing */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block; /* Ensures that the elements take up the full available width */
+    outline: none; /* Remove focus outline */
+    transition: border-color 0.3s, background-color 0.3s; /* Smooth transition for interaction */
+}
+select {
+    background-color: #f0f0f0; /* Light background for input fields */
+    margin-top: 8px;
+    margin-bottom: 8px; /* Adjusted to add bottom margin for spacing */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block; /* Ensures that the elements take up the full available width */
     outline: none; /* Remove focus outline */
     transition: border-color 0.3s, background-color 0.3s; /* Smooth transition for interaction */
 }

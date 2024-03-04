@@ -5,7 +5,7 @@
 </head>
 <body>
     <h1>Expense List</h1>
-    <!-- Add Expense Button -->
+    <a href="{% url 'add_category' %}"style="padding: 10px; background-color: blue; color: white; text-decoration: none; border-radius: 5px;">Add New Category</a>
     <a href="{% url 'add_expense' %}" style="padding: 10px; background-color: blue; color: white; text-decoration: none; border-radius: 5px;">Add New Expense</a>
     <ul>
         {% for expense in expenses %}

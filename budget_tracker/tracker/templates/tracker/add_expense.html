@@ -9,9 +9,19 @@
     <h1>Add New Expense</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Save</button>
-    </form>
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div>
+                {{ field.label_tag }} {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div style="color: red;">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>   
     <a href="{% url 'expense_list' %}">Back to Expenses</a> | <a href="{% url 'home' %}">Return Home</a>
 </body>
 </html>

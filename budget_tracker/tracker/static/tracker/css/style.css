@@ -101,3 +101,79 @@ button[type="submit"]:hover {
         width: calc(100% - 40px);
     }
 }
+/* New styles added below */
+
+/* Typography improvements for a cleaner look */
+h1, h2, h3, p, .summary-item, .navigation-links a {
+    font-weight: normal;
+    color: #333;
+}
+
+h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+    color: #007aff; /* Adding a touch of color to headings */
+}
+
+/* Improving the visual spacing and alignment */
+.container, .financial-summary, .navigation-links, form {
+    max-width: 800px; /* Restricting the maximum width for better readability */
+    text-align: center; /* Centering text for a cleaner look */
+}
+
+/* Enhancing form elements for a more modern appearance */
+input[type="text"], input[type="date"], input[type="number"], select {
+    background-color: #f0f0f0; /* Light background for input fields */
+    border: 2px solid transparent; /* Hide border by default */
+    outline: none; /* Remove focus outline */
+    transition: border-color 0.3s, background-color 0.3s; /* Smooth transition for interaction */
+}
+
+input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus {
+    border-color: #007aff; /* Highlight border on focus */
+    background-color: #fff; /* White background on focus for contrast */
+}
+
+button[type="submit"] {
+    font-size: 1.1rem;
+    padding: 12px 24px;
+    border-radius: 30px; /* More pronounced rounded corners for buttons */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+}
+
+/* Enhancing alerts for better visibility */
+.alert, .error, .success {
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* Consistent with button shadows */
+    width: calc(100% - 40px); /* Ensure it doesn't extend full container width */
+    max-width: 600px; /* Maximum width for better appearance */
+    margin: 20px auto; /* Center horizontally */
+}
+
+/* Subtle hover effect for navigation links for a polished interaction */
+.navigation-links a {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05); /* Initial subtle shadow */
+}
+
+.navigation-links a:hover {
+    transform: translateY(-2px); /* Lift effect on hover */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* Increased shadow for depth */
+}
+
+/* Responsive tweaks for smaller screens */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2rem; /* Slightly smaller headings on small devices */
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    .main-content, .container, .financial-summary, .navigation-links, form {
+        padding: 15px; /* Adjust padding for smaller screens */
+    }
+}

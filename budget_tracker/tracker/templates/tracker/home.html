@@ -6,47 +6,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Budget Tracker Home{% endblock title %}</title>
+    <title>{% block title %}Budget Tracker Home{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'tracker/css/style.css' %}" type="text/css">
-    <!-- Consider adding a favicon -->
     <link rel="icon" type="image/png" href="{% static 'tracker/images/favicon.png' %}">
 </head>
 <body>
     <header class="site-header">
-        <h1>{% block header %}Welcome to the Budget Tracker{% endblock header %}</h1>
+        <h1>Welcome to the Budget Tracker</h1>
     </header>
 
     <main class="main-content">
-        <div class="container">
-            {% for message in messages %}
-                <div class="alert {{ message.tags }}">{{ message }}</div>
-            {% endfor %}
-    
-            <section class="financial-summary">
-                <h2>Financial Summary</h2>
-                <div class="summary-item"><strong>Total Income:</strong> <span class="amount">$ {{ total_income }}</span></div>
-                <div class="summary-item"><strong>Total Expenses:</strong> <span class="amount">$ {{ total_expenses }}</span></div>
-                <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>
-            </section>
-    
-            <nav class="navigation-links">
-                <h2>Navigation</h2>
-                <a href="{% url 'expense_list' %}">View Expenses</a> 
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+
+        <section class="financial-summary">
+            <h2>Financial Summary</h2>
+            <div class="summary-item"><strong>Total Income:</strong> <span class="amount">$ {{ total_income }}</span></div>
+            <div class="summary-item"><strong>Total Expenses:</strong> <span class="amount">$ {{ total_expenses }}</span></div>
+            <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>
+        </section>
+
+        <nav class="navigation-links">
+            <h2>Navigation</h2>
+            <div>
+                <a href="{% url 'expense_list' %}">View Expenses</a>
                 <a href="{% url 'add_expense' %}">Add Expense</a>
                 <a href="{% url 'add_expenses_category' %}">Add Expense Category</a>
-                <div>
+            </div>
+            <br>
+            <div>
                 <a href="{% url 'income_list' %}">View Incomes</a>
                 <a href="{% url 'add_income' %}">Add Income</a>
                 <a href="{% url 'add_income_category' %}">Add Income Category</a>
-            </nav>
-        </div>
+            </div>
+        </nav>
     </main>
 
     <footer class="site-footer">
-        {% block footer %}
-        <p>&copy; {{ year }} Budget Tracker. All rights reserved.</p>
-        {% endblock footer %}
+        <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
     </footer>
+
     <script src="{% static 'tracker/js/script.js' %}"></script>
 </body>
 </html>

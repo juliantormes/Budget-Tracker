@@ -1,0 +1,10 @@
+{% extends "tracker/home.html" %}
+
+{% block content %}
+    <h2>Edit Expense Category</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Save changes</button>
+    </form>
+{% endblock %}

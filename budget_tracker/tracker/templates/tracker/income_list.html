@@ -8,8 +8,12 @@
 <body>
     <h1>Incomes</h1>
     <ul>
-        {% for item in income %}
-            <li>{{ item.date }}: {{ item.description }} - ${{ item.amount }}</li>
+        {% for income in incomes %}
+        <li>
+            {{ income.date }}: {{ income.description }} - ${{ income.amount }}
+            <a href="{% url 'edit_income' income.id %}" class="list-action-button">Edit</a>
+            <a href="{% url 'delete_income' income.id %}" class="list-action-button">Delete</a>
+        </li>
         {% endfor %} 
     </ul>
     {% if messages %}

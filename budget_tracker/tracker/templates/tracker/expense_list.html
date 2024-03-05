@@ -9,7 +9,11 @@
     <h1>Expenses</h1>
     <ul>
         {% for expense in expenses %}
-            <li>{{ expense.date }}: {{ expense.description }} - ${{ expense.amount }}</li>
+        <li>
+            {{ expense.date }}: {{ expense.description }} - ${{ expense.amount }}
+            <a href="{% url 'edit_expense' expense.id %}" class="list-action-button">Edit</a>
+            <a href="{% url 'delete_expense' expense.id %}" class="list-action-button">Delete</a>
+        </li>
         {% endfor %}
     </ul>
     {% if messages %}

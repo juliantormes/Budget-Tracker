@@ -195,3 +195,20 @@ button[type="submit"] {
         padding: 15px; /* Adjust padding for smaller screens */
     }
 }
+.list-action-button {
+    font-size: 0.8rem; /* Smaller font size */
+    padding: 5px 10px; /* Smaller padding */
+    margin: 0 4px; /* Space between buttons */
+    border: 1px solid #007aff; /* Optional: border to make it look like a button */
+    border-radius: 4px; /* Rounded corners for aesthetics */
+    background-color: #f7f7f7; /* Light background */
+    color: #007aff; /* Text color that matches your design */
+    text-decoration: none; /* Remove underline from link */
+    display: inline-block; /* Ensure it's treated as an inline block */
+    transition: background-color 0.2s, color 0.2s; /* Smooth transition for hover effect */
+}
+
+.list-action-button:hover {
+    background-color: #007aff; /* Background color on hover */
+    color: #ffffff; /* Text color on hover */
+}

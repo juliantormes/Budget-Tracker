@@ -19,15 +19,16 @@
         <div class="alert {{ message.tags }}">{{ message }}</div>
     {% endfor %}
 
-    <section class="financial-summary container">
+    {% block content %}
+    <section class="financial-summary">
         <h2>Financial Summary</h2>
         <br>
-        <div class="summary-item"><strong>Total Income:</strong> <span class="amount">$ {{ total_income }}</span></div>
+        <div class="summary-item"><strong>Total Incomes:</strong> <span class="amount">$ {{ total_incomes }}</span></div>
         <div class="summary-item"><strong>Total Expenses:</strong> <span class="amount">$ {{ total_expenses }}</span></div>
         <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>
     </section>
 
-    <nav class="navigation-links container">
+    <nav class="navigation-links">
         <h2>Navigation</h2>
         <br>
         <div>
@@ -38,6 +39,11 @@
             <a href="{% url 'income_list' %}">View Incomes</a> <a href="{% url 'add_income' %}">Add Income</a> <a href="{% url 'add_income_category' %}">Add Income Category</a>
         </div>
     </nav>
+    {% endblock content %}
+
+    <footer class="site-footer">
+        <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
+    </footer>
 
     <script src="{% static 'tracker/js/script.js' %}"></script>
 </body>

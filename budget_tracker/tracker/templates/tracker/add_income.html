@@ -1,4 +1,8 @@
+{% extends "home.html" %}
+
 {% load static %}
+
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -22,8 +26,9 @@
         {% endfor %}
         <button type="submit">Submit</button>
     </form>    
-    <a href="{% url 'income_list' %}">Back to Income</a> 
+    <a href="{% url 'income_list' %}">Back to Income List</a> 
     <br>
     <a href="{% url 'home' %}">Return Home</a>
 </body>
 </html>
+{% endblock %}

@@ -6,8 +6,8 @@
         {% for category in categories %}
             <li>
                 {{ category.name }}
-                <a href="{% url 'edit_expense_category' category.id %}" class="button">Edit</a>
-                <a href="{% url 'delete_expense_category' category.id %}" class="button">Delete</a>
+                <a href="{% url 'edit_expense_category' category.id %}" class="list-action-button">Edit</a>
+                <a href="{% url 'delete_expense_category' category.id %}" class="list-action-button">Delete</a>
             </li>
         {% empty %}
             <li>No expense categories found.</li>

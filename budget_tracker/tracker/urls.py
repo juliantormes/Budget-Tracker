@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import DeleteExpenseCategory
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -15,7 +16,8 @@ urlpatterns = [
     path('income/delete/<int:income_id>/', views.delete_income, name='delete_income'),
     path('expense_category/edit/<int:category_id>/', views.edit_expense_category, name='edit_expense_category'),
     path('income_category/edit/<int:category_id>/', views.edit_income_category, name='edit_income_category'),
-    path('expense_category/delete/<int:pk>/', views.delete_expense, name='delete_expense_category'),
-    path('income_category/delete/<int:pk>/', views.delete_income, name='delete_income_category'),
-
+    path('expense_category/delete/<int:pk>/', DeleteExpenseCategory.as_view(), name='delete_expense_category'),
+    path('income_category/delete/<int:pk>/', DeleteExpenseCategory.as_view(), name='delete_income_category'),
+    path('expenses_categories/', views.expenses_categories_list, name='expenses_categories_list'),
+    path('incomes_categories/', views.incomes_categories_list, name='incomes_categories_list'),
 ]

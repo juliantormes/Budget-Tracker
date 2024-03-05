@@ -1,0 +1,17 @@
+{% extends "tracker/home.html" %}
+
+{% block content %}
+    <h2>Income Categories</h2>
+    <ul>
+        {% for category in categories %}
+            <li>
+                {{ category.name }}
+                <a href="{% url 'edit_income_category' category.id %}" class="button">Edit</a>
+                <a href="{% url 'delete_income_category' category.id %}" class="button">Delete</a>
+            </li>
+        {% empty %}
+            <li>No income categories found.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'home' %}">Return Home</a>
+{% endblock %}

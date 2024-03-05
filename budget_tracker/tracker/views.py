@@ -10,9 +10,18 @@ def expense_list(request):
     expenses = Expense.objects.all()
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
+def expenses_categories_list(request):
+    categories = ExpensesCategory.objects.all()
+    return render(request, 'tracker/expenses_categories_list.html', {'categories': categories})
+
+
 def income_list(request):
     incomes = Income.objects.all()
     return render(request, 'tracker/income_list.html', {'incomes': incomes})
+
+def incomes_categories_list(request):
+    categories = IncomesCategory.objects.all()
+    return render(request, 'tracker/incomes_categories_list.html', {'categories': categories})
 
 def add_expenses_category(request):
     if request.method == 'POST':
@@ -38,7 +47,7 @@ def edit_expense_category(request, category_id):
     return render(request, "tracker/edit_expense_category.html", {"form": form})
 class DeleteExpenseCategory(DeleteView):
     model = ExpensesCategory
-    success_url = reverse_lazy('expense_categories_list')  # Redirect to the list of categories
+    success_url = reverse_lazy('expenses_categories_list')  # Redirect to the list of categories
     template_name = 'tracker/confirm_delete_expense_category.html'  # Confirmation template
 
 
@@ -103,7 +112,7 @@ from .models import IncomesCategory
 
 class DeleteIncomeCategory(DeleteView):
     model = IncomesCategory
-    success_url = reverse_lazy('income_categories_list')  # Adjust as needed
+    success_url = reverse_lazy('incomes_categories_list')  # Adjust as needed
     template_name = 'tracker/confirm_delete_income_category.html'  # Confirmation template
 
 def add_income(request):

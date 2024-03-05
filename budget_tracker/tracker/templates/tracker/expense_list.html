@@ -14,6 +14,8 @@
             <a href="{% url 'edit_expense' expense.id %}" class="list-action-button">Edit</a>
             <a href="{% url 'delete_expense' expense.id %}" class="list-action-button">Delete</a>
         </li>
+        {% empty %}
+            <li>No expenses found.</li>
         {% endfor %}
     </ul>
     {% if messages %}

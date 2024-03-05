@@ -14,7 +14,9 @@
             <a href="{% url 'edit_income' income.id %}" class="list-action-button">Edit</a>
             <a href="{% url 'delete_income' income.id %}" class="list-action-button">Delete</a>
         </li>
-        {% endfor %} 
+        {% empty %}
+            <li>No incomes found.</li>
+        {% endfor %}
     </ul>
     {% if messages %}
     <div class="messages">

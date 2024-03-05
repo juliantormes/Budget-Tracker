@@ -3,52 +3,51 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.urls import reverse_lazy
 from django.views.generic.edit import DeleteView
-from .models import Expense, ExpensesCategory, IncomesCategory, Income
-from .forms import ExpenseForm, IncomeForm, ExpensesCategoryForm, IncomeCategoryForm
+from .models import Expense, ExpenseCategory, IncomeCategory, Income
+from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm
 
 def expense_list(request):
     expenses = Expense.objects.all()
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
-def expenses_categories_list(request):
-    categories = ExpensesCategory.objects.all()
-    return render(request, 'tracker/expenses_categories_list.html', {'categories': categories})
+def expense_category_list(request):
+    categories = ExpenseCategory.objects.all()
+    return render(request, 'tracker/expense_category_list.html', {'categories': categories})
 
 
 def income_list(request):
     incomes = Income.objects.all()
     return render(request, 'tracker/income_list.html', {'incomes': incomes})
 
-def incomes_categories_list(request):
-    categories = IncomesCategory.objects.all()
-    return render(request, 'tracker/incomes_categories_list.html', {'categories': categories})
+def income_category_list(request):
+    categories = IncomeCategory.objects.all()
+    return render(request, 'tracker/income_category_list.html', {'categories': categories})
 
-def add_expenses_category(request):
+def add_expense_category(request):
     if request.method == 'POST':
-        form = ExpensesCategoryForm(request.POST)
+        form = ExpenseCategoryForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Expense category added successfully!')
-            return redirect('home')  # Assuming you want to return to the home page
+            return redirect('expense_category_list')
     else:
-        form = ExpensesCategoryForm()
-    return render(request, 'tracker/add_category.html', {'form': form, 'type': 'Expense'})
+        form = ExpenseCategoryForm()
+    return render(request, 'tracker/add_expense_category.html', {'form': form})
 
 def edit_expense_category(request, category_id):
-    category = get_object_or_404(ExpensesCategory, pk=category_id)
+    category = get_object_or_404(ExpenseCategory, pk=category_id)
     if request.method == "POST":
-        form = ExpensesCategoryForm(request.POST, instance=category)
+        form = ExpenseCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
             messages.success(request, "Expense category updated successfully!")
-            return redirect('view_where_categories_are_listed')
+            return redirect('view_where_category_are_listed')
     else:
-        form = ExpensesCategoryForm(instance=category)
+        form = ExpenseCategoryForm(instance=category)
     return render(request, "tracker/edit_expense_category.html", {"form": form})
 class DeleteExpenseCategory(DeleteView):
-    model = ExpensesCategory
-    success_url = reverse_lazy('expenses_categories_list')  # Redirect to the list of categories
-    template_name = 'tracker/confirm_delete_expense_category.html'  # Confirmation template
+    model = ExpenseCategory
+    success_url = reverse_lazy('expense_category_list')
+    template_name = 'tracker/confirm_delete_expense_category.html'
 
 
 
@@ -83,36 +82,31 @@ def delete_expense(request, expense_id):
         return redirect("expense_list")
     return render(request, "tracker/confirm_delete_expense.html", {"expense": expense})
 
-
-
 def add_income_category(request):
     if request.method == 'POST':
         form = IncomeCategoryForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Income category added successfully!')
-            return redirect('home')
+            return redirect('income_category_list')
     else:
         form = IncomeCategoryForm()
-    return render(request, 'tracker/add_category.html', {'form': form, 'type': 'Income'})
+    return render(request, 'tracker/add_income_category.html', {'form': form})
 
 def edit_income_category(request, category_id):
-    category = get_object_or_404(IncomesCategory, pk=category_id)
+    category = get_object_or_404(IncomeCategory, pk=category_id)
     if request.method == "POST":
         form = IncomeCategoryForm(request.POST, instance=category)
         if form.is_valid():
             form.save()
             messages.success(request, "Income category updated successfully!")
-            return redirect('view_where_categories_are_listed')
+            return redirect('view_where_category_are_listed')
     else:
         form = IncomeCategoryForm(instance=category)
     return render(request, "tracker/edit_income_category.html", {"form": form})
 
-from .models import IncomesCategory
-
 class DeleteIncomeCategory(DeleteView):
-    model = IncomesCategory
-    success_url = reverse_lazy('incomes_categories_list')  # Adjust as needed
+    model = IncomeCategory
+    success_url = reverse_lazy('income_category_list')  # Adjust as needed
     template_name = 'tracker/confirm_delete_income_category.html'  # Confirmation template
 
 def add_income(request):
@@ -128,38 +122,38 @@ def add_income(request):
 
 
 def edit_income(request, income_id):
-    incomes = get_object_or_404(Income, pk=income_id)
+    income = get_object_or_404(Income, pk=income_id)
     if request.method == "POST":
-        form = IncomeForm(request.POST, instance=incomes)
+        form = IncomeForm(request.POST, instance=income)
         if form.is_valid():
             form.save()
             messages.success(request, "Income updated successfully!")
             return redirect("income_list")
     else:
-        form = IncomeForm(instance=incomes)
+        form = IncomeForm(instance=income)
     return render(request, "tracker/edit_income.html", {"form": form})
 
 def delete_income(request, income_id):
-    incomes = get_object_or_404(Income, pk=income_id)
+    income = get_object_or_404(Income, pk=income_id)
     if request.method == "POST":
-        incomes.delete()
+        income.delete()
         messages.success(request, "Income deleted successfully!")
         return redirect("income_list")
-    return render(request, "tracker/confirm_delete_income.html", {"income": incomes})
+    return render(request, "tracker/confirm_delete_income.html", {"income": income})
 
 
 def home(request):
-    total_expenses = Expense.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
-    expense_categories = ExpensesCategory.objects.annotate(total_expense=Sum('expenses__amount'))
+    total_expense = Expense.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
+    expense_category = ExpenseCategory.objects.annotate(total_expense=Sum('expense__amount'))
     
-    total_incomes = Income.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
-    income_categories = IncomesCategory.objects.annotate(total_incomes=Sum('incomes__amount'))
+    total_income = Income.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
+    income_category = IncomeCategory.objects.annotate(total_income=Sum('income__amount'))
 
     context = {
-        'total_expenses': total_expenses,
-        'total_incomes': total_incomes,
-        'expense_categories': expense_categories,  
-        'income_categories': income_categories,
-        'net': total_incomes - total_expenses,
+        'total_expenses': total_expense,
+        'total_incomes': total_income,
+        'expense_category': expense_category,  
+        'income_category': income_category,
+        'net': total_income - total_expense,
     }
     return render(request, 'tracker/home.html', context)

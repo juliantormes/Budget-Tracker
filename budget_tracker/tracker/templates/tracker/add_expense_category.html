@@ -1,0 +1,23 @@
+{% extends "tracker/home.html" %}
+
+{% block content %}
+    <h1>Add New Expense Category</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
+            <div>
+                {{ field.label_tag }} {{ field }}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div style="color: red;">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">Submit</button>
+    </form>
+    <a href="{% url 'expense_category_list' %}">Back to Expense Categories</a>
+    <br>
+    <a href="{% url 'home' %}">Return Home</a>
+{% endblock %}

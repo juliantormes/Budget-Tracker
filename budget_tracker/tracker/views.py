@@ -90,6 +90,7 @@ def add_income_category(request):
         form = IncomeCategoryForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Income category added successfully!')
             return redirect('home')
     else:
         form = IncomeCategoryForm()
@@ -115,8 +116,6 @@ class DeleteIncomeCategory(DeleteView):
     template_name = 'tracker/confirm_delete_income_category.html'  # Confirmation template
 
 def add_income(request):
-    messages.success(request, 'Income added successfully!')
-    print('Message added:', messages.get_messages(request))
     if request.method == 'POST':
         form = IncomeForm(request.POST)
         if form.is_valid():

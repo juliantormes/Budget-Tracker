@@ -90,7 +90,6 @@ def add_income_category(request):
         form = IncomeCategoryForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Income category added successfully!')
             return redirect('home')
     else:
         form = IncomeCategoryForm()

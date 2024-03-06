@@ -218,13 +218,17 @@ button[type="submit"] {
     background-color: #007bff; /* Blue background for button */
     color: white; /* White text */
     text-align: center;
+    font-size: 16px; /* Adjust font size to match */
+    line-height: 1.5; /* Adjust line height for vertical centering */
     padding: 10px 20px;
     margin: 5px;
     border: 1px solid transparent;
     text-decoration: none; /* Remove underline from link */
     transition: background-color 0.3s; /* Smooth transition for hover effect */
-    max-width: fit-content;
-    max-height: fit-content;
+    font-size: inherit; /* Ensure it inherits the font-size from .delete-form-action */
+    line-height: inherit; /* Ensure it inherits the line-height from .delete-form-action */
+    width: 150px; /* Fixed width, if needed */
+
   }
   
   /* Hover effect */
@@ -237,5 +241,9 @@ button[type="submit"] {
   button.delete-form-action {
     border: none; /* Remove border for button */
     cursor: pointer;
+    font-size: inherit; /* Ensure it inherits the font-size from .delete-form-action */
+    line-height: inherit; /* Ensure it inherits the line-height from .delete-form-action */
+    height: 45px; /* Fixed height, if needed */
+    width: 185px; /* Fixed width, if needed */
   }
   

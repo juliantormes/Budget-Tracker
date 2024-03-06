@@ -209,6 +209,33 @@ button[type="submit"] {
 }
 
 .list-action-button:hover {
-    background-color: #007aff; /* Background color on hover */
-    color: #ffffff; /* Text color on hover */
+    background-color: #007aff;
+    color: #ffffff;
 }
+/* Style for both <a> and <button> to make them look the same */
+.delete-form-action {
+    display: inline-block;
+    background-color: #007bff; /* Blue background for button */
+    color: white; /* White text */
+    text-align: center;
+    padding: 10px 20px;
+    margin: 5px;
+    border: 1px solid transparent;
+    text-decoration: none; /* Remove underline from link */
+    transition: background-color 0.3s; /* Smooth transition for hover effect */
+    max-width: fit-content;
+    max-height: fit-content;
+  }
+  
+  /* Hover effect */
+  .delete-form-action:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    text-decoration: none; /* Remove underline from link on hover */
+  }
+  
+  /* Apply additional styles if necessary for the <button> element */
+  button.delete-form-action {
+    border: none; /* Remove border for button */
+    cursor: pointer;
+  }
+  

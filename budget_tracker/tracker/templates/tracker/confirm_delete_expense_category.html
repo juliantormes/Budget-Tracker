@@ -6,7 +6,8 @@
 
     <form method="post">
         {% csrf_token %}
-        <button type="submit" class="action-button">Yes, delete</button>
-        <a href="{% url 'expense_category_list' %}"class="action-button">Cancel</a>
+        <button type="submit" class="delete-form-action">Yes, delete</button>
+        <a href="{% url 'expense_category_list' %}" class="delete-form-action">Cancel</a>
+
     </form>
 {% endblock %}

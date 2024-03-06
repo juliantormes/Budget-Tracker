@@ -4,12 +4,12 @@ from .views import DeleteExpenseCategory, DeleteIncomeCategory
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('add/', views.add_expense, name='add_expense'),
-    path('expense_list/', views.expense_list, name='expense_list'),
+    path('add_expense/', views.add_expense, name='add_expense'),
+    path('add_income/', views.add_income, name='add_income'),
     path('add_expense_category/', views.add_expense_category, name='add_expense_category'),
     path('add_income_category/', views.add_income_category, name='add_income_category'),
+    path('expense_list/', views.expense_list, name='expense_list'),
     path('income_list/', views.income_list, name='income_list'),
-    path('add_income/', views.add_income, name='add_income'),
     path('expense/edit/<int:expense_id>/', views.edit_expense, name='edit_expense'),
     path('expense/delete/<int:expense_id>/', views.delete_expense, name='delete_expense'),
     path('income/edit/<int:income_id>/', views.edit_income, name='edit_income'),

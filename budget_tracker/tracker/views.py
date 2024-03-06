@@ -40,7 +40,7 @@ def edit_expense_category(request, category_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Expense category updated successfully!")
-            return redirect('view_where_category_are_listed')
+            return redirect('expense_category_list')
     else:
         form = ExpenseCategoryForm(instance=category)
     return render(request, "tracker/edit_expense_category.html", {"form": form})
@@ -99,7 +99,7 @@ def edit_income_category(request, category_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Income category updated successfully!")
-            return redirect('view_where_category_are_listed')
+            return redirect('income_category_list')
     else:
         form = IncomeCategoryForm(instance=category)
     return render(request, "tracker/edit_income_category.html", {"form": form})

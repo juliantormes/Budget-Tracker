@@ -4,10 +4,14 @@
     <h2>Income Categories</h2>
     <ul>
         {% for category in categories %}
-            <li>
-                {{ category.name }}
-                <a href="{% url 'edit_income_category' category.id %}" class="list-action-button">Edit</a>
-                <a href="{% url 'delete_income_category' category.id %}" class="list-action-button">Delete</a>
+            <li class="list-item-container">
+                <div class="list-content">
+                    {{ category.name }}
+                </div>
+                <div class="list-action-buttons">
+                    <a href="{% url 'edit_income_category' category.id %}" class="list-action-button">Edit</a>
+                    <a href="{% url 'delete_income_category' category.id %}" class="list-action-button">Delete</a>
+                </div>
             </li>
         {% empty %}
             <li>No income categories found.</li>

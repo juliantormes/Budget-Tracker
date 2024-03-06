@@ -195,10 +195,16 @@ button[type="submit"] {
         padding: 15px; /* Adjust padding for smaller screens */
     }
 }
+.list-item-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px; /* Adjust the space between list items */
+  }
 .list-action-button {
     font-size: 0.8rem; /* Smaller font size */
     padding: 5px 10px; /* Smaller padding */
-    margin: 0 4px; /* Space between buttons */
+    margin-left: 10px;
     border: 1px solid #007aff; /* Optional: border to make it look like a button */
     border-radius: 4px; /* Rounded corners for aesthetics */
     background-color: #f7f7f7; /* Light background */

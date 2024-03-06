@@ -9,10 +9,14 @@
     <h1>Incomes</h1>
     <ul>
         {% for income in incomes %}
-        <li>
-            {{ income.date }}: {{ income.description }} - ${{ income.amount }}
-            <a href="{% url 'edit_income' income.id %}" class="list-action-button">Edit</a>
-            <a href="{% url 'delete_income' income.id %}" class="list-action-button">Delete</a>
+        <li class="list-item-container">
+            <div class="list-content">
+                {{ income.date }}: {{ income.description }} - ${{ income.amount }}
+            </div>
+            <div class="list-action-buttons">
+                <a href="{% url 'edit_income' income.id %}" class="list-action-button">Edit</a>
+                <a href="{% url 'delete_income' income.id %}" class="list-action-button">Delete</a>
+            </div>
         </li>
         {% empty %}
             <li>No incomes found.</li>

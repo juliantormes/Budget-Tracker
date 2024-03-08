@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 x: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) { return value + "%" }
+                        callback: function(value) { return  Math.round(value) + "%" }
                     }
                 }
             },

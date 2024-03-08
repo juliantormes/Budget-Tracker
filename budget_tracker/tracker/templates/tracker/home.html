@@ -26,7 +26,9 @@
         <canvas id="incomeChart" width="400" height="400"></canvas>
         <div class="summary-item"><strong>Total Expenses:</strong> <span class="amount">$ {{ total_expenses }}</span></div>
         <canvas id="expenseChart" width="400" height="400"></canvas>
-        <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>             
+        <canvas id="financialOverviewChart" data-spending-percentage="{{ spending_percentage }}" data-net-percentage="{{ net_percentage }}"></canvas>
+        <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>
+          
     </section>
 
     <nav class="navigation-links">
@@ -55,7 +57,7 @@
         {{ income_values|json_script:"income-values" }}
         {{ expense_labels|json_script:"expense-data" }}
         {{ expense_values|json_script:"expense-values" }}
-        
+
         <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
         <script>
             var incomeData = {
@@ -73,6 +75,7 @@
                 }]
             };
         </script>
+        <script src="{% static 'tracker/js/financial-overview-chart.js' %}"></script>
         <script src="{% static 'tracker/js/chart-setup.js' %}"></script>
         <script src="{% static 'tracker/js/script.js' %}"></script>
     </body>

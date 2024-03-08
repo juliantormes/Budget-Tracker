@@ -160,6 +160,12 @@ def home(request):
     expense_labels = [category.name for category in expense_categories]
     expense_values = [data['total'] for data in expense_data]
 
+    if total_income > 0:
+        spending_percentage = (total_expense / total_income) * 100
+        net_percentage = ((total_income - total_expense) / total_income) * 100
+    else:
+        spending_percentage = 0
+        net_percentage = 0
 
     context = {
         'income_labels': income_labels,
@@ -171,6 +177,8 @@ def home(request):
         'expense_category': expense_category,  
         'income_category': income_category,
         'net': total_income - total_expense,
+        'spending_percentage': spending_percentage,
+        'net_percentage': net_percentage,
     }
 
     return render(request, 'tracker/home.html', context)

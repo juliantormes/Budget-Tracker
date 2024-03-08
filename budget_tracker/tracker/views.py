@@ -149,11 +149,28 @@ def home(request):
     total_income = Income.objects.all().aggregate(Sum('amount'))['amount__sum'] or 0
     income_category = IncomeCategory.objects.annotate(total_income=Sum('income__amount'))
 
+    income_categories = IncomeCategory.objects.all()
+    expense_categories = ExpenseCategory.objects.all()
+    income_data = Income.objects.values('income_category').annotate(total=Sum('amount')).order_by('-total')
+    expense_data = Expense.objects.values('expense_category').annotate(total=Sum('amount')).order_by('-total')
+    # Prepare data for Chart.js
+    income_labels = [category.name for category in income_categories]
+    income_values = [data['total'] for data in income_data]
+    
+    expense_labels = [category.name for category in expense_categories]
+    expense_values = [data['total'] for data in expense_data]
+
+
     context = {
+        'income_labels': income_labels,
+        'income_values': income_values,
+        'expense_labels': expense_labels,
+        'expense_values': expense_values,
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'expense_category': expense_category,  
         'income_category': income_category,
         'net': total_income - total_expense,
     }
+
     return render(request, 'tracker/home.html', context)

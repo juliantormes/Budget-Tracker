@@ -22,15 +22,15 @@
     {% block content %}
     <section class="financial-summary">
         <h2>Financial Summary</h2>
-        <br>
         <div class="summary-item"><strong>Total Incomes:</strong> <span class="amount">$ {{ total_incomes }}</span></div>
+        <canvas id="incomeChart" width="400" height="400"></canvas>
         <div class="summary-item"><strong>Total Expenses:</strong> <span class="amount">$ {{ total_expenses }}</span></div>
-        <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>
+        <canvas id="expenseChart" width="400" height="400"></canvas>
+        <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div>             
     </section>
 
     <nav class="navigation-links">
         <h2>Navigation</h2>
-        <br>
         <div>
             <a href="{% url 'expense_list' %}">View Expenses</a> 
             <a href="{% url 'add_expense' %}">Add Expense</a> 
@@ -49,8 +49,31 @@
 
     <footer class="site-footer">
         <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
-    </footer>
-
-    <script src="{% static 'tracker/js/script.js' %}"></script>
-</body>
-</html>
+    </footer>  
+        <!-- Pass your JSON data into the template -->
+        {{ income_labels|json_script:"income-data" }}
+        {{ income_values|json_script:"income-values" }}
+        {{ expense_labels|json_script:"expense-data" }}
+        {{ expense_values|json_script:"expense-values" }}
+        
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            var incomeData = {
+                labels: JSON.parse(document.getElementById('income-data').textContent),
+                datasets: [{
+                    data: JSON.parse(document.getElementById('income-values').textContent),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            };
+            var expenseData = {
+                labels: JSON.parse(document.getElementById('expense-data').textContent),
+                datasets: [{
+                    data: JSON.parse(document.getElementById('expense-values').textContent),
+                    backgroundColor: ['#4BC0C0', '#FFCD56', '#FF6384']
+                }]
+            };
+        </script>
+        <script src="{% static 'tracker/js/chart-setup.js' %}"></script>
+        <script src="{% static 'tracker/js/script.js' %}"></script>
+    </body>
+    

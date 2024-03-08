@@ -252,4 +252,11 @@ button[type="submit"] {
     height: 45px; /* Fixed height, if needed */
     width: 185px; /* Fixed width, if needed */
   }
+  #incomeChart, #expenseChart {
+    max-width: 300px;
+    max-height: 300px;
+    margin: auto; /* This centers the canvas in its container */
+}
+
+  
   

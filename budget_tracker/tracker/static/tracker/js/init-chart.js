@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var incomeData = {
+    const incomeData = {
         labels: JSON.parse(document.getElementById('income-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('income-values').textContent),
@@ -7,22 +7,49 @@ document.addEventListener('DOMContentLoaded', function() {
         }]
     };
 
-    var ctxIncome = document.getElementById('incomeChart').getContext('2d');
+    const ctxIncome = document.getElementById('incomeChart').getContext('2d');
     new Chart(ctxIncome, {
         type: 'pie',
         data: incomeData,
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            return `${label}: $${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        }
     });
 
-    var expenseData = {
+    const expenseData = {
         labels: JSON.parse(document.getElementById('expense-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('expense-values').textContent),
             backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
         }]
     };
-    var ctxExpense = document.getElementById('expenseChart').getContext('2d');
+
+    const ctxExpense = document.getElementById('expenseChart').getContext('2d');
     new Chart(ctxExpense, {
         type: 'pie',
         data: expenseData,
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            return `${label}: $${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        }
     });
 });

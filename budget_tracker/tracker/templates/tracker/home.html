@@ -51,7 +51,7 @@
         <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
     </footer>  
     
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2"></script>
     {{ income_labels|json_script:"income-data" }}
     {{ income_values|json_script:"income-values" }}
     {{ expense_labels|json_script:"expense-data" }}
@@ -59,7 +59,7 @@
     <script src="{% static 'tracker/js/init-chart.js' %}"></script>
     <script src="{% static 'tracker/js/financial-overview-chart.js' %}"></script>
     <script src="{% static 'tracker/js/chart-setup.js' %}"></script>
-    <script src="{% static 'tracker/js/script.js' %}"></script>
+    <script src="{% static 'tracker/js/alerts.js' %}"></script>
     </body>
     </html>
     

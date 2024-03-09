@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', function() {
-    var financialChartElement = document.getElementById('financialOverviewChart');
-    var spendingPercentage = parseFloat(financialChartElement.getAttribute('data-spending-percentage'));
-    var netPercentage = parseFloat(financialChartElement.getAttribute('data-net-percentage'));
+    const financialChartElement = document.getElementById('financialOverviewChart');
+    const spendingPercentage = parseFloat(financialChartElement.getAttribute('data-spending-percentage'));
+    const netPercentage = parseFloat(financialChartElement.getAttribute('data-net-percentage'));
 
-    var ctxFinancialOverview = financialChartElement.getContext('2d');
-    var financialOverviewChart = new Chart(ctxFinancialOverview, {
-        type: 'bar', // Use 'bar' type for Chart.js 3 or later
+    const ctxFinancialOverview = financialChartElement.getContext('2d');
+    const financialOverviewChart = new Chart(ctxFinancialOverview, {
+        type: 'bar',
         data: {
             labels: ['Spending', 'Net'],
             datasets: [{
@@ -17,20 +17,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }]
         },
         options: {
-            indexAxis: 'y', // Ensures the bar chart is horizontal
+            indexAxis: 'y', // This will make the bar chart horizontal
             scales: {
                 x: {
                     beginAtZero: true,
                     ticks: {
-                        callback: function(value) { return  Math.round(value) + "%" }
+                        callback: function(value) {
+                            // Round the value to the nearest whole number
+                            return Math.round(value) + '%';
+                        }
                     }
                 }
             },
             plugins: {
                 tooltip: {
                     callbacks: {
-                        label: function(tooltipItem) {
-                            return tooltipItem.parsed.x + '%';
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            // Here we're also rounding the value in the tooltip
+                            label += Math.round(context.parsed.x) + '%';
+                            return label;
                         }
                     }
                 }

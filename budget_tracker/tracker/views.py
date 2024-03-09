@@ -2,9 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
 from django.urls import reverse_lazy
+from django.views import generic
 from django.views.generic.edit import DeleteView
 from .models import Expense, ExpenseCategory, IncomeCategory, Income
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm
+from django.contrib.auth.forms import UserCreationForm
+
+class SignUpView(generic.CreateView):
+    form_class = UserCreationForm
+    success_url = reverse_lazy('login')
+    template_name = 'registration/signup.html'
 
 def expense_list(request):
     expenses = Expense.objects.all()

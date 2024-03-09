@@ -194,7 +194,32 @@ button[type="submit"] {
     .main-content, .container, .financial-summary, .navigation-links, form {
         padding: 15px; /* Adjust padding for smaller screens */
     }
+
+    /* Adjust navigation links layout */
+    .navigation-links {
+        /* Example: Stack the buttons vertically instead of horizontally */
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Align buttons to the start of the container */
+    }
+
+    /* Adjust individual buttons if necessary */
+    .navigation-links a {
+        margin-bottom: 10px; /* Add some space between stacked buttons */
+        display: block; /* Make each link take the full available width */
+    }
 }
+/* This targets screens with a width between 768px and 788px */
+@media (min-width: 768px) and (max-width: 788px) {
+    .navigation-links a, .navigation-links a.button {
+        /* Adjust font-size, padding, or any other properties that could cause the overlap */
+        font-size: 0.8rem; /* Example: Reduce font size */
+        padding: 5px 10px; /* Example: Reduce padding */
+        margin: 5px; /* Example: Add margin to ensure buttons don’t touch */
+    }
+}
+
+
 .list-item-container {
     display: flex;
     justify-content: space-between;
@@ -255,6 +280,8 @@ button[type="submit"] {
   #incomeChart, #expenseChart {
     max-width: 300px;
     max-height: 300px;
+    min-width: 150px;
+    min-height: 150px;
     margin: auto; /* This centers the canvas in its container */
 }
 

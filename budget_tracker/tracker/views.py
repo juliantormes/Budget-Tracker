@@ -125,7 +125,7 @@ def delete_expense_category(request, category_id):
 @login_required
 def add_expense(request):
     if request.method == 'POST':
-        form = ExpenseForm(request.POST)
+        form = ExpenseForm(request.POST, user=request.user)
         if form.is_valid():
             expense = form.save(commit=False)
             expense.user = request.user
@@ -133,7 +133,7 @@ def add_expense(request):
             messages.success(request, 'Expense added successfully!')
             return redirect('expense_list')
     else:
-        form = ExpenseForm()
+        form = ExpenseForm(user=request.user)
     return render(request, 'tracker/add_expense.html', {'form': form})
 
 @login_required
@@ -196,7 +196,7 @@ def delete_income_category(request, category_id):
 @login_required
 def add_income(request):
     if request.method == 'POST':
-        form = IncomeForm(request.POST)
+        form = IncomeForm(request.POST, user=request.user)
         if form.is_valid():
             income = form.save(commit=False)
             income.user = request.user
@@ -204,7 +204,7 @@ def add_income(request):
             messages.success(request, 'Income added successfully!')
             return redirect('income_list')
     else:
-        form = IncomeForm()
+        form = IncomeForm(user=request.user)
     return render(request, 'tracker/add_income.html', {'form': form})
 
 @login_required

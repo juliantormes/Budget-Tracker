@@ -284,6 +284,28 @@ button[type="submit"] {
     min-height: 150px;
     margin: auto; /* This centers the canvas in its container */
 }
+.form-container {
+    background-color: #f0f0f0; /* Light background for input fields */
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 20px; /* Added bottom margin for spacing above the footer */
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block;
+    outline: none;
+    transition: border-color 0.3s, background-color 0.3s;
+}
 
-  
-  
+/* This selector applies styles to both types of inputs */
+.form-container input[type="text"], 
+.form-container input[type="password"] {
+    width: 100%; /* Makes input fields take up the full width of their container */
+    padding: 3px; /* Add padding to make the input fields taller */
+    margin-bottom: 10px; /* Space between input fields */
+    display: block; /* Ensures that the elements take up the full available width */
+}
+
+/* Footer margin top for spacing */
+.site-footer {
+    margin-top: 10px; /* Adjust the value as needed for space above the footer */
+}

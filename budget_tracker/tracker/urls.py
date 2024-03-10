@@ -1,12 +1,11 @@
-from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
 from . import views
-from .views import DeleteExpenseCategory, DeleteIncomeCategory, SignUpView
+from .views import DeleteExpenseCategory, DeleteIncomeCategory
 
 urlpatterns = [
-    path('', LoginView.as_view(), name='login'), # Class-based view for user login
-    path('signup/', SignUpView.as_view(), name='signup'),  # Class-based view for user signup
-    path('logout/', LogoutView.as_view(), name='logout'), # Class-based view for user logout
+    path('', views.login, name='login'),  # Pointing to a custom login view
+    path('signup/', views.signup, name='signup'),  # Pointing to a custom signup view
+    path('logout/', views.logout, name='logout'),  # Pointing to a custom logout view
     path('home/', views.home, name='home'),  # Function-based view for the home page
     path('add_expense/', views.add_expense, name='add_expense'),  # Add an expense
     path('add_income/', views.add_income, name='add_income'),  # Add income

@@ -12,20 +12,23 @@
 </head>
 <body>
     <header class="site-header">
-        <h1>{% block header %}Budget Tracker{% endblock header %}</h1>
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-button">Logout</button>
+        </form>
+        {% endif %}
+        <h1>{% block header %}Budget Tracker {% endblock header %}</h1>
     </header>
-
     {% for message in messages %}
         <div class="alert {{ message.tags }}">{{ message }}</div>
     {% endfor %}
-
     {% block content %}
     {% endblock content %}
 
     <footer class="site-footer">
         <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
     </footer>  
-    
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2"></script>
     <script src="{% static 'tracker/js/init-chart.js' %}"></script>
     <script src="{% static 'tracker/js/financial-overview-chart.js' %}"></script>

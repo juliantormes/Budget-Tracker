@@ -309,3 +309,37 @@ button[type="submit"] {
 .site-footer {
     margin-top: 10px; /* Adjust the value as needed for space above the footer */
 }
+form[action="/logout/"] {
+    background: none; /* Removes any background styling */
+    border: none; /* Removes any border */
+    padding: 0; /* Removes padding */
+    margin: 0; /* Removes margin */
+    width: auto; /* Allows the form to shrink to the width of its contents */
+    height: auto; /* Allows the form to shrink to the height of its contents */
+}
+/* Logout button positioned in the top right corner */
+.logout-button {
+    position: fixed;
+    top: 20px; /* Adjust as necessary */
+    right: 20px; /* Adjust as necessary */
+    padding: 8px 16px; /* Padding for a small, elegant button */
+    background-color: #007aff; /* Blue background for the button */
+    color: white; /* White text for contrast */
+    font-size: 0.75rem; /* Small font size for subtlety */
+    border: none; /* No border for a clean look */
+    border-radius: 15px; /* Rounded corners for a modern look */
+    cursor: pointer; /* Indicates a clickable button */
+    text-transform: uppercase; /* Uppercase text for a styled look */
+    letter-spacing: 0.05em; /* Letter spacing for better readability */
+    transition: background-color 0.3s ease-in-out; /* Transition for interactive states */
+    z-index: 1000; /* High z-index to ensure visibility over other elements */
+    min-width: auto; /* Ensures the button is not too wide */
+    max-width: fit-content; /* Ensures the button width fits its content */
+}
+
+/* Hover and focus states for logout button */
+.logout-button:hover, .logout-button:focus {
+    background-color: #005ecb; /* Slightly darker shade on hover */
+    outline: none; /* Removes the outline to keep the design clean */
+}
+

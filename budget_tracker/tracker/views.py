@@ -2,16 +2,41 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
 from django.urls import reverse_lazy
-from django.views import generic
 from django.views.generic.edit import DeleteView
 from .models import Expense, ExpenseCategory, IncomeCategory, Income
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
-class SignUpView(generic.CreateView):
-    form_class = UserCreationForm
-    success_url = reverse_lazy('login')
-    template_name = 'registration/signup.html'
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            # Redirect to the home page or any other page
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+def login(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid():
+            auth_login(request, form.get_user())
+            return redirect('home')
+    else:
+        form = AuthenticationForm()
+    return render(request, 'registration/login.html', {'form': form})
+
+def logout(request):
+    auth_logout(request)
+    messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
+    return redirect('login')  # Use the name of the login URL pattern here
 
 def expense_list(request):
     expenses = Expense.objects.all()

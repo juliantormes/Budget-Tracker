@@ -27,9 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/home/' # Redirect to the home page after login
 
-LOGOUT_REDIRECT_URL = '/'
+
+LOGOUT_REDIRECT_URL = '/login/' # Redirect to the login page after logout
+
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage' # Store messages in cookies
 
 
 # Application definition

@@ -1,6 +1,5 @@
 from django.urls import path
 from . import views
-from .views import DeleteExpenseCategory, DeleteIncomeCategory
 
 urlpatterns = [
     path('', views.login, name='login'),  # Pointing to a custom login view
@@ -19,8 +18,8 @@ urlpatterns = [
     path('income/delete/<int:income_id>/', views.delete_income, name='delete_income'),  # Delete an income
     path('expense_category/edit/<int:category_id>/', views.edit_expense_category, name='edit_expense_category'),  # Edit an expense category
     path('income_category/edit/<int:category_id>/', views.edit_income_category, name='edit_income_category'),  # Edit an income category
-    path('expense_category/delete/<int:pk>/', DeleteExpenseCategory.as_view(), name='delete_expense_category'),  # Delete an expense category
-    path('income_category/delete/<int:pk>/', DeleteIncomeCategory.as_view(), name='delete_income_category'),  # Delete an income category
+    path('expense_category/delete/<int:pk>/', views.delete_expense_category, name='delete_expense_category'),  # Delete an expense category
+    path('income_category/delete/<int:pk>/', views.delete_income_category, name='delete_income_category'),  # Delete an income category
     path('expense_category/', views.expense_category_list, name='expense_category_list'),  # List all expense categories
     path('income_category/', views.income_category_list, name='income_category_list'),  # List all income categories
 ]

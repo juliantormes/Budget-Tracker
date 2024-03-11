@@ -6,6 +6,9 @@ from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryF
 from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 def signup(request):
     if request.method == 'POST':
@@ -38,16 +41,55 @@ def logout(request):
 
 @login_required
 def home(request):
-    total_expense = Expense.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
-    cash_flow = Expense.objects.filter(user=request.user).exclude(credit_card=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_credit_card_expense = Expense.objects.filter(user=request.user).exclude(credit_card=None).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Preparing chart data for incomes and expenses
-    income_data = Income.objects.filter(user=request.user).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
-    expense_data = Expense.objects.filter(user=request.user).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
-    credit_card_expense_data = Expense.objects.filter(user=request.user).exclude(credit_card=None).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
+    # Parse month and year from request parameters, defaulting to the current month and year
+    now = timezone.now()
+    month_query = request.GET.get('month', now.month)
+    year_query = request.GET.get('year', now.year)
+    try:
+        month = int(month_query)
+        year = int(year_query)
+        # Ensure valid month values
+        if month < 1 or month > 12:
+            raise ValueError
+    except ValueError:
+        # Redirect to the current month and year if invalid values are provided
+        return redirect(f"?year={now.year}&month={now.month}")
+
+    selected_date = datetime(year, month, 1)
+    start_date = selected_date
+    end_date = (start_date + relativedelta(months=1)) - relativedelta(days=1)
+    previous_month = start_date - relativedelta(months=1)
+    next_month = start_date + relativedelta(months=1)
+    # Query your Expense and Income models as needed, filtering by the user and the date range
+    total_expense = Expense.objects.filter(
+        user=request.user, date__range=(start_date, end_date)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_income = Income.objects.filter(
+        user=request.user, date__range=(start_date, end_date)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_credit_card_expense = Expense.objects.filter(
+        user=request.user, credit_card__isnull=False, date__range=(start_date, end_date)
+        ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Preparing chart data
+    income_data = Income.objects.filter(
+        user=request.user,
+        date__range=(start_date, end_date)
+    ).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
     
+    expense_data = Expense.objects.filter(
+        user=request.user,
+        date__range=(start_date, end_date)
+    ).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
+    
+    credit_card_expense_data = Expense.objects.filter(
+        user=request.user,
+        credit_card__isnull=False,
+        date__range=(start_date, end_date)
+    ).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
+
+    # Prepare labels and values for charts
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
     income_labels = [data['income_category__name'] for data in income_data]
@@ -55,9 +97,16 @@ def home(request):
     expense_labels = [data['expense_category__name'] for data in expense_data]
     expense_values = [data['total'] for data in expense_data]
 
-    net = total_income - cash_flow - total_credit_card_expense
+    # Calculate net income
+    net = total_income - total_expense
 
     context = {
+        'previous_month_year': previous_month.year,
+        'previous_month_month': previous_month.month,
+        'next_month_year': next_month.year,
+        'next_month_month': next_month.month,
+        'month_name': selected_date.strftime("%B"),
+        'year': year,
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
@@ -68,8 +117,8 @@ def home(request):
         'expense_values': expense_values,
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
-        'cash_flow_percentage': ((cash_flow / total_income) * 100) if total_income > 0 else 0,
-        'net_percentage': (((total_income - total_expense) / total_income) * 100) if total_income > 0 else 0,
+        'cash_flow_percentage': (((total_expense - total_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
+        'net_percentage': ((net / total_income) * 100) if total_income > 0 else 0,
         'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
     }
     return render(request, 'tracker/home.html', context)

@@ -3,6 +3,12 @@
 {% block title %}Budget Tracker Home{% endblock %}
 
 {% block content %}
+<div class="month-navigation">
+    <a href="?year={{ previous_month_year }}&month={{ previous_month_month }}">← Previous Month</a>
+    <span>{{ month_name }} {{ year }}</span>
+    <a href="?year={{ next_month_year }}&month={{ next_month_month }}">Next Month →</a>
+</div>
+
 <section class="financial-summary">
     <h2>Financial Summary</h2>
     <canvas id="incomeChart" width="400" height="400"></canvas>

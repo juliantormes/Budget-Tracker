@@ -342,3 +342,40 @@ form[action="/logout/"] {
     background-color: #005ecb; /* Slightly darker shade on hover */
     outline: none; /* Removes the outline to keep the design clean */
 }
+.month-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 15px;
+    margin: 20px 0;
+    gap: 20px;
+}
+
+.month-navigation a {
+    padding: 8px 16px; /* Padding for a small, elegant button */
+    background-color: #007aff; /* Blue background for the button */
+    color: white; /* White text for contrast */
+    font-size: 0.9rem; /* Small font size for subtlety */
+    border: none; /* No border for a clean look */
+    border-radius: 15px; /* Rounded corners for a modern look */
+    cursor: pointer; /* Indicates a clickable button */
+    text-transform: uppercase; /* Uppercase text for a styled look */
+    letter-spacing: 0.05em; /* Letter spacing for better readability */
+    transition: background-color 0.3s ease-in-out; /* Transition for interactive states */
+    z-index: 1000; /* High z-index to ensure visibility over other elements */
+    min-width: 150px; /* Ensures the button is not too wide */
+    max-width: 150px; /* Ensures the button width fits its content */
+    text-align: center;
+}
+
+.month-navigation a:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.month-navigation span {
+    font-weight: bold;
+    text-align: center;
+}

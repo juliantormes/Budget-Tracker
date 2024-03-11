@@ -38,7 +38,8 @@ def logout(request):
 
 @login_required
 def home(request):
-    total_expense = Expense.objects.filter(user=request.user).exclude(credit_card=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = Expense.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
+    cash_flow = Expense.objects.filter(user=request.user).exclude(credit_card=True).aggregate(Sum('amount'))['amount__sum'] or 0
     total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
     total_credit_card_expense = Expense.objects.filter(user=request.user).exclude(credit_card=None).aggregate(Sum('amount'))['amount__sum'] or 0
 
@@ -54,7 +55,7 @@ def home(request):
     expense_labels = [data['expense_category__name'] for data in expense_data]
     expense_values = [data['total'] for data in expense_data]
 
-    net = total_income - total_expense - total_credit_card_expense
+    net = total_income - cash_flow - total_credit_card_expense
 
     context = {
         'total_expenses': total_expense,
@@ -67,7 +68,7 @@ def home(request):
         'expense_values': expense_values,
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
-        'spending_percentage': ((total_expense / total_income) * 100) if total_income > 0 else 0,
+        'cash_flow_percentage': ((cash_flow / total_income) * 100) if total_income > 0 else 0,
         'net_percentage': (((total_income - total_expense) / total_income) * 100) if total_income > 0 else 0,
         'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
     }

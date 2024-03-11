@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('income-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('income-values').textContent),
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            backgroundColor: ['#4CAF50', '#81C784', '#A5D6A7', '#C8E6C9', '#E8F5E9']
         }]
     };
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('expense-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('expense-values').textContent),
-            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+            backgroundColor: ['#FFEB3B', '#FFEE58', '#FFF176', '#FFF59D', '#FFF9C4']
         }]
     };
 
@@ -58,7 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('credit-card-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('credit-card-values').textContent),
-            backgroundColor: ['#4BC0C0', '#FFCD56', '#FF6384', '#36A2EB', '#9966FF', '#C9CB3A']
+            backgroundColor: ['#E57373', '#EF5350', '#F44336', '#E53935', '#D32F2F']
         }]
     };
 

@@ -47,4 +47,8 @@
     {{ expense_values|json_script:"expense-values" }}
     {{ credit_card_labels|json_script:"credit-card-data" }}
     {{ credit_card_values|json_script:"credit-card-values" }}
+    {{ recurring_income_labels|json_script:"recurring-income-data" }}
+    {{ recurring_income_values|json_script:"recurring-income-values" }}
+    {{ recurring_expense_labels|json_script:"recurring-expense-data" }}
+    {{ recurring_expense_values|json_script:"recurring-expense-values" }}
 {% endblock content %}

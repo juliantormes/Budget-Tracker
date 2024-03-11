@@ -2,6 +2,7 @@
 
 {% block content %}
     <h2>Expense Categories</h2>
+    <a href="{% url 'add_expense_category' %}" class="list-action-button">New Expense Category</a>
     <ul>
         {% for category in categories %}
         <li class="list-item-container">

@@ -7,15 +7,19 @@
 </head>
 <body>
     <h1>Incomes</h1>
+    <a href="{% url 'add_income' %}" class= "list-action-button"> New Income</a>
     <ul>
         {% for income in incomes %}
-        <li class="list-item-container">
-            <div class="list-content">
-                {{ income.date }}: {{ income.description }} - ${{ income.amount }}
-            </div>
+        <li>
+            <span>{{ income.description }}</span> - 
+            <span>{{ income.amount }}</span> - 
+            <span>{{ income.date }}</span>
             <div class="list-action-buttons">
                 <a href="{% url 'edit_income' income.id %}" class="list-action-button">Edit</a>
                 <a href="{% url 'delete_income' income.id %}" class="list-action-button">Delete</a>
+                {% if income.is_recurring %}
+                <a href="{% url 'record_recurring_income_change' income.id %}" class="list-action-button"> Update amount</a>
+                {% endif %}
             </div>
         </li>
         {% empty %}
@@ -30,7 +34,5 @@
     </div>
     {% endif %}
     <a href="{% url 'home' %}">Return Home</a>
-
-    <script src="{% static 'tracker/js/script.js' %}"></script>
 </body>
 </html>

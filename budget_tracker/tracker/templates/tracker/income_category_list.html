@@ -2,6 +2,7 @@
 
 {% block content %}
     <h2>Income Categories</h2>
+    <a href="{% url 'add_income_category' %}" class="list-action-button">New Income Category</a>
     <ul>
         {% for category in categories %}
             <li class="list-item-container">

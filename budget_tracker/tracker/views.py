@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum, F
 from django.contrib import messages
-from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, RecurringExpenseChange, RecurringIncomeChange
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm, CreditCardForm
 from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -61,34 +61,26 @@ def home(request):
     end_date = (start_date + relativedelta(months=1)) - relativedelta(days=1)
     previous_month = start_date - relativedelta(months=1)
     next_month = start_date + relativedelta(months=1)
-    # Query your Expense and Income models as needed, filtering by the user and the date range
-    total_expense = Expense.objects.filter(
-        user=request.user, date__range=(start_date, end_date)
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_income = Income.objects.filter(
-        user=request.user, date__range=(start_date, end_date)
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_credit_card_expense = Expense.objects.filter(
-        user=request.user, credit_card__isnull=False, date__range=(start_date, end_date)
-        ).aggregate(Sum('amount'))['amount__sum'] or 0
+    # Calculate total expenses, including recurring
+    monthly_expenses = Expense.objects.filter(user=request.user, date__range=(start_date, end_date), is_recurring=False).aggregate(Sum('amount'))['amount__sum'] or 0
+    recurring_expenses = Expense.objects.filter(user=request.user, is_recurring=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_expense = monthly_expenses + recurring_expenses
 
-    # Preparing chart data
-    income_data = Income.objects.filter(
-        user=request.user,
-        date__range=(start_date, end_date)
-    ).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
-    
-    expense_data = Expense.objects.filter(
-        user=request.user,
-        date__range=(start_date, end_date)
-    ).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
-    
-    credit_card_expense_data = Expense.objects.filter(
-        user=request.user,
-        credit_card__isnull=False,
-        date__range=(start_date, end_date)
-    ).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
+    # Calculate total incomes, including recurring
+    monthly_incomes = Income.objects.filter(user=request.user, date__range=(start_date, end_date), is_recurring=False).aggregate(Sum('amount'))['amount__sum'] or 0
+    recurring_incomes = Income.objects.filter(user=request.user, is_recurring=True).aggregate(Sum('amount'))['amount__sum'] or 0
+    total_income = monthly_incomes + recurring_incomes
 
+    # Credit card expenses
+    total_credit_card_expense = Expense.objects.filter(user=request.user, credit_card__isnull=False, date__range=(start_date, end_date)).aggregate(Sum('amount'))['amount__sum'] or 0
+
+    # Adjusted for charts
+    income_data = Income.objects.filter(user=request.user, date__lte=end_date).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
+    expense_data = Expense.objects.filter(user=request.user, date__lte=end_date).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
+    credit_card_expense_data = Expense.objects.filter(user=request.user,credit_card__isnull=False,date__range=(start_date, end_date)).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
+    # Calculate net
+    net = total_income - total_expense - total_credit_card_expense
+    
     # Prepare labels and values for charts
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
@@ -101,22 +93,26 @@ def home(request):
     net = total_income - total_expense
 
     context = {
+        # Data for the date navigation
         'previous_month_year': previous_month.year,
         'previous_month_month': previous_month.month,
         'next_month_year': next_month.year,
         'next_month_month': next_month.month,
         'month_name': selected_date.strftime("%B"),
         'year': year,
+        # Data for the summary table
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
         'total_credit_card_expenses': total_credit_card_expense,
-        'income_labels': income_labels,
-        'income_values': income_values,
-        'expense_labels': expense_labels,
-        'expense_values': expense_values,
+        # Labels and values for pie charts
+        'income_labels': [data['income_category__name'] for data in income_data],
+        'income_values': [data['total'] for data in income_data],
+        'expense_labels': [data['expense_category__name'] for data in expense_data],
+        'expense_values': [data['total'] for data in expense_data],
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
+        # Percentage data for bar graphs
         'cash_flow_percentage': (((total_expense - total_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
         'net_percentage': ((net / total_income) * 100) if total_income > 0 else 0,
         'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
@@ -167,7 +163,14 @@ def credit_card_list(request):
 
 @login_required
 def expense_list(request):
-    expenses = Expense.objects.filter(user=request.user)
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+    expenses = Expense.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
+    for expense in expenses:
+        if expense.is_recurring:
+            latest_change = RecurringExpenseChange.objects.filter(expense=expense, change_date__lte=timezone.now()).order_by('-change_date').first()
+            if latest_change:
+                expense.amount = latest_change.new_amount
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
 @login_required
@@ -177,7 +180,14 @@ def expense_category_list(request):
 
 @login_required
 def income_list(request):
-    incomes = Income.objects.filter(user=request.user)
+    current_month = timezone.now().month
+    current_year = timezone.now().year
+    incomes = Income.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
+    for income in incomes:
+        if income.is_recurring:
+            latest_change = RecurringIncomeChange.objects.filter(income=income, change_date__lte=timezone.now()).order_by('-change_date').first()
+            if latest_change:
+                income.amount = latest_change.new_amount
     return render(request, 'tracker/income_list.html', {'incomes': incomes})
 
 @login_required
@@ -238,13 +248,13 @@ def add_expense(request):
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, pk=expense_id, user=request.user)
     if request.method == "POST":
-        form = ExpenseForm(request.POST, instance=expense)
+        form = ExpenseForm(request.POST, instance=expense , user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Expense updated successfully!")
             return redirect("expense_list")
     else:
-        form = ExpenseForm(instance=expense)
+        form = ExpenseForm(instance=expense, user=request.user)
     return render(request, "tracker/edit_expense.html", {"form": form})
 
 @login_required
@@ -309,13 +319,13 @@ def add_income(request):
 def edit_income(request, income_id):
     income = get_object_or_404(Income, pk=income_id, user=request.user)
     if request.method == "POST":
-        form = IncomeForm(request.POST, instance=income)
+        form = IncomeForm(request.POST, instance=income, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Income updated successfully!")
             return redirect("income_list")
     else:
-        form = IncomeForm(instance=income)
+        form = IncomeForm(instance=income, user=request.user)
     return render(request, "tracker/edit_income.html", {"form": form})
 
 @login_required
@@ -327,3 +337,22 @@ def delete_income(request, income_id):
         return redirect("income_list")
     return render(request, "tracker/confirm_delete_income.html", {"income": income})
 
+@login_required
+def record_recurring_expense_change(request, expense_id):
+    expense = Expense.objects.get(id=expense_id)
+    if request.method == 'POST':
+        new_amount = request.POST.get('new_amount')
+        change_date = timezone.now().date()
+        RecurringExpenseChange.objects.create(expense=expense, change_date=change_date, new_amount=new_amount)
+        return redirect('expense_list')
+    return render(request, 'tracker/record_recurring_expense_change.html', {'expense': expense})
+
+@login_required
+def record_recurring_income_change(request, income_id):
+    income = Income.objects.get(id=income_id)
+    if request.method == 'POST':
+        new_amount = request.POST.get('new_amount')
+        change_date = timezone.now().date()
+        RecurringIncomeChange.objects.create(income=income, change_date=change_date, new_amount=new_amount)
+        return redirect('expense_list')
+    return render(request, 'tracker/record_recurring_income_change.html', {'expense': income})

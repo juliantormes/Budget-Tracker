@@ -9,9 +9,10 @@ class ExpenseCategoryForm(forms.ModelForm):
 class ExpenseForm(forms.ModelForm):
     using_credit_card = forms.BooleanField(required=False, label='Paying with a credit card?')
     amount = forms.DecimalField(validators=[MinValueValidator(0.01)], help_text='Enter a positive amount.')
+    is_recurring= forms.BooleanField(required=False,label= 'Is recurring monthly? (e.g., subscription fees, salary).')
     class Meta:
         model = Expense
-        fields = ['expense_category', 'description', 'amount', 'date', 'credit_card', 'installments', 'interest_rate']
+        fields = ['expense_category', 'description', 'amount', 'date', 'credit_card', 'installments', 'interest_rate', 'is_recurring']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -33,9 +34,10 @@ class IncomeCategoryForm(forms.ModelForm):
         model = IncomeCategory
         fields = ['name']
 class IncomeForm(forms.ModelForm):
+    is_recurring= forms.BooleanField(required=False,label= 'Is recurring monthly? (e.g., subscription fees, salary).')
     class Meta:
         model = Income
-        fields = ['income_category', 'description', 'amount', 'date']
+        fields = ['income_category', 'description', 'amount', 'date', 'is_recurring']
     
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')  # Get the user passed from the view

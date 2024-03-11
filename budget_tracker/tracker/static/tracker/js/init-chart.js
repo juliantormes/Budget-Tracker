@@ -1,8 +1,12 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Assuming recurring data is also passed to the template
+    const recurringIncomeData = JSON.parse(document.getElementById('recurring-income-values').textContent);
+    const recurringExpenseData = JSON.parse(document.getElementById('recurring-expense-values').textContent);
+
     const incomeData = {
         labels: JSON.parse(document.getElementById('income-data').textContent),
         datasets: [{
-            data: JSON.parse(document.getElementById('income-values').textContent),
+            data: JSON.parse(document.getElementById('income-values').textContent).concat(recurringIncomeData),
             backgroundColor: ['#4CAF50', '#81C784', '#A5D6A7', '#C8E6C9', '#E8F5E9']
         }]
     };
@@ -29,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const expenseData = {
         labels: JSON.parse(document.getElementById('expense-data').textContent),
         datasets: [{
-            data: JSON.parse(document.getElementById('expense-values').textContent),
+            data: JSON.parse(document.getElementById('expense-values').textContent).concat(recurringExpenseData),
             backgroundColor: ['#FFEB3B', '#FFEE58', '#FFF176', '#FFF59D', '#FFF9C4']
         }]
     };
@@ -53,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Credit Card Chart
+    // Credit Card Chart remains unchanged unless you're including recurring credit card expenses
     const creditCardData = {
         labels: JSON.parse(document.getElementById('credit-card-data').textContent),
         datasets: [{

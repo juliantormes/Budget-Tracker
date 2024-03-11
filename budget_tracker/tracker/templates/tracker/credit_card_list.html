@@ -3,13 +3,13 @@
 {% block content %}
 <div class="container">
     <h2>My Credit Cards</h2>
-    <a href="{% url 'add_credit_card' %}">Add New Credit Card</a>
+    <a href="{% url 'add_credit_card' %}" class="list-action-button">New Credit Card</a>
     <ul>
         {% for card in credit_cards %}
             <li>
                 {{ card.brand }} ending in {{ card.last_four_digits }} - Exp: {{ card.expire_date }} - Limit: {{ card.credit_limit }} - Payment Day: {{ card.payment_day }}
-                <a href="{% url 'edit_credit_card' card.id %}">Edit</a>  
-                <a href="{% url 'delete_credit_card' card.id %}" onclick="return confirm('Are you sure?');">Delete</a>
+                <a href="{% url 'edit_credit_card' card.id %}" class="list-action-button">Edit</a> 
+                <a href="{% url 'delete_credit_card' card.id %}" class="list-action-button">Delete</a>
             </li>
         {% empty %}
             <li>No credit cards added yet.</li>

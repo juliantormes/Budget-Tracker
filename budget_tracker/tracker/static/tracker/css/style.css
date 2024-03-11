@@ -277,7 +277,7 @@ button[type="submit"] {
     height: 45px; /* Fixed height, if needed */
     width: 185px; /* Fixed width, if needed */
   }
-  #incomeChart, #expenseChart {
+  #incomeChart, #expenseChart, #creditCardChart{
     max-width: 300px;
     max-height: 300px;
     min-width: 150px;
@@ -342,4 +342,3 @@ form[action="/logout/"] {
     background-color: #005ecb; /* Slightly darker shade on hover */
     outline: none; /* Removes the outline to keep the design clean */
 }
-

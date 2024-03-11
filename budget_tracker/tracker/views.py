@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum
+from django.db.models import Sum, F
 from django.contrib import messages
-from django.urls import reverse_lazy
-from django.views.generic.edit import DeleteView
-from .models import Expense, ExpenseCategory, IncomeCategory, Income
-from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard
+from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm, CreditCardForm
 from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
@@ -40,32 +38,82 @@ def logout(request):
 
 @login_required
 def home(request):
-    total_expense = Expense.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
-    expense_categories = ExpenseCategory.objects.filter(user=request.user)
+    total_expense = Expense.objects.filter(user=request.user).exclude(credit_card=True).aggregate(Sum('amount'))['amount__sum'] or 0
     total_income = Income.objects.filter(user=request.user).aggregate(Sum('amount'))['amount__sum'] or 0
-    income_categories = IncomeCategory.objects.filter(user=request.user)
+    total_credit_card_expense = Expense.objects.filter(user=request.user).exclude(credit_card=None).aggregate(Sum('amount'))['amount__sum'] or 0
 
-    # Preparing chart data
+    # Preparing chart data for incomes and expenses
     income_data = Income.objects.filter(user=request.user).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
     expense_data = Expense.objects.filter(user=request.user).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
-
+    credit_card_expense_data = Expense.objects.filter(user=request.user).exclude(credit_card=None).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
+    
+    credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
+    credit_card_values = [data['total'] for data in credit_card_expense_data]
     income_labels = [data['income_category__name'] for data in income_data]
     income_values = [data['total'] for data in income_data]
     expense_labels = [data['expense_category__name'] for data in expense_data]
     expense_values = [data['total'] for data in expense_data]
 
+    net = total_income - total_expense - total_credit_card_expense
+
     context = {
         'total_expenses': total_expense,
         'total_incomes': total_income,
-        'net': total_income - total_expense,
+        'net': net,
+        'total_credit_card_expenses': total_credit_card_expense,
         'income_labels': income_labels,
         'income_values': income_values,
         'expense_labels': expense_labels,
         'expense_values': expense_values,
+        'credit_card_labels': credit_card_labels,
+        'credit_card_values': credit_card_values,
         'spending_percentage': ((total_expense / total_income) * 100) if total_income > 0 else 0,
         'net_percentage': (((total_income - total_expense) / total_income) * 100) if total_income > 0 else 0,
+        'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
     }
     return render(request, 'tracker/home.html', context)
+
+@login_required
+def add_credit_card(request):
+    if request.method == 'POST':
+        form = CreditCardForm(request.POST)
+        if form.is_valid():
+            credit_card = form.save(commit=False)
+            credit_card.user = request.user
+            credit_card.save()
+            messages.success(request, 'Credit card added successfully!')
+            return redirect('credit_card_list')
+    else:
+        form = CreditCardForm()
+    return render(request, 'tracker/add_credit_card.html', {'form': form})
+
+@login_required
+def edit_credit_card(request, card_id):
+    credit_card = get_object_or_404(CreditCard, pk=card_id, user=request.user)
+    if request.method == 'POST':
+        form = CreditCardForm(request.POST, instance=credit_card)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Credit card updated successfully!')
+            return redirect('credit_card_list')
+    else:
+        form = CreditCardForm(instance=credit_card)
+    return render(request, 'tracker/edit_credit_card.html', {'form': form})
+
+@login_required
+def delete_credit_card(request, card_id):
+    credit_card = get_object_or_404(CreditCard, pk=card_id, user=request.user)
+    if request.method == "POST":
+        credit_card.delete()
+        messages.success(request, "Credit card deleted successfully!")
+        return redirect("credit_card_list")
+    return render(request, "tracker/confirm_delete_credit_card.html", {"credit_card": credit_card})
+
+@login_required
+def credit_card_list(request):
+    credit_cards = CreditCard.objects.filter(user=request.user)
+    return render(request, 'tracker/credit_card_list.html', {'credit_cards': credit_cards})
+
 
 @login_required
 def expense_list(request):

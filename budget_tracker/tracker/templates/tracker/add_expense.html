@@ -31,5 +31,8 @@
     <a href="{% url 'home' %}">Return Home</a>
 </body>
 </html>
+{% block extra_js %}
+    <script src="{% static 'tracker/js/dynamic_forms.js' %}"></script>
 {% endblock %}
+{% endblock %} 
 ```

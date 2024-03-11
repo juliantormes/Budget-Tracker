@@ -52,4 +52,32 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     });
+
+    // Credit Card Chart
+    const creditCardData = {
+        labels: JSON.parse(document.getElementById('credit-card-data').textContent),
+        datasets: [{
+            data: JSON.parse(document.getElementById('credit-card-values').textContent),
+            backgroundColor: ['#4BC0C0', '#FFCD56', '#FF6384', '#36A2EB', '#9966FF', '#C9CB3A']
+        }]
+    };
+
+    const ctxCreditCard = document.getElementById('creditCardChart').getContext('2d');
+    new Chart(ctxCreditCard, {
+        type: 'pie',
+        data: creditCardData,
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            const label = context.label || '';
+                            const value = context.parsed;
+                            return `${label}: $${value.toLocaleString()}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
 });

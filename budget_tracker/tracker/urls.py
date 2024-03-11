@@ -22,4 +22,8 @@ urlpatterns = [
     path('income_category/delete/<int:pk>/', views.delete_income_category, name='delete_income_category'),  # Delete an income category
     path('expense_category/', views.expense_category_list, name='expense_category_list'),  # List all expense categories
     path('income_category/', views.income_category_list, name='income_category_list'),  # List all income categories
+    path('credit_card/', views.credit_card_list, name='credit_card_list'),  # List all credit cards
+    path('add_credit_card/', views.add_credit_card, name='add_credit_card'),  # Add a credit card
+    path('credit_card/edit/<int:pk>/', views.edit_credit_card, name='edit_credit_card'),  # Edit a credit card
+    path('credit_card/delete/<int:pk>/', views.delete_credit_card, name='delete_credit_card'),  # Delete a credit card
 ]

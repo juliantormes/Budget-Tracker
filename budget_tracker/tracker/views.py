@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum, F ,  Subquery, OuterRef, DecimalField
+from django.db.models import Sum, F ,  Subquery, OuterRef, DecimalField, Q
 from django.contrib import messages
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm, CreditCardForm
@@ -54,6 +54,9 @@ def home(request):
 
     # Parse month and year from request parameters, defaulting to the current month and year
     now = timezone.now()
+    start_of_month = now.replace(day=1)
+    end_of_month = now.replace(day=1) + timezone.timedelta(days=31)
+    end_of_month = end_of_month.replace(day=1) - timezone.timedelta(days=1)
     this_month = int(now.month)
     this_year = int(now.year)
     month_query = request.GET.get('month', now.month)
@@ -72,7 +75,9 @@ def home(request):
     start_date = selected_date
     end_date = (start_date + relativedelta(months=1)) - relativedelta(days=1)
     previous_month = start_date - relativedelta(months=1)
-    next_month = start_date + relativedelta(months=1)
+    next_month = start_date + relativedelta(days=31)
+    last_day_of_month = next_month.replace(day=1) - timezone.timedelta(days=1)
+    end_date = last_day_of_month
     # Filter non-recurring and recurring incomes
     non_recurring_incomes = Income.objects.filter(user=request.user, is_recurring=False, date__month=month, date__year=year)
     recurring_incomes = Income.objects.filter(user=request.user, is_recurring=True)
@@ -100,13 +105,18 @@ def home(request):
     credit_card_expense_data = Expense.objects.filter(user=request.user,credit_card__isnull=False,date__range=(start_date, end_date)).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
 
     # Credit card expenses
-    total_credit_card_expense = Expense.objects.filter(user=request.user, credit_card__isnull=False, date__range=(start_date, end_date)).aggregate(Sum('amount'))['amount__sum'] or 0
+    non_recurring_credit_card_expense = Expense.objects.filter(
+    user=request.user, 
+    credit_card__isnull=False,
+    is_recurring=False, 
+    date__range=(start_of_month, end_of_month)
+    ).aggregate(total=Sum('amount'))['total'] or 0
     
     
     # Calculations for summary table
     total_expense = total_recurring_expenses + total_non_recurring_expenses
     total_income = total_recurring_incomes + total_non_recurring_incomes
-    net = total_income - total_expense - total_credit_card_expense
+    net = total_income - total_expense - non_recurring_credit_card_expense
     net = total_income - total_expense
 
     # Prepare data and labels for charts
@@ -114,6 +124,26 @@ def home(request):
     expense_labels, expense_data = zip(*combined_expenses) # This separates the labels and values
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
+    recurring_credit_card_expenses = Expense.objects.filter(
+        user=request.user, 
+        credit_card__isnull=False, 
+        is_recurring=True,
+        date__lte=end_of_month
+    ).exclude(
+        date__year=now.year,
+        date__month=now.month
+    ).values(
+        'credit_card__last_four_digits', 'credit_card__brand'
+    ).annotate(total=Sum('amount'))
+
+    for expense in recurring_credit_card_expenses:
+        label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
+        if label in credit_card_labels:
+            index = credit_card_labels.index(label)
+            credit_card_values[index] += expense['total']
+        else:
+            credit_card_labels.append(label)
+            credit_card_values.append(expense['total'])
     
     context = {
         # Data for the date navigation
@@ -129,7 +159,7 @@ def home(request):
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
-        'total_credit_card_expenses': total_credit_card_expense,
+        'total_credit_card_expenses': non_recurring_credit_card_expense,
         # Labels and values for pie charts
         'income_labels': income_labels,
         'income_data': income_data,
@@ -138,9 +168,9 @@ def home(request):
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
         # Percentage data for bar graphs
-        'cash_flow_percentage': (((total_expense - total_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
+        'cash_flow_percentage': (((total_expense - non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
         'net_percentage': ((net / total_income) * 100) if total_income > 0 else 0,
-        'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
+        'credit_card_percentage': ((non_recurring_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
     }
     return render(request, 'tracker/home.html', context)
 @login_required

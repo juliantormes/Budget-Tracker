@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from dateutil.relativedelta import relativedelta
+
 class ExpenseCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -22,6 +24,7 @@ class Expense(models.Model):
     description = models.CharField(max_length=255, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
     is_recurring = models.BooleanField(default=False)
     credit_card = models.ForeignKey(CreditCard, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
     installments = models.IntegerField(default=1)
@@ -35,6 +38,10 @@ class Expense(models.Model):
             )
             self.amount = new_amount
             self.save()
+    def save(self, *args, **kwargs):
+        if self.is_recurring and self.credit_card and self.installments:
+            self.end_date = self.date + relativedelta(months=self.installments-1)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.expense_category.name}: {self.amount} on {self.date}"

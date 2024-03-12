@@ -2,6 +2,8 @@ from django import forms
 from django.utils import timezone
 from .models import Expense, Income , ExpenseCategory, IncomeCategory, CreditCard
 from django.core.validators import MinValueValidator
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 class ExpenseCategoryForm(forms.ModelForm):
     class Meta:
         model = ExpenseCategory
@@ -33,6 +35,18 @@ class ExpenseForm(forms.ModelForm):
         self.fields['credit_card'].required = False
         self.fields['installments'].required = False
         self.fields['interest_rate'].required = False
+    def save(self, commit=True):
+        expense = super().save(commit=False)
+
+        # Check if the expense is a recurring credit card payment with installments
+        if expense.is_recurring and expense.credit_card and expense.installments:
+            # Calculate end_date based on the number of installments
+            expense.end_date = expense.date + relativedelta(months=expense.installments-1)
+        
+        if commit:
+            expense.save()
+        return expense
+    
 class IncomeCategoryForm(forms.ModelForm):
     class Meta:
         model = IncomeCategory

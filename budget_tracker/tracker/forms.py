@@ -24,6 +24,10 @@ class ExpenseForm(forms.ModelForm):
         
         # Set today's date as the default for the date field
         self.fields['date'].initial = timezone.now().date()
+
+        # Initialize the using_credit_card checkbox
+        if self.instance.pk:  # Check if the form is bound to an existing instance
+            self.fields['using_credit_card'].initial = self.instance.credit_card is not None
         
         # Set credit card related fields as not required and initially hidden
         self.fields['credit_card'].required = False

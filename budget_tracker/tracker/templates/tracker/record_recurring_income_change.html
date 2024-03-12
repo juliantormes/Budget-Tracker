@@ -1,12 +1,10 @@
-{% extends "base.html" %}
-
+{% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h2>Update Recurring Income</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn">Save changes</button>
-    </form>
-</div>
+<h2>Record Change for Recurring Income</h2>
+<form method="post">
+    {% csrf_token %}
+    <label for="new_amount">New Amount:</label>
+    <input type="text" name="new_amount" id="new_amount" required>
+    <button type="submit">Submit</button>
+</form>
 {% endblock %}

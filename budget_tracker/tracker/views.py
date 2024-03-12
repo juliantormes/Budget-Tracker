@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum, F
+from django.db.models import Sum, F ,  Subquery, OuterRef, DecimalField
 from django.contrib import messages
-from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, RecurringExpenseChange, RecurringIncomeChange
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm, CreditCardForm
 from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -10,6 +10,7 @@ from django.utils import timezone
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
+from decimal import Decimal, InvalidOperation
 
 def signup(request):
     if request.method == 'POST':
@@ -189,11 +190,22 @@ def expense_list(request):
     current_month = timezone.now().month
     current_year = timezone.now().year
     expenses = Expense.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
+    # Create a subquery for the most recent change for each expense
+    latest_changes = ExpenseChangeLog.objects.filter(
+        expense=OuterRef('pk'),
+        change_date__lte=timezone.now()
+    ).order_by('-change_date')
+
+    # Annotate the expenses with the most recent amount
+    expenses = Expense.objects.annotate(
+        recent_amount=Subquery(latest_changes.values('new_amount')[:1], output_field=DecimalField())
+    )
+
+    # Then when you iterate through them, use the annotated recent_amount
     for expense in expenses:
         if expense.is_recurring:
-            latest_change = RecurringExpenseChange.objects.filter(expense=expense, change_date__lte=timezone.now()).order_by('-change_date').first()
-            if latest_change:
-                expense.amount = latest_change.new_amount
+            expense.display_amount = expense.recent_amount if expense.recent_amount else expense.amount
+
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
 @login_required
@@ -206,11 +218,21 @@ def income_list(request):
     current_month = timezone.now().month
     current_year = timezone.now().year
     incomes = Income.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
+    # Create a subquery for the most recent change for each income
+    latest_changes = IncomeChangeLog.objects.filter(
+        income=OuterRef('pk'),
+        change_date__lte=timezone.now()
+    ).order_by('-change_date')
+
+    # Annotate the incomes with the most recent amount
+    incomes = Income.objects.annotate(
+        recent_amount=Subquery(latest_changes.values('new_amount')[:1], output_field=DecimalField())
+    )
+
+    # Then when you iterate through them, use the annotated recent_amount
     for income in incomes:
         if income.is_recurring:
-            latest_change = RecurringIncomeChange.objects.filter(income=income, change_date__lte=timezone.now()).order_by('-change_date').first()
-            if latest_change:
-                income.amount = latest_change.new_amount
+            income.display_amount = income.recent_amount if income.recent_amount else income.amount
     return render(request, 'tracker/income_list.html', {'incomes': incomes})
 
 @login_required
@@ -362,20 +384,44 @@ def delete_income(request, income_id):
 
 @login_required
 def record_recurring_expense_change(request, expense_id):
-    expense = Expense.objects.get(id=expense_id)
+    expense = get_object_or_404(Expense, id=expense_id, user=request.user)
     if request.method == 'POST':
         new_amount = request.POST.get('new_amount')
-        change_date = timezone.now().date()
-        RecurringExpenseChange.objects.create(expense=expense, change_date=change_date, new_amount=new_amount)
-        return redirect('expense_list')
+        try:
+            new_amount_decimal = Decimal(new_amount)
+            if expense.is_recurring:
+                ExpenseChangeLog.objects.create(
+                    expense=expense,
+                    previous_amount=expense.amount,
+                    new_amount=new_amount_decimal,
+                    change_date=timezone.now().date()
+                )
+                expense.amount = new_amount_decimal
+                expense.save()
+                return redirect('expense_list')
+        except InvalidOperation:
+            raise ValueError("Invalid amount")
+
     return render(request, 'tracker/record_recurring_expense_change.html', {'expense': expense})
 
 @login_required
 def record_recurring_income_change(request, income_id):
-    income = Income.objects.get(id=income_id)
+    income = get_object_or_404(Income, id=income_id, user=request.user)  # Ensures the user owns the income
     if request.method == 'POST':
         new_amount = request.POST.get('new_amount')
-        change_date = timezone.now().date()
-        RecurringIncomeChange.objects.create(income=income, change_date=change_date, new_amount=new_amount)
-        return redirect('expense_list')
-    return render(request, 'tracker/record_recurring_income_change.html', {'expense': income})
+        try:
+            new_amount_decimal = Decimal(new_amount)
+            if income.is_recurring:
+                IncomeChangeLog.objects.create(
+                    income=income,
+                    previous_amount=income.amount,
+                    new_amount=new_amount_decimal,
+                    change_date=timezone.now().date()
+                )
+                income.amount = new_amount_decimal
+                income.save()
+                return redirect('income_list')
+        except ValueError:
+            raise ValueError("Invalid amount")
+
+    return render(request, 'tracker/record_recurring_income_change.html', {'income': income})

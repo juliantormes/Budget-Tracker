@@ -26,6 +26,15 @@ class Expense(models.Model):
     credit_card = models.ForeignKey(CreditCard, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
     installments = models.IntegerField(default=1)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
+    def update_amount(self, new_amount):
+        if self.is_recurring:
+            ExpenseChangeLog.objects.create(
+                expense=self,
+                previous_amount=self.amount,
+                new_amount=new_amount
+            )
+            self.amount = new_amount
+            self.save()
 
     def __str__(self):
         return f"{self.expense_category.name}: {self.amount} on {self.date}"
@@ -44,23 +53,32 @@ class Income(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     is_recurring = models.BooleanField(default=False)
+    def update_amount(self, new_amount):
+        if self.is_recurring:
+            IncomeChangeLog.objects.create(
+                income=self,
+                previous_amount=self.amount,
+                new_amount=new_amount
+            )
+            self.amount = new_amount
+            self.save()
 
     def __str__(self):
         return f"{self.income_category.name}: {self.amount} on {self.date}"
-
-class RecurringExpenseChange(models.Model):
-    expense = models.ForeignKey(Expense, related_name='amount_changes', on_delete=models.CASCADE, null=True, blank=True)
-    change_date = models.DateField()
+class ExpenseChangeLog(models.Model):
+    expense = models.ForeignKey('Expense', on_delete=models.CASCADE, related_name='change_logs')
+    previous_amount = models.DecimalField(max_digits=10, decimal_places=2)
     new_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    change_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.expense} changed to {self.new_amount} on {self.change_date}"
+        return f"Change for {self.expense.expense_category.name} on {self.change_date}: {self.previous_amount} to {self.new_amount}"
 
-class RecurringIncomeChange(models.Model):
-    income = models.ForeignKey('Income', on_delete=models.CASCADE, related_name='changes')
-    change_date = models.DateField()
+class IncomeChangeLog(models.Model):
+    income = models.ForeignKey('Income', on_delete=models.CASCADE, related_name='change_logs')
+    previous_amount = models.DecimalField(max_digits=10, decimal_places=2)
     new_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    change_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.income} changed to {self.new_amount} on {self.change_date}"
-
+        return f"Change for {self.income.income_category.name} on {self.change_date}: {self.previous_amount} to {self.new_amount}"

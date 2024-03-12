@@ -120,30 +120,33 @@ def home(request):
     net = total_income - total_expense
 
     # Prepare data and labels for charts
+    credit_card_expenses = {}
     income_labels, income_data= zip(*combined_incomes) # This separates the labels and values
     expense_labels, expense_data = zip(*combined_expenses) # This separates the labels and values
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
     recurring_credit_card_expenses = Expense.objects.filter(
-        user=request.user, 
-        credit_card__isnull=False, 
+        user=request.user,
+        credit_card__isnull=False,
         is_recurring=True,
-        date__lte=end_of_month
-    ).exclude(
-        date__year=now.year,
-        date__month=now.month
     ).values(
         'credit_card__last_four_digits', 'credit_card__brand'
     ).annotate(total=Sum('amount'))
 
     for expense in recurring_credit_card_expenses:
         label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
-        if label in credit_card_labels:
-            index = credit_card_labels.index(label)
-            credit_card_values[index] += expense['total']
+        # Add or update the expense total in the dictionary
+        if label not in credit_card_expenses:
+            credit_card_expenses[label] = expense['total']
         else:
-            credit_card_labels.append(label)
-            credit_card_values.append(expense['total'])
+            # This condition prevents duplication by ensuring an expense is only added once
+            # It's useful if you're still facing duplication issues despite the query adjustments
+            # However, if your logic already ensures no duplication, this part may be adjusted as needed
+            credit_card_expenses[label] += expense['total']
+    credit_card_labels = list(credit_card_expenses.keys())
+    credit_card_values = list(credit_card_expenses.values())
+    recurring_credit_card_expense_total = recurring_credit_card_expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+
     
     context = {
         # Data for the date navigation
@@ -159,7 +162,7 @@ def home(request):
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
-        'total_credit_card_expenses': non_recurring_credit_card_expense,
+        'total_credit_card_expenses': non_recurring_credit_card_expense + recurring_credit_card_expense_total,
         # Labels and values for pie charts
         'income_labels': income_labels,
         'income_data': income_data,
@@ -168,9 +171,10 @@ def home(request):
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
         # Percentage data for bar graphs
-        'cash_flow_percentage': (((total_expense - non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
-        'net_percentage': ((net / total_income) * 100) if total_income > 0 else 0,
-        'credit_card_percentage': ((non_recurring_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
+        'cash_flow_percentage' : (((total_expense - recurring_credit_card_expense_total - non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
+        'net_percentage' : (((total_income - total_expense) / total_income) * 100) if total_income > 0 else 0,
+        'credit_card_percentage' : (((recurring_credit_card_expense_total + non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0
+
     }
     return render(request, 'tracker/home.html', context)
 @login_required

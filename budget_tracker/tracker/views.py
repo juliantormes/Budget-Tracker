@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from collections import defaultdict
 
 def signup(request):
     if request.method == 'POST':
@@ -38,6 +39,14 @@ def logout(request):
     auth_logout(request)
     messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
     return redirect('login')
+
+def aggregate_data(queryset, label_field, value_field):
+    aggregated_data = defaultdict(float)  # Use default float to auto-initialize amounts to 0
+    for entry in queryset:
+        label = entry[label_field]
+        value = entry[value_field]
+        aggregated_data[label] += value  # Sum amounts with the same label
+    return list(aggregated_data.items())
 
 @login_required
 def home(request):
@@ -102,7 +111,7 @@ def home(request):
     expense_labels, expense_data = zip(*combined_expenses) # This separates the labels and values
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
-
+    
     context = {
         # Data for the date navigation
         'previous_month_year': previous_month.year,
@@ -131,7 +140,6 @@ def home(request):
         'credit_card_percentage': ((total_credit_card_expense / total_income) * 100) if total_income > 0 else 0,
     }
     return render(request, 'tracker/home.html', context)
-
 @login_required
 def add_credit_card(request):
     if request.method == 'POST':

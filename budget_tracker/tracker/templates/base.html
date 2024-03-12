@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{% static 'tracker/css/style.css' %}" type="text/css">
     <link rel="icon" type="image/png" href="{% static 'tracker/images/favicon.png' %}">
 </head>
-<body>
+<body data-viewing-month="{{ viewing_month }}" data-viewing-year="{{ viewing_year }}">
     <header class="site-header">
         {% if user.is_authenticated %}
         <form method="post" action="{% url 'logout' %}">
@@ -28,11 +28,10 @@
 
     <footer class="site-footer">
         <p>&copy; {% now "Y" %} Budget Tracker. All rights reserved.</p>
-    </footer>  
+    </footer>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.2"></script>
     <script src="{% static 'tracker/js/init-chart.js' %}"></script>
     <script src="{% static 'tracker/js/financial-overview-chart.js' %}"></script>
-    <script src="{% static 'tracker/js/chart-setup.js' %}"></script>
     <script src="{% static 'tracker/js/alerts.js' %}"></script>
 </body>
 </html>

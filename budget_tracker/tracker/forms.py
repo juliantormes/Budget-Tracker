@@ -38,11 +38,14 @@ class IncomeForm(forms.ModelForm):
     class Meta:
         model = Income
         fields = ['income_category', 'description', 'amount', 'date', 'is_recurring']
-    
+        widgets = {
+            'date': forms.DateInput(attrs={'type': 'date'}),
+        }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')  # Get the user passed from the view
         super(IncomeForm, self).__init__(*args, **kwargs)
         self.fields['income_category'].queryset = IncomeCategory.objects.filter(user=user)  # Filter the queryset
+        self.fields['date'].initial = timezone.now().date()  # Set today's date as the default for the date field
 class CreditCardForm(forms.ModelForm):
     expire_date = forms.DateField(
         input_formats=['%m/%y'], 

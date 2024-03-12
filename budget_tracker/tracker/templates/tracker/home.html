@@ -8,7 +8,6 @@
     <span>{{ month_name }} {{ year }}</span>
     <a href="?year={{ next_month_year }}&month={{ next_month_month }}">Next Month →</a>
 </div>
-
 <section class="financial-summary">
     <h2>Financial Summary</h2>
     <canvas id="incomeChart" width="400" height="400"></canvas>
@@ -20,35 +19,30 @@
     <canvas id="financialOverviewChart" data-cash-flow-percentage="{{ cash_flow_percentage }}" data-net-percentage="{{ net_percentage }}" data-credit-card-percentage="{{ credit_card_percentage }}"></canvas>
     <div class="summary-item"><strong>Net:</strong> <span class="amount">$ {{ net }}</span></div> 
 </section>
-
-    <nav class="navigation-links">
-        <h2>Navigation</h2>
-        <div>
-            <a href="{% url 'expense_list' %}">View Expenses</a> 
-            <a href="{% url 'add_expense' %}">Add Expense</a> 
-            <a href="{% url 'expense_category_list' %}" class="button">View Expense Categories</a> 
-            <a href="{% url 'add_expense_category' %}">Add Expense Category</a>
-        </div>
-        <br>
-        <div>
-            <a href="{% url 'income_list' %}">View Incomes</a> 
-            <a href="{% url 'add_income' %}">Add Income</a> 
-            <a href="{% url 'income_category_list' %}" class="button">View Income Categories</a> 
-            <a href="{% url 'add_income_category' %}">Add Income Category</a>
-        </div>
-        <br>
-        <div>
-            <a href="{% url 'credit_card_list' %}">View Credit Cards</a> 
-            <a href="{% url 'add_credit_card' %}">Add Credit Card</a>
-    </nav>
-    {{ income_labels|json_script:"income-data" }}
-    {{ income_values|json_script:"income-values" }}
-    {{ expense_labels|json_script:"expense-data" }}
-    {{ expense_values|json_script:"expense-values" }}
-    {{ credit_card_labels|json_script:"credit-card-data" }}
-    {{ credit_card_values|json_script:"credit-card-values" }}
-    {{ recurring_income_labels|json_script:"recurring-income-data" }}
-    {{ recurring_income_values|json_script:"recurring-income-values" }}
-    {{ recurring_expense_labels|json_script:"recurring-expense-data" }}
-    {{ recurring_expense_values|json_script:"recurring-expense-values" }}
+<nav class="navigation-links">
+    <h2>Navigation</h2>
+    <div>
+        <a href="{% url 'expense_list' %}">View Expenses</a> 
+        <a href="{% url 'add_expense' %}">Add Expense</a> 
+        <a href="{% url 'expense_category_list' %}" class="button">View Expense Categories</a> 
+        <a href="{% url 'add_expense_category' %}">Add Expense Category</a>
+    </div>
+    <br>
+    <div>
+        <a href="{% url 'income_list' %}">View Incomes</a> 
+        <a href="{% url 'add_income' %}">Add Income</a> 
+        <a href="{% url 'income_category_list' %}" class="button">View Income Categories</a> 
+        <a href="{% url 'add_income_category' %}">Add Income Category</a>
+    </div>
+    <br>
+    <div>
+        <a href="{% url 'credit_card_list' %}">View Credit Cards</a> 
+        <a href="{% url 'add_credit_card' %}">Add Credit Card</a>
+</nav>
+{{ non_recurring_incomes|json_script:"non-recurring-income-values" }}
+{{ non_recurring_expenses|json_script:"non-recurring-expense-values" }}
+{{ recurring_incomes_total|json_script:"recurring-income-amounts" }}
+{{ recurring_expenses_total|json_script:"recurring-expense-amounts" }}
+{{ credit_card_labels|json_script:"credit-card-data" }}
+{{ credit_card_values|json_script:"credit-card-values" }}
 {% endblock content %}

@@ -44,6 +44,8 @@ def home(request):
 
     # Parse month and year from request parameters, defaulting to the current month and year
     now = timezone.now()
+    this_month = int(now.month)
+    this_year = int(now.year)
     month_query = request.GET.get('month', now.month)
     year_query = request.GET.get('year', now.year)
     try:
@@ -61,34 +63,47 @@ def home(request):
     end_date = (start_date + relativedelta(months=1)) - relativedelta(days=1)
     previous_month = start_date - relativedelta(months=1)
     next_month = start_date + relativedelta(months=1)
-    # Calculate total expenses, including recurring
-    monthly_expenses = Expense.objects.filter(user=request.user, date__range=(start_date, end_date), is_recurring=False).aggregate(Sum('amount'))['amount__sum'] or 0
-    recurring_expenses = Expense.objects.filter(user=request.user, is_recurring=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_expense = monthly_expenses + recurring_expenses
+    # Non-recurring incomes and expenses
+    non_recurring_incomes = Income.objects.filter(
+        user=request.user, is_recurring=False, date__month=month_query, date__year=year_query
+    ).values('date__month', 'date__year', 'amount')
 
-    # Calculate total incomes, including recurring
-    monthly_incomes = Income.objects.filter(user=request.user, date__range=(start_date, end_date), is_recurring=False).aggregate(Sum('amount'))['amount__sum'] or 0
-    recurring_incomes = Income.objects.filter(user=request.user, is_recurring=True).aggregate(Sum('amount'))['amount__sum'] or 0
-    total_income = monthly_incomes + recurring_incomes
+    non_recurring_expenses = Expense.objects.filter(
+        user=request.user, is_recurring=False, date__month=month_query, date__year=year_query
+    ).values('date__month', 'date__year', 'amount')
+
+    # Assuming non_recurring_expenses and non_recurring_incomes are QuerySets of expense and income objects
+    non_recurring_expenses_total = non_recurring_expenses.aggregate(Sum('amount'))['amount__sum'] or 0
+    non_recurring_incomes_total = non_recurring_incomes.aggregate(Sum('amount'))['amount__sum'] or 0
+    # Aggregate totals for recurring incomes and expenses
+    recurring_incomes_total = Income.objects.filter(
+        user=request.user, is_recurring=True
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    recurring_expenses_total = Expense.objects.filter(
+        user=request.user, is_recurring=True
+    ).aggregate(total=Sum('amount'))['total'] or 0
+    
+    # Assuming recurring_expenses_total and recurring_incomes_total are already decimal.Decimal values representing the sum of all recurring expenses and incomes
+    total_expense = non_recurring_expenses_total + recurring_expenses_total
+    total_income = non_recurring_incomes_total + recurring_incomes_total
 
     # Credit card expenses
     total_credit_card_expense = Expense.objects.filter(user=request.user, credit_card__isnull=False, date__range=(start_date, end_date)).aggregate(Sum('amount'))['amount__sum'] or 0
-
-    # Adjusted for charts
-    income_data = Income.objects.filter(user=request.user, date__lte=end_date).values('income_category__name').annotate(total=Sum('amount')).order_by('-total')
-    expense_data = Expense.objects.filter(user=request.user, date__lte=end_date).values('expense_category__name').annotate(total=Sum('amount')).order_by('-total')
     credit_card_expense_data = Expense.objects.filter(user=request.user,credit_card__isnull=False,date__range=(start_date, end_date)).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
     # Calculate net
     net = total_income - total_expense - total_credit_card_expense
     
     # Prepare labels and values for charts
+    non_recurring_incomes = Income.objects.filter(
+    user=request.user, is_recurring=False, date__month=month_query, date__year=year_query
+    ).values('income_category', 'date__month', 'date__year', 'amount')
+
+    non_recurring_expenses = Expense.objects.filter(
+    user=request.user, is_recurring=False, date__month=month_query, date__year=year_query
+    ).values('expense_category', 'date__month', 'date__year', 'amount')
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
-    income_labels = [data['income_category__name'] for data in income_data]
-    income_values = [data['total'] for data in income_data]
-    expense_labels = [data['expense_category__name'] for data in expense_data]
-    expense_values = [data['total'] for data in expense_data]
-
     # Calculate net income
     net = total_income - total_expense
 
@@ -100,16 +115,18 @@ def home(request):
         'next_month_month': next_month.month,
         'month_name': selected_date.strftime("%B"),
         'year': year,
+        'viewing_month': this_month,
+        'viewing_year': this_year,
         # Data for the summary table
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
         'total_credit_card_expenses': total_credit_card_expense,
         # Labels and values for pie charts
-        'income_labels': [data['income_category__name'] for data in income_data],
-        'income_values': [data['total'] for data in income_data],
-        'expense_labels': [data['expense_category__name'] for data in expense_data],
-        'expense_values': [data['total'] for data in expense_data],
+        'non_recurring_incomes': list(non_recurring_incomes),
+        'non_recurring_expenses': list(non_recurring_expenses),
+        'recurring_incomes_total': recurring_incomes_total,
+        'recurring_expenses_total': recurring_expenses_total,
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
         # Percentage data for bar graphs

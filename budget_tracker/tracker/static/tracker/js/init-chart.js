@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('income-labels').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('income-data').textContent),
-            backgroundColor: ['#4CAF50', '#81C784', '#A5D6A7', '#C8E6C9', '#E8F5E9']
+            backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585']
         }]
     };
     const incomeChartCtx = document.getElementById('incomeChart').getContext('2d');
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('expense-labels').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('expense-data').textContent),
-            backgroundColor: ['#FFEB3B', '#FFEE58', '#FFF176', '#FFF59D', '#FFF9C4']
+            backgroundColor: ['#6b4c9a', '#f28e2b', '#59a14f', '#edc948', '#b07aa1']
         }]
     };
     const expenseChartCtx = document.getElementById('expenseChart').getContext('2d');
@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
         labels: JSON.parse(document.getElementById('credit-card-data').textContent),
         datasets: [{
             data: JSON.parse(document.getElementById('credit-card-values').textContent),
-            backgroundColor: ['#E57373', '#EF5350', '#F44336', '#E53935', '#D32F2F']
+            backgroundColor: ['#76b7b2', '#ff9da7', '#9c755f', '#bab0ac', '#d67236']
         }]
     };
     const ctxCreditCard = document.getElementById('creditCardChart').getContext('2d');

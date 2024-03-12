@@ -88,12 +88,14 @@ def home(request):
     total_recurring_expenses = recurring_expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
     # Data
-    non_recurring_incomes_list = list(non_recurring_incomes.values_list('income_category__name', 'amount'))
-    recurring_incomes_list = [('Recurring Incomes', total_recurring_incomes)]
-    non_recurring_expenses_list = list(non_recurring_expenses.values_list('expense_category__name', 'amount'))
-    recurring_expenses_list = [('Recurring Expenses', total_recurring_expenses)]
-    combined_incomes = non_recurring_incomes_list + recurring_incomes_list
-    combined_expenses = non_recurring_expenses_list + recurring_expenses_list
+
+    non_recurring_incomes_list = list(non_recurring_incomes.values('income_category__name').annotate(total=Sum('amount')).order_by().values_list('income_category__name', 'total'))
+    recurring_incomes_by_category = list(Income.objects.filter(user=request.user, is_recurring=True, date__year=year).values('income_category__name').annotate(total=Sum('amount')).order_by().values_list('income_category__name', 'total'))
+    combined_incomes = non_recurring_incomes_list + recurring_incomes_by_category
+    non_recurring_expenses_list = list(non_recurring_expenses.values('expense_category__name').annotate(total=Sum('amount')).order_by().values_list('expense_category__name', 'total'))
+    recurring_expenses_by_category = list(recurring_expenses.values('expense_category__name').annotate(total=Sum('amount')).order_by().values_list('expense_category__name', 'total'))
+    combined_expenses = non_recurring_expenses_list + recurring_expenses_by_category
+
     credit_card_expense_data = Expense.objects.filter(user=request.user,credit_card__isnull=False,date__range=(start_date, end_date)).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
 
     # Credit card expenses

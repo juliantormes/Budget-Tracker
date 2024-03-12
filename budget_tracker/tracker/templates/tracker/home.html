@@ -39,10 +39,10 @@
         <a href="{% url 'credit_card_list' %}">View Credit Cards</a> 
         <a href="{% url 'add_credit_card' %}">Add Credit Card</a>
 </nav>
-{{ non_recurring_incomes|json_script:"non-recurring-income-values" }}
-{{ non_recurring_expenses|json_script:"non-recurring-expense-values" }}
-{{ recurring_incomes_total|json_script:"recurring-income-amounts" }}
-{{ recurring_expenses_total|json_script:"recurring-expense-amounts" }}
+{{ income_data|json_script:"income-data" }}
+{{ expense_data|json_script:"expense-data" }}
+{{ income_labels|json_script:"income-labels" }}
+{{ expense_labels|json_script:"expense-labels" }}
 {{ credit_card_labels|json_script:"credit-card-data" }}
 {{ credit_card_values|json_script:"credit-card-values" }}
 {% endblock content %}

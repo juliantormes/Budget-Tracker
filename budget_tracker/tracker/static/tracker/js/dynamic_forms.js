@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const usingCreditCardCheckbox = document.querySelector('#id_using_credit_card');
-    const creditCardFields = ['id_credit_card', 'id_installments', 'id_interest_rate'];
+    const creditCardFields = ['id_credit_card', 'id_installments', 'id_'];
 
     function toggleCreditCardFields(display) {
         creditCardFields.forEach(fieldId => {

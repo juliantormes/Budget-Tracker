@@ -15,6 +15,7 @@ class CreditCard(models.Model):
     expire_date = models.DateField()
     credit_limit = models.DecimalField(max_digits=10, decimal_places=2)
     payment_day = models.IntegerField()
+    close_card_day = models.IntegerField(default=21)
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
@@ -28,7 +29,7 @@ class Expense(models.Model):
     is_recurring = models.BooleanField(default=False)
     credit_card = models.ForeignKey(CreditCard, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
     installments = models.IntegerField(default=1)
-    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
+    surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
     def update_amount(self, new_amount):
         if self.is_recurring:
             ExpenseChangeLog.objects.create(

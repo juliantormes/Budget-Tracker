@@ -4,6 +4,7 @@ from .models import Expense, Income , ExpenseCategory, IncomeCategory, CreditCar
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 from datetime import timedelta
+from decimal import Decimal
 class ExpenseCategoryForm(forms.ModelForm):
     class Meta:
         model = ExpenseCategory
@@ -14,7 +15,7 @@ class ExpenseForm(forms.ModelForm):
     is_recurring= forms.BooleanField(required=False,label= 'Is recurring monthly? (e.g., subscription fees, salary).')
     class Meta:
         model = Expense
-        fields = ['expense_category', 'description', 'amount', 'date', 'credit_card', 'installments', 'interest_rate', 'is_recurring']
+        fields = ['expense_category', 'description', 'amount', 'date', 'credit_card', 'installments', 'surcharge', 'is_recurring']
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
         }
@@ -34,9 +35,24 @@ class ExpenseForm(forms.ModelForm):
         # Set credit card related fields as not required and initially hidden
         self.fields['credit_card'].required = False
         self.fields['installments'].required = False
-        self.fields['interest_rate'].required = False
+        self.fields['surcharge'].required = False
     def save(self, commit=True):
         expense = super().save(commit=False)
+        if expense.is_recurring and expense.credit_card and expense.installments:
+                # Assuming amount is a Decimal
+                P = expense.amount
+                # Convert R to Decimal
+                R = Decimal(expense.surcharge) / Decimal(100)
+                # Convert T to Decimal, assuming installments is an integer
+                T = Decimal(expense.installments) / Decimal(12)
+                # Calculate simple interest
+                SI = P * R * T
+                # Calculate total amount to be paid
+                total_amount = P + SI
+                expense.amount = total_amount  # Ensure amount can handle Decimal
+                
+                if commit:
+                    expense.save()
 
         # Check if the expense is a recurring credit card payment with installments
         if expense.is_recurring and expense.credit_card and expense.installments:
@@ -70,6 +86,7 @@ class CreditCardForm(forms.ModelForm):
         widget=forms.DateInput(format='%m/%y', attrs={'placeholder': 'MM/YY'})
     )
     payment_day = forms.IntegerField(min_value=1, max_value=31, help_text= 'The day of the month the bill is due')
+    close_card_day = forms.IntegerField(min_value=1, max_value=31, help_text= 'The day of the month the card is closed')
     
     class Meta:
         model = CreditCard

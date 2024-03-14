@@ -132,19 +132,23 @@ def home(request):
     credit_card_expense_data = Expense.objects.filter(user=request.user,credit_card__isnull=False,date__range=(start_date, end_date)).values('credit_card__last_four_digits', 'credit_card__brand').annotate(total=Sum('amount')).order_by('-total')
 
     # Credit card expenses
-    non_recurring_credit_card_expense = Expense.objects.filter(
-    user=request.user, 
-    credit_card__isnull=False,
-    is_recurring=False, 
-    date__range=(start_of_month, end_of_month)
-    ).aggregate(total=Sum('amount'))['total'] or 0
+    non_recurring_credit_card_expenses = Expense.objects.filter(
+        user=request.user,
+        credit_card__isnull=False,
+        is_recurring=False,
+        date__range=(start_of_month, end_of_month)
+    ).annotate(
+        close_card_day=F('credit_card__close_card_day')  # Adding close_card_day to each expense
+    )
+
+    # If you still need to calculate the total amount
+    total_non_recurring_credit_card_expense = non_recurring_credit_card_expenses.aggregate(total=Sum('amount'))['total'] or 0
     
     
     # Calculations for summary table
     total_expense = total_recurring_expenses + total_non_recurring_expenses
     total_income = total_recurring_incomes + total_non_recurring_incomes
-    net = total_income - total_expense - non_recurring_credit_card_expense
-    net = total_income - total_expense
+    net = total_income - total_expense - total_non_recurring_credit_card_expense
 
     # Prepare data and labels for charts
     credit_card_expenses = {}
@@ -152,24 +156,38 @@ def home(request):
     expense_labels, expense_data = zip(*combined_expenses) # This separates the labels and values
     credit_card_labels = [f"{data['credit_card__brand']} ending in {data['credit_card__last_four_digits']}" for data in credit_card_expense_data]
     credit_card_values = [data['total'] for data in credit_card_expense_data]
+
     recurring_credit_card_expenses = Expense.objects.filter(
         user=request.user,
         credit_card__isnull=False,
         is_recurring=True,
     ).values(
-        'credit_card__last_four_digits', 'credit_card__brand'
-    ).annotate(total=Sum('amount'))
-
+        'credit_card__last_four_digits',
+        'credit_card__brand',
+        'date'  # Assuming 'date' is a field in Expense
+    ).annotate(
+        total=Sum('amount'),
+        close_card_day=F('credit_card__close_card_day')  # Fetch the close_card_day from related CreditCard
+    ).order_by()
+    for expense in non_recurring_credit_card_expenses:
+        label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
+        effective_month = get_effective_month(expense.date, expense.credit_card.close_card_day)
+        # Ensure correct attribute access for amount
+        if label not in credit_card_expenses:
+            credit_card_expenses[label] = expense.amount
+        else:
+            credit_card_expenses[label] += expense.amount
     for expense in recurring_credit_card_expenses:
         label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
-        # Add or update the expense total in the dictionary
+        effective_month = get_effective_month(expense['date'], expense['close_card_day'])
+        effective_month_str = effective_month.strftime('%B %Y')
+        combined_label = f"{label} - {effective_month_str}"
+        # Use combined_label consistently for aggregation
         if label not in credit_card_expenses:
             credit_card_expenses[label] = expense['total']
         else:
-            # This condition prevents duplication by ensuring an expense is only added once
-            # It's useful if you're still facing duplication issues despite the query adjustments
-            # However, if your logic already ensures no duplication, this part may be adjusted as needed
             credit_card_expenses[label] += expense['total']
+    
     credit_card_labels = list(credit_card_expenses.keys())
     credit_card_values = list(credit_card_expenses.values())
     recurring_credit_card_expense_total = recurring_credit_card_expenses.aggregate(Sum('amount'))['amount__sum'] or 0
@@ -189,7 +207,7 @@ def home(request):
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
-        'total_credit_card_expenses': non_recurring_credit_card_expense + recurring_credit_card_expense_total,
+        'total_credit_card_expenses': total_non_recurring_credit_card_expense + recurring_credit_card_expense_total,
         # Labels and values for pie charts
         'income_labels': income_labels,
         'income_data': income_data,
@@ -198,9 +216,9 @@ def home(request):
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
         # Percentage data for bar graphs
-        'cash_flow_percentage' : (((total_expense - recurring_credit_card_expense_total - non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
+        'cash_flow_percentage' : (((total_expense - recurring_credit_card_expense_total - total_non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0,
         'net_percentage' : (((total_income - total_expense) / total_income) * 100) if total_income > 0 else 0,
-        'credit_card_percentage' : (((recurring_credit_card_expense_total + non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0
+        'credit_card_percentage' : (((recurring_credit_card_expense_total + total_non_recurring_credit_card_expense) / total_income) * 100) if total_income > 0 else 0
 
     }
     return render(request, 'tracker/home.html', context)

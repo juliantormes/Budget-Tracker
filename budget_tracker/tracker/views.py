@@ -74,7 +74,6 @@ def distribute_installments(expense, close_card_day):
             effective_date += relativedelta(months=1)
         effective_month = effective_date.replace(day=1)
         distributed_payments[effective_month].append(monthly_payment)
-
     return distributed_payments
 
 @login_required

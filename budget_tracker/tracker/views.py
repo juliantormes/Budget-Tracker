@@ -204,12 +204,21 @@ def home(request):
         monthly_credit_card_expenses[effective_month_str][card_label] += expense.amount
     # Process recurring credit card expenses similarly
     for expense in recurring_credit_card_expenses:
-        effective_month = get_effective_month(expense['date'], expense['close_card_day'])
-        effective_month_str = effective_month.strftime('%B %Y')
-        card_label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
+        now_date = now.date()  # Convert 'now' to a datetime.date object
+        projection_end_date = now_date + relativedelta(years=5)  # Now correctly a datetime.date
+        projection_date = expense['date']  # Start projection from the original expense date
 
-        # Aggregate expense amount by card within each month
-        monthly_credit_card_expenses[effective_month_str][card_label] += expense['total']
+        while projection_date <= projection_end_date:
+            # Calculate the effective month for each projected date, using projection_date
+            effective_month = get_effective_month(projection_date, expense['close_card_day'])
+            effective_month_str = effective_month.strftime('%B %Y')
+            card_label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
+
+            # Aggregate expense amount by card within each effective month
+            monthly_credit_card_expenses[effective_month_str][card_label] += expense['total']
+
+            # Move to the next month for the next iteration
+            projection_date += relativedelta(months=1)
     
     selected_month_str = datetime(year, month, 1).strftime('%B %Y')
     if selected_month_str in monthly_credit_card_expenses:

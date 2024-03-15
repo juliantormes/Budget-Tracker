@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (label) {
                                 label += ': ';
                             }
-                            label += Math.round(context.parsed.x) + '%';
+                            label += parseFloat(context.parsed.x).toFixed(2) + '%';
                             return label;
                         }
                     }

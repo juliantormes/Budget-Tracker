@@ -109,9 +109,19 @@ def home(request):
     non_recurring_incomes = Income.objects.filter(user=request.user, is_recurring=False, date__month=month, date__year=year)
     recurring_incomes = Income.objects.filter(user=request.user, is_recurring=True)
     
-    # Filter non-recurring and recurring expenses
-    non_recurring_expenses = Expense.objects.filter(user=request.user, is_recurring=False, date__month=month, date__year=year)
-    recurring_expenses = Expense.objects.filter(user=request.user, is_recurring=True)
+    # Filter non-recurring expenses not paid with a credit card
+    non_recurring_expenses = Expense.objects.filter(
+        user=request.user, 
+        is_recurring=False,
+        date__month=month, 
+        date__year=year
+    ).exclude(credit_card__isnull=False)  # Excludes expenses with a credit card
+
+    # Filter recurring expenses not paid with a credit card
+    recurring_expenses = Expense.objects.filter(
+        user=request.user, 
+        is_recurring=True
+    ).exclude(credit_card__isnull=False)  # Excludes expenses with a credit card
 
     
     # Calculate totals
@@ -149,8 +159,8 @@ def home(request):
     )
 
     # Initialize totals
-    total_non_recurring_credit_card_expense = Decimal('0.00')
-    total_recurring_credit_card_expense_total = Decimal('0.00')
+    total_non_recurring_credit_card_expense = Decimal('0')
+    total_recurring_credit_card_expense_total = Decimal('0')
 
     # Loop through expenses to calculate totals based on effective month
     for expense in credit_card_expenses:
@@ -167,7 +177,7 @@ def home(request):
     # Calculations for summary table
     total_expense = total_recurring_expenses + total_non_recurring_expenses
     total_income = total_recurring_incomes + total_non_recurring_incomes
-    net = total_income - total_expense - total_non_recurring_credit_card_expense
+    net = total_income - total_expense - total_non_recurring_credit_card_expense - total_recurring_credit_card_expense_total
 
     # Prepare data and labels for charts
     monthly_credit_card_expenses = defaultdict(lambda: defaultdict(Decimal))
@@ -252,9 +262,9 @@ def home(request):
         'credit_card_labels': credit_card_labels,
         'credit_card_values': credit_card_values,
         # Percentage data for bar graphs
-        'cash_flow_percentage': max(0, (((total_expense - total_recurring_credit_card_expense_total - total_non_recurring_credit_card_expense) / total_income) * 100)) if total_income > 0 else 0,
-        'net_percentage': max(0, (((total_income - total_expense) / total_income) * 100)) if total_income > 0 else 0,
-        'credit_card_percentage': max(0, (((total_recurring_credit_card_expense_total + total_non_recurring_credit_card_expense) / total_income) * 100)) if total_income > 0 else 0,
+        'cash_flow_percentage': "{:.2f}".format(max(0, (((total_expense - total_recurring_credit_card_expense_total - total_non_recurring_credit_card_expense) / total_income) * 100)) if total_income > 0 else 0),
+        'net_percentage': "{:.2f}".format(max(0, (((total_income - total_expense) / total_income) * 100)) if total_income > 0 else 0),
+        'credit_card_percentage': "{:.2f}".format(max(0, (((total_recurring_credit_card_expense_total + total_non_recurring_credit_card_expense) / total_income) * 100)) if total_income > 0 else 0),
     }
     return render(request, 'tracker/home.html', context)
 @login_required

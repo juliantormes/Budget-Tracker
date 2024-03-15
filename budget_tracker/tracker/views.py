@@ -151,13 +151,6 @@ def home(request):
         close_card_day=F('credit_card__close_card_day')  # Adding close_card_day to each expense
     )
 
-    credit_card_expenses = Expense.objects.filter(
-        user=request.user,
-        credit_card__isnull=False,
-    ).annotate(
-        close_card_day=F('credit_card__close_card_day')
-    )
-
     # Prepare data and labels for charts
     monthly_credit_card_expenses = defaultdict(lambda: defaultdict(Decimal))
     if combined_incomes:
@@ -188,9 +181,14 @@ def home(request):
         effective_month = get_effective_month(expense.date, expense.credit_card.close_card_day)
         effective_month_str = effective_month.strftime('%B %Y')
         card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
+            # Calculate total amount including surcharge
+        if expense.surcharge:
+            total_amount_with_surcharge = expense.amount * (1 + expense.surcharge / 100)
+        else:
+            total_amount_with_surcharge = expense.amount
 
         # Aggregate expense amount by card within each month
-        monthly_credit_card_expenses[effective_month_str][card_label] += expense.amount
+        monthly_credit_card_expenses[effective_month_str][card_label] += total_amount_with_surcharge
     # Process recurring credit card expenses similarly
     for expense in recurring_credit_card_expenses:
         now_date = now.date()  # Convert 'now' to a datetime.date object
@@ -203,8 +201,15 @@ def home(request):
             effective_month_str = effective_month.strftime('%B %Y')
             card_label = f"{expense['credit_card__brand']} ending in {expense['credit_card__last_four_digits']}"
 
-            # Aggregate expense amount by card within each effective month
-            monthly_credit_card_expenses[effective_month_str][card_label] += expense['total']
+            # Use .get() to safely access 'surcharge', defaulting to 0 if it's not present
+            surcharge = expense.get('surcharge', 0)
+            surcharge_rate = Decimal(surcharge) / Decimal(100)  # Convert surcharge to a Decimal
+
+            # Ensure all parts of the operation are Decimal
+            total_amount_with_surcharge = expense['total'] * (Decimal('1') + surcharge_rate)
+            
+            # Aggregate adjusted expense amount by card within each effective month
+            monthly_credit_card_expenses[effective_month_str][card_label] += total_amount_with_surcharge
 
             # Move to the next month for the next iteration
             projection_date += relativedelta(months=1)
@@ -247,7 +252,7 @@ def home(request):
         'total_expenses': total_expense,
         'total_incomes': total_income,
         'net': net,
-        'total_credit_card_expenses': total_non_recurring_credit_card_expense + total_recurring_credit_card_expense_total,
+        'total_credit_card_expenses': round (total_non_recurring_credit_card_expense + total_recurring_credit_card_expense_total,2),
         # Labels and values for pie charts
         'income_labels': income_labels,
         'income_data': income_data,

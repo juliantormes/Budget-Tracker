@@ -314,15 +314,19 @@ def expense_list(request):
         change_date__lte=timezone.now()
     ).order_by('-change_date')
 
-    # Annotate the expenses with the most recent amount
     expenses = Expense.objects.annotate(
         recent_amount=Subquery(latest_changes.values('new_amount')[:1], output_field=DecimalField())
     )
-
-    # Then when you iterate through them, use the annotated recent_amount
     for expense in expenses:
-        if expense.is_recurring:
-            expense.display_amount = expense.recent_amount if expense.recent_amount else expense.amount
+        # Determine the base amount to use (most recent amount or original amount)
+        base_amount = expense.recent_amount if expense.recent_amount else expense.amount
+        
+        # Apply surcharge to the base amount if surcharge is present
+        if expense.surcharge:
+            expense.display_amount = round(base_amount * (1 + expense.surcharge / 100), 2)
+        else:
+            expense.display_amount = round(base_amount, 2)
+
 
     return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 

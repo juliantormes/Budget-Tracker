@@ -4,20 +4,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function toggleCreditCardFields(display) {
         creditCardFields.forEach(fieldId => {
-            const field = document.querySelector(`#${fieldId}`).parentNode;
-            field.style.display = display ? '' : 'none';
+            const fieldElement = document.querySelector(`#${fieldId}`);
+            if(display) {
+                fieldElement.required = true; // Make the field required
+                fieldElement.removeAttribute('disabled'); // Ensure the field is not disabled
+            } else {
+                fieldElement.required = false; // No longer required
+                fieldElement.setAttribute('disabled', 'disabled'); // Disable the field to not validate on submit
+            }
         });
     }
+
     if (usingCreditCardCheckbox) {
         toggleCreditCardFields(usingCreditCardCheckbox.checked);
-
+        
         usingCreditCardCheckbox.addEventListener('change', function() {
             toggleCreditCardFields(this.checked);
-        })
-    }
-    else if(display){
-        if(field.tagName === 'INPUT' || field.tagName === 'SELECT') {
-            field.disabled = false;
-        }
+        });
     }
 });

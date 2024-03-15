@@ -13,20 +13,28 @@
     <h1>Add New Expense</h1>
     <form method="post">
         {% csrf_token %}
-        {{ form.non_field_errors }}
+        {% if form.non_field_errors %}
+            <div style="color: red;">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
         {% for field in form %}
             <div>
                 {{ field.label_tag }} {{ field }}
                 {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div style="color: red;">{{ error }}</div>
-                    {% endfor %}
+                    <div style="color: red;">
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 {% endif %}
             </div>
         {% endfor %}
         <button type="submit">Submit</button>
-    </form>   
-    <a href="{% url 'expense_list' %}">Expenses List</a> 
+    </form>
+    <a href="{% url 'expense_list' %}">Expenses List</a>
     <br>
     <a href="{% url 'home' %}">Return Home</a>
 </body>
@@ -34,5 +42,4 @@
 {% block extra_js %}
     <script src="{% static 'tracker/js/dynamic_forms.js' %}"></script>
 {% endblock %}
-{% endblock %} 
-```
+{% endblock %}

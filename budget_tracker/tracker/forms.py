@@ -21,6 +21,7 @@ class ExpenseForm(forms.ModelForm):
         }
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
+        display_credit_card_fields = kwargs.pop('display_credit_card_fields', False)
         super(ExpenseForm, self).__init__(*args, **kwargs)
         self.fields['expense_category'].queryset = ExpenseCategory.objects.filter(user=user)
         self.fields['credit_card'].queryset = CreditCard.objects.filter(user=user)
@@ -36,6 +37,21 @@ class ExpenseForm(forms.ModelForm):
         self.fields['credit_card'].required = False
         self.fields['installments'].required = False
         self.fields['surcharge'].required = False
+    def clean(self):
+        cleaned_data = super().clean()
+        is_recurring = cleaned_data.get("is_recurring")
+        credit_card = cleaned_data.get("credit_card")
+        installments = cleaned_data.get("installments")
+
+        if is_recurring and credit_card and installments and installments > 1:
+            raise forms.ValidationError("Recurring expenses with installments are not supported for credit card payments.")
+        if not credit_card:
+            self.add_error('credit_card', 'This field is required.')
+        if not installments:
+            self.add_error('installments', 'This field is required.')
+        # Check if the expense is a recurring credit card payment with installments
+        
+        return cleaned_data
     def save(self, commit=True):
         expense = super().save(commit=False)
         if expense.is_recurring and expense.credit_card and expense.installments:
@@ -58,7 +74,7 @@ class ExpenseForm(forms.ModelForm):
         if expense.is_recurring and expense.credit_card and expense.installments:
             # Calculate end_date based on the number of installments
             expense.end_date = expense.date + relativedelta(months=expense.installments-1)
-        
+    
         if commit:
             expense.save()
         return expense

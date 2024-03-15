@@ -158,27 +158,6 @@ def home(request):
         close_card_day=F('credit_card__close_card_day')
     )
 
-    # Initialize totals
-    total_non_recurring_credit_card_expense = Decimal('0')
-    total_recurring_credit_card_expense_total = Decimal('0')
-
-    # Loop through expenses to calculate totals based on effective month
-    for expense in credit_card_expenses:
-        effective_month = get_effective_month(expense.date, expense.close_card_day).month
-        effective_year = get_effective_month(expense.date, expense.close_card_day).year
-        
-        # Check if the expense's effective month matches the month and year of interest
-        if effective_month == month and effective_year == year:
-            if expense.is_recurring:
-                total_recurring_credit_card_expense_total += expense.amount
-            else:
-                total_non_recurring_credit_card_expense += expense.amount
-
-    # Calculations for summary table
-    total_expense = total_recurring_expenses + total_non_recurring_expenses
-    total_income = total_recurring_incomes + total_non_recurring_incomes
-    net = total_income - total_expense - total_non_recurring_credit_card_expense - total_recurring_credit_card_expense_total
-
     # Prepare data and labels for charts
     monthly_credit_card_expenses = defaultdict(lambda: defaultdict(Decimal))
     if combined_incomes:
@@ -237,6 +216,21 @@ def home(request):
     else:
         credit_card_labels = []
         credit_card_values = []
+
+    # Initialize totals
+    total_non_recurring_credit_card_expense = Decimal('0')
+    total_recurring_credit_card_expense_total = Decimal('0')
+
+    # Loop through expenses to calculate totals based on effective month
+    if selected_month_str in monthly_credit_card_expenses:
+        for card_label, amount in monthly_credit_card_expenses[selected_month_str].items():
+            # Assuming you want to aggregate all credit card expenses here, without distinguishing between recurring and non-recurring
+            # If you need to distinguish between recurring and non-recurring, you would need to have kept track of that distinction when populating monthly_credit_card_expenses
+            total_recurring_credit_card_expense_total += amount  # Adjust this logic based on your distinction between recurring and non-recurring
+    # Calculations for summary table
+    total_expense = total_recurring_expenses + total_non_recurring_expenses
+    total_income = total_recurring_incomes + total_non_recurring_incomes
+    net = total_income - total_expense - total_non_recurring_credit_card_expense - total_recurring_credit_card_expense_total
 
     
     context = {

@@ -10,7 +10,7 @@ from django.utils import timezone
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
 from datetime import datetime,timedelta
 
 def signup(request):
@@ -177,18 +177,28 @@ def home(request):
         total=Sum('amount'),
         close_card_day=F('credit_card__close_card_day')  # Fetch the close_card_day from related CreditCard
     ).order_by()
+
     for expense in non_recurring_credit_card_expenses:
         effective_month = get_effective_month(expense.date, expense.credit_card.close_card_day)
         effective_month_str = effective_month.strftime('%B %Y')
         card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
-            # Calculate total amount including surcharge
-        if expense.surcharge:
-            total_amount_with_surcharge = expense.amount * (1 + expense.surcharge / 100)
-        else:
-            total_amount_with_surcharge = expense.amount
 
-        # Aggregate expense amount by card within each month
-        monthly_credit_card_expenses[effective_month_str][card_label] += total_amount_with_surcharge
+        if expense.credit_card and expense.installments and expense.installments > 1:
+            # Calculate the amount for each installment including the surcharge
+            amount_per_installment = calculate_total_payment_with_surcharge(expense.amount, expense.surcharge) / expense.installments
+            
+            # Distribute this amount across the corresponding months
+            for installment in range(1, expense.installments + 1):
+                projection_date = effective_month + relativedelta(months=installment-1)
+                projection_month_str = projection_date.strftime('%B %Y')
+                
+                monthly_credit_card_expenses[projection_month_str][card_label] += amount_per_installment.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+        else:
+            # Calculate total amount including surcharge for single installment or no installment specified
+            total_amount_with_surcharge = calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+
+            monthly_credit_card_expenses[effective_month_str][card_label] += total_amount_with_surcharge.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
     # Process recurring credit card expenses similarly
     for expense in recurring_credit_card_expenses:
         now_date = now.date()  # Convert 'now' to a datetime.date object
@@ -328,7 +338,7 @@ def expense_list(request):
         
         # Apply surcharge to the base amount if surcharge is present
         if expense.surcharge:
-            expense.display_amount = round(base_amount * (1 + expense.surcharge / 100), 2)
+            expense.display_amount = round (calculate_total_payment_with_surcharge(base_amount, expense.surcharge),2)
         else:
             expense.display_amount = round(base_amount, 2)
 

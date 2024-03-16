@@ -5,6 +5,7 @@
 <div class="form-container">
     <form method="post">
         {% csrf_token %}
+        {% include '_form_errors.html' %}
         {{ form.as_p }}
         <button type="submit">Sign Up</button>
     </form>

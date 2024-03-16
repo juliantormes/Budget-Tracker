@@ -4,17 +4,7 @@
     <h1>Add New Income Category</h1>
     <form method="post" novalidate>
         {% csrf_token %}
-        {{ form.non_field_errors }}
-        {% for field in form %}
-            <div>
-                {{ field.label_tag }} {{ field }}
-                {% if field.errors %}
-                    {% for error in field.errors %}
-                        <div style="color: red;">{{ error }}</div>
-                    {% endfor %}
-                {% endif %}
-            </div>
-        {% endfor %}
+        {% include '_form_errors.html' %}
         <button type="submit">Submit</button>
     </form>    
     <a href="{% url 'income_category_list' %}">Incomes Categories</a>

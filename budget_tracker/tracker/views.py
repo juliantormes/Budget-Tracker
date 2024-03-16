@@ -536,6 +536,7 @@ def record_recurring_expense_change(request, expense_id):
                 )
                 expense.amount = new_amount_decimal
                 expense.save()
+                messages.success(request, "Amount updated sucesfully!")
                 return redirect('expense_list')
         except InvalidOperation:
             raise ValueError("Invalid amount")
@@ -557,6 +558,7 @@ def record_recurring_income_change(request, income_id):
                     change_date=timezone.now().date()
                 )
                 income.amount = new_amount_decimal
+                messages.success(request, "Amount updated sucesfully!")
                 income.save()
                 return redirect('income_list')
         except ValueError:

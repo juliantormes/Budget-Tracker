@@ -6,10 +6,7 @@
 
     <form method="post"novalidate>
         {% csrf_token %}
-        <div>
-            {{ field.label_tag }} {{ field }}
-            <div class="error"></div>
-        </div>   
+        {% include '_form_errors.html' %}
         <button type="submit" class="delete-form-action">Yes, delete</button>
         <a href="{% url 'income_list' %}"class="delete-form-action">Cancel</a>
     </form>

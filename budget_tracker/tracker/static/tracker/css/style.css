@@ -144,9 +144,6 @@ button[type="submit"]:hover {
     display: block; /* Shown when there's an error */
 }
 
-}
-
-
 @media (max-width: 768px) {
     .container, .financial-summary, form, .navigation-links {
         width: calc(100% - 40px);

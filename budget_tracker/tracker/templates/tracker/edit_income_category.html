@@ -3,11 +3,8 @@
 {% block content %}
     <h2>Edit Income Category</h2>
     <form method="post" novalidate>
-        <div>
-            {{ field.label_tag }} {{ field }}
-            <div class="error"></div>
-        </div>   
         {% csrf_token %}
+        {% include '_form_errors.html' %}
         {{ form.as_p }}
         <button type="submit">Save changes</button>
     </form>

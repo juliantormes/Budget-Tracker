@@ -13,7 +13,7 @@
 <body data-viewing-month="{{ viewing_month }}" data-viewing-year="{{ viewing_year }}">
     <header class="site-header">
         {% if user.is_authenticated %}
-        <form method="post" action="{% url 'logout' %}">
+        <form method="post" action="{% url 'logout' %}" novalidate>
             {% csrf_token %}
             <button type="submit" class="logout-button">Logout</button>
         </form>
@@ -33,5 +33,6 @@
     <script src="{% static 'tracker/js/init-chart.js' %}"></script>
     <script src="{% static 'tracker/js/financial-overview-chart.js' %}"></script>
     <script src="{% static 'tracker/js/alerts.js' %}"></script>
+    <script src="{% static 'tracker/js/disable-validation.js' %}"></script>
 </body>
 </html>

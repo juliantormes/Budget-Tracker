@@ -322,28 +322,29 @@ def credit_card_list(request):
 def expense_list(request):
     current_month = timezone.now().month
     current_year = timezone.now().year
+    # Ensure you're filtering by the current user
     expenses = Expense.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
-    # Create a subquery for the most recent change for each expense
+
+    # Annotate the filtered expenses with the most recent amount
     latest_changes = ExpenseChangeLog.objects.filter(
         expense=OuterRef('pk'),
         change_date__lte=timezone.now()
     ).order_by('-change_date')
 
-    expenses = Expense.objects.annotate(
+    expenses_with_recent_amount = expenses.annotate(
         recent_amount=Subquery(latest_changes.values('new_amount')[:1], output_field=DecimalField())
     )
-    for expense in expenses:
-        # Determine the base amount to use (most recent amount or original amount)
+
+    # Use the annotated queryset 'expenses_with_recent_amount' for the loop
+    for expense in expenses_with_recent_amount:
         base_amount = expense.recent_amount if expense.recent_amount else expense.amount
-        
-        # Apply surcharge to the base amount if surcharge is present
         if expense.surcharge:
-            expense.display_amount = round (calculate_total_payment_with_surcharge(base_amount, expense.surcharge),2)
+            expense.display_amount = round(calculate_total_payment_with_surcharge(base_amount, expense.surcharge), 2)
         else:
             expense.display_amount = round(base_amount, 2)
 
+    return render(request, 'tracker/expense_list.html', {'expenses': expenses_with_recent_amount})
 
-    return render(request, 'tracker/expense_list.html', {'expenses': expenses})
 
 @login_required
 def expense_category_list(request):
@@ -354,23 +355,24 @@ def expense_category_list(request):
 def income_list(request):
     current_month = timezone.now().month
     current_year = timezone.now().year
+    # Ensure you're filtering by the current user
     incomes = Income.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
-    # Create a subquery for the most recent change for each income
+
     latest_changes = IncomeChangeLog.objects.filter(
         income=OuterRef('pk'),
         change_date__lte=timezone.now()
     ).order_by('-change_date')
 
-    # Annotate the incomes with the most recent amount
-    incomes = Income.objects.annotate(
+    incomes_with_recent_amount = incomes.annotate(
         recent_amount=Subquery(latest_changes.values('new_amount')[:1], output_field=DecimalField())
     )
 
-    # Then when you iterate through them, use the annotated recent_amount
-    for income in incomes:
-        if income.is_recurring:
-            income.display_amount = income.recent_amount if income.recent_amount else income.amount
-    return render(request, 'tracker/income_list.html', {'incomes': incomes})
+    # Use the annotated queryset 'incomes_with_recent_amount' for the loop
+    for income in incomes_with_recent_amount:
+        income.display_amount = income.recent_amount if income.recent_amount else income.amount
+
+    return render(request, 'tracker/income_list.html', {'incomes': incomes_with_recent_amount})
+
 
 @login_required
 def income_category_list(request):

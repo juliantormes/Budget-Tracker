@@ -6,14 +6,14 @@
     <h1>Expenses</h1>
     <a href="{% url 'add_expense' %}" class="list-action-button">New Expense</a>
     <ul>
-        {% for expense in expenses %}
+        {% for expenses_with_recent_amount in expenses %}
             <li class="{% if expense.is_recurring %}recurring{% endif %}">
-                Description: {{ expense.description }},  Amount: {{ expense.display_amount }}, Date: {{ expense.date|date:"Y-m-d" }}
+                Description: {{ expenses_with_recent_amount.description }},  Amount: {{ expenses_with_recent_amount.display_amount }}, Date: {{ expenses_with_recent_amount.date|date:"Y-m-d" }}
                 <div class="list-action-buttons">
-                    <a href="{% url 'edit_expense' expense.id %}" class="list-action-button">Edit</a>
-                    <a href="{% url 'delete_expense' expense.id %}" class="list-action-button">Delete</a>
-                    {% if expense.is_recurring %}
-                    <a href="{% url 'record_recurring_expense_change' expense.id %}" class="list-action-button">Update amount</a>
+                    <a href="{% url 'edit_expense' expenses_with_recent_amount.id %}" class="list-action-button">Edit</a>
+                    <a href="{% url 'delete_expense' expenses_with_recent_amount.id %}" class="list-action-button">Delete</a>
+                    {% if expenses_with_recent_amount.is_recurring %}
+                    <a href="{% url 'record_recurring_expense_change' expenses_with_recent_amount.id %}" class="list-action-button">Update amount</a>
                     {% endif %}
                 </div>
             </li>

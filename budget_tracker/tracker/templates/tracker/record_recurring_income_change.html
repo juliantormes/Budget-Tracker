@@ -1,8 +1,12 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Record Change for Recurring Income</h2>
-<form method="post">
+<form method="post" novalidate>
     {% csrf_token %}
+    <div>
+        {{ field.label_tag }} {{ field }}
+        <div class="error"></div>
+    </div>   
     <label for="new_amount">New Amount:</label>
     <input type="text" name="new_amount" id="new_amount" required>
     <button type="submit">Submit</button>

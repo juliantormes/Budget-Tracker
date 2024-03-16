@@ -2,7 +2,11 @@
 
 {% block content %}
 <h2>Add Credit Card</h2>
-<form method="post">
+<form method="post" novalidate>
+    <div>
+        {{ field.label_tag }} {{ field }}
+        <div class="error"></div>
+    </div>    
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Save</button>

@@ -7,13 +7,15 @@
         {% endfor %}
     </div>
 {% endif %}
-
 {% for field in form %}
-    {% if field.errors %}
-        <div class="error">
-            {% for error in field.errors %}
-                {{ error }}
-            {% endfor %}
-        </div>
-    {% endif %}
+    <div>
+        {{ field.label_tag }} {{ field }}
+        {% if field.errors %}
+            <div class="error">
+                {% for error in field.errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 {% endfor %}

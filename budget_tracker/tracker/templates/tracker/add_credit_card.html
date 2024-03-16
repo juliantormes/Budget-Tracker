@@ -5,7 +5,6 @@
 <form method="post" novalidate>
     {% csrf_token %}
     {% include '_form_errors.html' %}
-    {{ form.as_p }}
     <button type="submit">Save</button>
 </form>
 {% endblock %}

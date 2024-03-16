@@ -37,6 +37,10 @@ class ExpenseForm(forms.ModelForm):
         self.fields['credit_card'].required = False
         self.fields['installments'].required = False
         self.fields['surcharge'].required = False
+        for field_name in self.fields:
+            field = self.fields.get(field_name)
+            if field and isinstance(field, forms.fields.CharField):
+                field.widget.attrs['required'] = 'required'  # Add required attribute
     def clean(self):
         cleaned_data = super().clean()
         is_recurring = cleaned_data.get("is_recurring")

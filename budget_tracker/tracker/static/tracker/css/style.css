@@ -80,23 +80,72 @@ button[type="submit"]:hover {
     background-color: #005ecb;
 }
 
+/* Base styles for messages */
 .alert, .error, .success {
+    box-sizing: border-box;
+    width: 100%;
     padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 5px;
+    margin-top: 5px;
+    border-radius: 4px;
     text-align: center;
+    font-size: 0.875rem; /* 14px */
+    transition: all 0.3s ease;
+    position: relative;
+    visibility: visible;
+    opacity: 1;
 }
 
-.alert, .success {
-    display: none; /* Hide by default, display via JS */
-    background-color: #4CAF50; /* Green for success */
-    color: white;
-}
-
+/* Error styles */
 .error {
-    background-color: #ff3b30; /* Apple's error color */
-    color: white;
+    color: #721c24;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
 }
+
+/* Alert styles */
+.alert {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+}
+
+/* Success styles */
+.success {
+    color: #155724;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+/* Animation for appearance */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert, .error, .success {
+    animation-name: fadeIn;
+    animation-duration: 0.5s;
+    animation-fill-mode: both;
+}
+
+/* Hiding the messages initially */
+.alert, .error, .success {
+    display: none; /* Hidden by default */
+}
+
+/* Showing the messages when there's content */
+.alert:not(:empty), .error:not(:empty), .success:not(:empty) {
+    display: block; /* Shown when there's an error */
+}
+
+}
+
 
 @media (max-width: 768px) {
     .container, .financial-summary, form, .navigation-links {

@@ -1,6 +1,8 @@
 from django.db import models
 from django.conf import settings
 from dateutil.relativedelta import relativedelta
+from decimal import Decimal
+from django.utils import timezone
 
 class ExpenseCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -16,6 +18,38 @@ class CreditCard(models.Model):
     credit_limit = models.DecimalField(max_digits=10, decimal_places=2)
     payment_day = models.IntegerField()
     close_card_day = models.IntegerField(default=21)
+    def calculate_total_payment_with_surcharge(self, amount, surcharge_percentage):
+        """Calculate total amount including surcharge."""
+        P = Decimal(amount)
+        S = Decimal(surcharge_percentage) / Decimal(100)
+        total_payment = P + (P * S)
+        return total_payment
+
+    def current_balance(self):
+        """Calculate the current balance, including surcharges and installments."""
+        now_date = timezone.now().date()
+        total_balance = Decimal('0')
+
+        # Non-recurring expenses
+        non_recurring_expenses = self.expenses.filter(is_recurring=False)
+        for expense in non_recurring_expenses:
+            total_balance += self.calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+
+        # Recurring expenses
+        recurring_expenses = self.expenses.filter(is_recurring=True)
+        for expense in recurring_expenses:
+            # Assuming you want to count only expenses for the current month or past, not future
+            if expense.date <= now_date:
+                total_payment = self.calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+                # Here you might want to divide by installments if you are spreading the surcharge over each installment
+                total_balance += total_payment / expense.installments if expense.installments else total_payment
+
+        return total_balance
+
+    def available_credit(self):
+        """Calculate available credit, factoring in surcharges and installments."""
+        # This might need adjustment based on how you account for future installments
+        return self.credit_limit - self.current_balance()
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
@@ -27,7 +61,7 @@ class Expense(models.Model):
     date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     is_recurring = models.BooleanField(default=False)
-    credit_card = models.ForeignKey(CreditCard, on_delete=models.SET_NULL, null=True, blank=True, related_name='expenses')
+    credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True)
     installments = models.IntegerField(default=1)
     surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
     def update_amount(self, new_amount):

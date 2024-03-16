@@ -430,6 +430,21 @@ def add_expense(request):
         if form.is_valid():
             expense = form.save(commit=False)
             expense.user = request.user
+
+            # Check if the expense is paid with a credit card and calculate the total charge
+            if expense.credit_card:
+                # Calculate the total expense amount considering the surcharge
+                total_expense_amount = expense.amount * (1 + (expense.surcharge / Decimal(100)))
+
+                # Distribute the total expense across installments if applicable
+                if expense.installments > 1:
+                    total_expense_amount = total_expense_amount / expense.installments
+
+                # Check against the available credit
+                if total_expense_amount > expense.credit_card.available_credit():
+                    form.add_error(None, "Total expense amount exceeds available credit on the credit card.")
+                    return render(request, 'tracker/add_expense.html', {'form': form})
+            
             expense.save()
             messages.success(request, 'Expense added successfully!')
             return redirect('expense_list')

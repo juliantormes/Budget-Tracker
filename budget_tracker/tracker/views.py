@@ -419,9 +419,8 @@ def delete_expense_category(request, category_id):
 
 @login_required
 def add_expense(request):
-    display_credit_card_fields = False  
     if request.method == 'POST':
-        form = ExpenseForm(request.POST, user=request.user, display_credit_card_fields=display_credit_card_fields)
+        form = ExpenseForm(request.POST, user=request.user)
         if form.is_valid():
             expense = form.save(commit=False)
             expense.user = request.user
@@ -429,7 +428,7 @@ def add_expense(request):
             messages.success(request, 'Expense added successfully!')
             return redirect('expense_list')
     else:
-        form = ExpenseForm(user=request.user, display_credit_card_fields=display_credit_card_fields)
+        form = ExpenseForm(user=request.user)
     return render(request, 'tracker/add_expense.html', {'form': form})
 
 @login_required

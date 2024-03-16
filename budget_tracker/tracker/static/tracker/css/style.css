@@ -425,3 +425,6 @@ form[action="/logout/"] {
     font-weight: bold;
     text-align: center;
 }
+#credit_card_fields {
+    display: none;
+}

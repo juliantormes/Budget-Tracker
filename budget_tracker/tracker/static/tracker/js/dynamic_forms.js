@@ -1,34 +1,29 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('form');
-    const submitButton = form.querySelector('button[type="submit"]');
+    const usingCreditCardCheckbox = document.querySelector('#id_using_credit_card');
+    const creditCardFields = ['id_credit_card', 'id_installments', 'id_surcharge'];
 
-    submitButton.addEventListener('click', function(event) {
-        // Clear out any old messages
-        form.querySelectorAll('.error').forEach(function(errorDiv) {
-            errorDiv.textContent = ''; // Clear the content
-            errorDiv.style.display = 'none'; // Hide the error div
-        });
+    function toggleCreditCardFields(display) {
+        creditCardFields.forEach(fieldId => {
+            const fieldElement = document.querySelector(`#${fieldId}`);
+            const fieldParentNode = fieldElement.closest('div'); // Get the parent <div>
 
-        // Find all invalid fields within the form
-        form.querySelectorAll(':invalid').forEach(function(field) {
-            // Prevent default bubble tooltip
-            event.preventDefault();
-
-            // Find the field's error display div and set the message
-            const errorDiv = field.parentNode.querySelector('.error');
-            errorDiv.textContent = field.validationMessage;
-            errorDiv.style.display = 'block'; // Show the error div
-        });
-    });
-
-    // Optional: Clear the error message if the user corrects the field
-    form.querySelectorAll('input, select, textarea').forEach(function(input) {
-        input.addEventListener('input', function() {
-            const errorDiv = input.parentNode.querySelector('.error');
-            if (errorDiv) {
-                errorDiv.textContent = '';
-                errorDiv.style.display = 'none';
+            if(display) {
+                fieldElement.required = true;
+                fieldElement.removeAttribute('disabled');
+                fieldParentNode.style.display = ''; // Show the field
+            } else {
+                fieldElement.required = false;
+                fieldElement.setAttribute('disabled', 'disabled');
+                fieldParentNode.style.display = 'none'; // Hide the field
             }
         });
-    });
+    }
+
+    if (usingCreditCardCheckbox) {
+        toggleCreditCardFields(usingCreditCardCheckbox.checked);
+
+        usingCreditCardCheckbox.addEventListener('change', function() {
+            toggleCreditCardFields(this.checked);
+        });
+    }
 });

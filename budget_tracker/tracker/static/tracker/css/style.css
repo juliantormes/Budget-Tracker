@@ -134,6 +134,31 @@ button[type="submit"]:hover {
     animation-fill-mode: both;
 }
 
+@keyframes fadeOut {
+    to {
+      opacity: 0;
+      max-height: 0;
+      padding: 0; /* Optional: Collapse padding */
+      margin: 0; /* Optional: Collapse margin */
+    }
+  }
+  
+  .error, .alert, .success {
+    overflow: hidden;
+    max-height: 50px; /* Start with max height equal to the actual height of your message */
+    /* ... other styles ... */
+    animation: fadeOut 5s ease forwards;
+  }
+  
+  /* Ensure the container for messages starts with a defined max-height */
+  .error, .alert, .success {
+    max-height: 50px; /* Adjust this value based on the actual height of your messages */
+    padding: 10px; /* Adjust to your actual padding */
+    margin: 10px 0; /* Adjust to your actual margin */
+    /* Rest of your styles */
+  }
+  
+
 /* Hiding the messages initially */
 .alert, .error, .success {
     display: none; /* Hidden by default */

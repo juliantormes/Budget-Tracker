@@ -14,6 +14,9 @@ from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
 from datetime import datetime,timedelta
 
 def signup(request):
+    if request.user.is_authenticated:
+    # Redirect to home page or other appropriate page
+        return redirect('home')  # Replace 'home' with the name of your home page's URL name
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
@@ -28,6 +31,9 @@ def signup(request):
     return render(request, 'registration/signup.html', {'form': form})
 
 def login(request):
+    if request.user.is_authenticated:
+    # Redirect to home page or other appropriate page
+        return redirect('home')  # Replace 'home' with the name of your home page's URL name
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():

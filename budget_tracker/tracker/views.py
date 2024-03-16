@@ -11,7 +11,8 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
-from datetime import datetime,timedelta
+from datetime import datetime
+from .utils import get_effective_month, calculate_total_payment_with_surcharge
 
 def signup(request):
     if request.user.is_authenticated:
@@ -47,40 +48,6 @@ def logout(request):
     auth_logout(request)
     messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
     return redirect('login')
-
-def aggregate_data(queryset, label_field, value_field):
-    aggregated_data = defaultdict(float)  # Use default float to auto-initialize amounts to 0
-    for entry in queryset:
-        label = entry[label_field]
-        value = entry[value_field]
-        aggregated_data[label] += value  # Sum amounts with the same label
-    return list(aggregated_data.items())
-def get_effective_month(date, close_card_day):
-    if date.day > close_card_day:
-        # Expense goes to the month after next month
-        effective_date = (date.replace(day=1) + timedelta(days=32)).replace(day=1)
-    else:
-        # Expense goes to the next month
-        effective_date = (date.replace(day=1) + timedelta(days=31)).replace(day=1)
-    return effective_date
-def calculate_total_payment_with_surcharge(amount, surcharge_percentage):
-    P = Decimal(amount)
-    S = Decimal(surcharge_percentage) / Decimal(100)
-    total_payment = P + (P * S)
-    return total_payment
-
-def distribute_installments(expense, close_card_day):
-    distributed_payments = defaultdict(list)
-    total_payment = calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
-    monthly_payment = total_payment / Decimal(expense.installments)
-
-    for i in range(expense.installments):
-        effective_date = expense.date + relativedelta(months=i)
-        if effective_date.day > close_card_day:
-            effective_date += relativedelta(months=1)
-        effective_month = effective_date.replace(day=1)
-        distributed_payments[effective_month].append(monthly_payment)
-    return distributed_payments
 
 @login_required
 def home(request):
@@ -435,11 +402,6 @@ def add_expense(request):
             if expense.credit_card:
                 # Calculate the total expense amount considering the surcharge
                 total_expense_amount = expense.amount * (1 + (expense.surcharge / Decimal(100)))
-
-                # Distribute the total expense across installments if applicable
-                if expense.installments > 1:
-                    total_expense_amount = total_expense_amount / expense.installments
-
                 # Check against the available credit
                 if total_expense_amount > expense.credit_card.available_credit():
                     form.add_error(None, "Total expense amount exceeds available credit on the credit card.")
@@ -458,6 +420,17 @@ def edit_expense(request, expense_id):
     if request.method == "POST":
         form = ExpenseForm(request.POST, instance=expense , user=request.user)
         if form.is_valid():
+            expense = form.save(commit=False)
+            expense.user = request.user
+
+            # Check if the expense is paid with a credit card and calculate the total charge
+            if expense.credit_card:
+                # Calculate the total expense amount considering the surcharge
+                total_expense_amount = expense.amount * (1 + (expense.surcharge / Decimal(100)))
+                # Check against the available credit
+                if total_expense_amount > expense.credit_card.available_credit():
+                    form.add_error(None, "Total expense amount exceeds available credit on the credit card.")
+                    return render(request, 'tracker/edit_expense.html', {'form': form})
             form.save()
             messages.success(request, "Expense updated successfully!")
             return redirect("expense_list")

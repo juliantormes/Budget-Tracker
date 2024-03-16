@@ -3,6 +3,7 @@ from django.conf import settings
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 from django.utils import timezone
+from .utils import calculate_total_payment_with_surcharge
 
 class ExpenseCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -18,12 +19,6 @@ class CreditCard(models.Model):
     credit_limit = models.DecimalField(max_digits=10, decimal_places=2)
     payment_day = models.IntegerField()
     close_card_day = models.IntegerField(default=21)
-    def calculate_total_payment_with_surcharge(self, amount, surcharge_percentage):
-        """Calculate total amount including surcharge."""
-        P = Decimal(amount)
-        S = Decimal(surcharge_percentage) / Decimal(100)
-        total_payment = P + (P * S)
-        return total_payment
 
     def current_balance(self):
         """Calculate the current balance, including surcharges and installments."""
@@ -33,14 +28,14 @@ class CreditCard(models.Model):
         # Non-recurring expenses
         non_recurring_expenses = self.expenses.filter(is_recurring=False)
         for expense in non_recurring_expenses:
-            total_balance += self.calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+            total_balance += calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
 
         # Recurring expenses
         recurring_expenses = self.expenses.filter(is_recurring=True)
         for expense in recurring_expenses:
             # Assuming you want to count only expenses for the current month or past, not future
             if expense.date <= now_date:
-                total_payment = self.calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+                total_payment = calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
                 # Here you might want to divide by installments if you are spreading the surcharge over each installment
                 total_balance += total_payment / expense.installments if expense.installments else total_payment
 

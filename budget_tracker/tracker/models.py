@@ -44,7 +44,7 @@ class CreditCard(models.Model):
     def available_credit(self):
         """Calculate available credit, factoring in surcharges and installments."""
         # This might need adjustment based on how you account for future installments
-        return self.credit_limit - self.current_balance()
+        return round(self.credit_limit - self.current_balance(),2)
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"

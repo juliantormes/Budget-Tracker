@@ -7,7 +7,7 @@
     <ul>
         {% for card in credit_cards %}
             <li>
-                {{ card.brand }} ending in {{ card.last_four_digits }} - Exp: {{ card.expire_date }} - Limit: {{ card.credit_limit }} - Payment Day: {{ card.payment_day }}
+                {{ card.brand }} ending in {{ card.last_four_digits }} - Limit: $ {{ card.credit_limit }}  - Available Credit: $ {{ card.available_credit }}
                 <a href="{% url 'edit_credit_card' card.id %}" class="list-action-button">Edit</a> 
                 <a href="{% url 'delete_credit_card' card.id %}" class="list-action-button">Delete</a>
             </li>

@@ -323,7 +323,10 @@ def expense_list(request):
     current_month = timezone.now().month
     current_year = timezone.now().year
     # Ensure you're filtering by the current user
-    expenses = Expense.objects.filter(user=request.user, date__year=current_year, date__month=current_month)
+    expenses = Expense.objects.filter(
+    Q(user=request.user, is_recurring=True) | 
+    Q(user=request.user, is_recurring=False, date__year=current_year, date__month=current_month)
+    )
 
     # Annotate the filtered expenses with the most recent amount
     latest_changes = ExpenseChangeLog.objects.filter(

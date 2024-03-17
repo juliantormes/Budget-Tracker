@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the Budget Tracker Project! This application is designed to help individuals manage their finances efficiently and effectively. Built with Python and Django for the frontend, it uses SQLite for database management. The project also includes comprehensive tests using PyTest and demonstrates consuming external APIs for enhanced functionalities.
+Welcome to the Budget Tracker Project! This application is designed to help individuals manage their finances efficiently and effectively. Built with Python and Django, it uses SQLite for database management and is poised for future enhancements with Command Query Responsibility Segregation (CQRS) and comprehensive testing.
 
 ## Features
 
@@ -10,15 +10,15 @@ Welcome to the Budget Tracker Project! This application is designed to help indi
 - **Dashboard:** Visualize your budget and expenses with intuitive charts and graphs.
 - **Expense Tracking:** Easily add, edit, or delete expenses and categorize them to keep track of your spending habits.
 - **Budget Planning:** Set monthly budget goals and compare them with your actual spending.
-- **API Integration:** Fetch real-time financial data and insights to aid in better budget management.
 - **Responsive Design:** Access your budget tracker on any device, anytime, anywhere.
 
 ## Technologies Used
 
 - **Frontend:** Django
-- **Database:** SQLite
-- **Testing:** PyTest
-- **API Consumption:** Python Requests Library
+- **Charts:** Chart.js
+- **Database:** SQLite (with plans to incorporate additional free DB options suitable for production)
+- **Testing:** Integration with PyTest pending
+- **Architecture:** Refactoring towards a clean architecture with CQRS pattern for separation of read and write operations
 
 ## Getting Started
 
@@ -37,13 +37,13 @@ Follow these steps to get your development environment set up:
    git clone https://github.com/your-username/budget-tracker.git
    cd budget-tracker
    
-# If using pipenv
-      pipenv shell  
+   # If using pipenv
+   pipenv shell  
 
-# Or using venv
-      python -m venv venv
-source venv/bin/activate  # On Unix/macOS
-source venv/Scripts/activate  # On Windows
+   # Or using venv
+   python -m venv venv
+   source venv/bin/activate  # On Unix/macOS
+   source venv/Scripts/activate  # On Windows
 
 2. **Install dependencies:**
     ```bash
@@ -57,16 +57,24 @@ source venv/Scripts/activate  # On Windows
     ```bash
    python manage.py runserver
 
-## API Integration
-This project consumes external APIs to fetch financial data. You'll need to obtain API keys and configure them in your settings. Please refer to the documentation of the respective APIs for guidance.
+## Project Status
+
+### Current Tasks
+
+- **Refactor Application:** Our first priority is to refactor the application for a cleaner architecture, ensuring that business logic is cleanly separated from presentation and data access layers.
+  
+- **Implement CQRS:** We plan to implement the CQRS pattern to enhance performance and maintainability, making the application more scalable.
+  
+- **Testing:** Comprehensive tests will be written and integrated into a CI pipeline for ongoing quality assurance.
 
 ## Contributing
+
 Contributions are welcome! If you have a feature request, bug report, or a pull request, please feel free to contribute. For major changes, please open an issue first to discuss what you would like to change.
 
-## License
-MIT
 
 ## Acknowledgements
-Hat tip to everyone who contributed to the tools and libraries we used in this project.
+
+Hat tip to everyone who contributed to the tools and libraries we used in this project. We appreciate your support and collaboration.
 
 Thank you for exploring the Budget Tracker Project! 🚀
+

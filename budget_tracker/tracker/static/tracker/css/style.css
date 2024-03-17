@@ -147,7 +147,7 @@ button[type="submit"]:hover {
     overflow: hidden;
     max-height: 50px; /* Start with max height equal to the actual height of your message */
     /* ... other styles ... */
-    animation: fadeOut 10s ease forwards;
+    animation: fadeOut 20s ease forwards;
   }
   
   /* Ensure the container for messages starts with a defined max-height */

@@ -9,7 +9,7 @@ Welcome to the Budget Tracker Project! This application is designed to help indi
 - **User Authentication:** Secure signup and login functionality for personalized budget tracking.
 - **Dashboard:** Visualize your budget and expenses with intuitive charts and graphs.
 - **Expense Tracking:** Easily add, edit, or delete expenses and categorize them to keep track of your spending habits.
-- **Budget Planning:** Set monthly budget goals and compare them with your actual spending.
+- **Budget Planning:** Set monthly budget goals and compare them with your actual spending. (NOT YET)
 - **Responsive Design:** Access your budget tracker on any device, anytime, anywhere.
 
 ## Technologies Used

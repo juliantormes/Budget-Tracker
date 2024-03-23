@@ -39,6 +39,7 @@ MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage' # Store
 
 INSTALLED_APPS = [
     'tracker',
+    'rest_framework',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

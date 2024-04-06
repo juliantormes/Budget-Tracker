@@ -13,6 +13,12 @@ from collections import defaultdict
 from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
 from datetime import datetime
 from .utils import get_effective_month, calculate_total_payment_with_surcharge
+from rest_framework import viewsets
+from .serializers import IncomeSerializer
+from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
+from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer
 
 def signup(request):
     if request.user.is_authenticated:
@@ -563,3 +569,65 @@ def record_recurring_income_change(request, income_id):
             raise ValueError("Invalid amount")
 
     return render(request, 'tracker/record_recurring_income_change.html', {'income': income})
+
+class ExpenseViewSet(viewsets.ModelViewSet):
+    queryset = Expense.objects.all()
+    serializer_class = ExpenseSerializer
+
+    def get_queryset(self):
+        # Filters the expenses to those belonging to the logged-in user
+        return Expense.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # Automatically assign the logged-in user as the user of the expense
+        serializer.save(user=self.request.user)
+class IncomeViewSet(viewsets.ModelViewSet):
+    queryset = Income.objects.all()
+    serializer_class = IncomeSerializer
+
+    def get_queryset(self):
+        return Income.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+class CreditCardViewSet(viewsets.ModelViewSet):
+    queryset = CreditCard.objects.all()
+    serializer_class = CreditCardSerializer
+
+    def get_queryset(self):
+        return CreditCard.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+class ExpenseCategoryViewSet(viewsets.ModelViewSet):
+    queryset = ExpenseCategory.objects.all()
+    serializer_class = ExpenseCategorySerializer
+
+    def get_queryset(self):
+        return ExpenseCategory.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+class IncomeCategoryViewSet(viewsets.ModelViewSet):
+    queryset = IncomeCategory.objects.all()
+    serializer_class = IncomeCategorySerializer
+
+    def get_queryset(self):
+        return IncomeCategory.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+class ExpenseChangeLogViewSet(viewsets.ModelViewSet):
+    queryset = ExpenseChangeLog.objects.all()
+    serializer_class = ExpenseChangeLogSerializer
+    
+    def get_queryset(self):
+        return ExpenseChangeLog.objects.filter(expense__user=self.request.user)
+class IncomeChangeLogViewSet(viewsets.ModelViewSet):
+    queryset = IncomeChangeLog.objects.all()
+    serializer_class = IncomeChangeLogSerializer
+    
+    def get_queryset(self):
+        return IncomeChangeLog.objects.filter(income__user=self.request.user)
+
+

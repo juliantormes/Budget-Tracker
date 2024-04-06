@@ -1,5 +1,16 @@
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
+
+
+router = DefaultRouter()
+router.register(r'incomes', views.IncomeViewSet)
+router.register(r'expenses', views.ExpenseViewSet)
+router.register(r'expense_categories', views.ExpenseCategoryViewSet)
+router.register(r'income_categories', views.IncomeCategoryViewSet)
+router.register(r'credit_cards', views.CreditCardViewSet)
+router.register(r'expense_change_logs', views.ExpenseChangeLogViewSet)
+router.register(r'income_change_logs', views.IncomeChangeLogViewSet)
 
 urlpatterns = [
     path('', views.login, name='login'),  # Pointing to a custom login view
@@ -28,4 +39,5 @@ urlpatterns = [
     path('credit_card/delete/<int:card_id>/', views.delete_credit_card, name='delete_credit_card'),  # Delete a credit card
     path('record_recurring_expense_change/<int:expense_id>/', views.record_recurring_expense_change, name='record_recurring_expense_change'), # Record a recurring change
     path('record_recurring_income_change/<int:income_id>/', views.record_recurring_income_change, name='record_recurring_income_change'), # Record a recurring change
-]
+    path('', include(router.urls)),
+]   

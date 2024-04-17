@@ -1,12 +1,11 @@
 // services/ExpenseService.js
+import axiosInstance from '../api/axiosApi';  // Adjust the path based on your file structure
 
-import axios from 'axios';
-
-const API_URL = 'http://localhost:8000/api/expenses/';
+const API_URL = 'expenses/';  // Since baseURL is set in axiosApi, you only need the endpoint
 
 export const fetchExpenses = async () => {
   try {
-    const response = await axios.get(API_URL);
+    const response = await axiosInstance.get(API_URL);
     return response.data;
   } catch (error) {
     console.error('Failed to fetch expenses:', error);

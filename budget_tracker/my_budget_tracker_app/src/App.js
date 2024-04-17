@@ -1,19 +1,16 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './utils/AuthContext';
-import Login from './components/Login';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Update imports
+import LoginForm from './components/Login';
 import HomePage from './components/HomePage';
 
 const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<HomePage />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <Router>
+      <Routes> {/* Replace Switch with Routes */}
+        <Route path="/home" element={<HomePage />} /> {/* Update Route syntax */}
+        <Route path="/" element={<LoginForm />} /> {/* Update Route syntax */}
+      </Routes>
+    </Router>
   );
 };
 

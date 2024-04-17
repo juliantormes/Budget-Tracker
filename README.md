@@ -34,8 +34,8 @@ Follow these steps to get your development environment set up:
 1. **Clone the repository:**
 
    ```bash
-   git clone https://github.com/your-username/budget-tracker.git
-   cd budget-tracker
+   git clone https://github.com/juliantormes/CS50PFinalProject.git
+   cd budget_tracker
    
    # If using pipenv
    pipenv shell  

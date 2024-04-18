@@ -28,7 +28,10 @@ def signup(request):
         user = serializer.save()
         token, created = Token.objects.get_or_create(user=user)  # Unpack the tuple here
         return Response({'token': token.key})  # Access the token's key correctly
-    return Response(serializer.errors, status=400)
+    else:
+        if 'username' in serializer.errors:
+            return Response({'username': 'This username is already in use.'}, status=status.HTTP_409_CONFLICT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 @api_view(['POST'])
 def login(request):

@@ -3,8 +3,6 @@ from django.db.models import Sum, F ,  Subquery, OuterRef, DecimalField, Q
 from django.contrib import messages
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
 from .forms import ExpenseForm, IncomeForm, ExpenseCategoryForm, IncomeCategoryForm, CreditCardForm
-from django.contrib.auth import authenticate, logout as auth_logout, login as auth_login
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import datetime
@@ -13,47 +11,49 @@ from collections import defaultdict
 from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
 from datetime import datetime
 from .utils import get_effective_month, calculate_total_payment_with_surcharge
-from rest_framework import viewsets
-from .serializers import IncomeSerializer
-from django.contrib.auth.mixins import LoginRequiredMixin
+from rest_framework.authtoken.models import Token
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework import viewsets, status
+from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer, UserSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import viewsets
-from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer
+from django.contrib.auth import authenticate
 
+@api_view(['POST'])
 def signup(request):
     if request.user.is_authenticated:
-    # Redirect to home page or other appropriate page
-        return redirect('home')  # Replace 'home' with the name of your home page's URL name
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=raw_password)
-            auth_login(request, user)
-            return redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+        return Response({'message': 'You are already authenticated'}, status=400)
+    serializer = SignUpSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)  # Unpack the tuple here
+        return Response({'token': token.key})  # Access the token's key correctly
+    return Response(serializer.errors, status=400)
 
+@api_view(['POST'])
 def login(request):
     if request.user.is_authenticated:
-    # Redirect to home page or other appropriate page
-        return redirect('home')  # Replace 'home' with the name of your home page's URL name
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            auth_login(request, form.get_user())
-            return redirect('home')
-    else:
-        form = AuthenticationForm()
-    return render(request, 'registration/login.html', {'form': form})
+        return Response({'message': 'You are already logged in'}, status=400)
+    serializer = LoginSerializer(data=request.data)
+    if serializer.is_valid():
+        username = serializer.validated_data['username']
+        password = serializer.validated_data['password']
+        user = authenticate(username=username, password=password)
+        if user and user.is_active:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key}, status=200)
+        else:
+            return Response({'error': 'Invalid Credentials'}, status=401)
+    return Response(serializer.errors, status=400)
 
+
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # Ensure only authenticated users can access this view
 def logout(request):
-    auth_logout(request)
-    messages.add_message(request, messages.SUCCESS, 'You have successfully logged out.')
-    return redirect('login')
+    request.auth.delete()  # Deletes the token, logging the user out
+    return Response({'message': 'Logged out successfully'})
 
 @login_required
 def home(request):
@@ -573,6 +573,7 @@ def record_recurring_income_change(request, income_id):
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Filters the expenses to those belonging to the logged-in user
@@ -581,7 +582,16 @@ class ExpenseViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         # Automatically assign the logged-in user as the user of the expense
         serializer.save(user=self.request.user)
+    '''
+    @action(detail=True, methods=['post'])
+    def record_change(self, request, pk=None):
+        expense = self.get_object()
+        new_amount = request.data.get('new_amount')
+        # Logic to record change...
+        return Response({"message": "Change recorded successfully"})
+    '''
 class IncomeViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = Income.objects.all()
     serializer_class = IncomeSerializer
 
@@ -591,6 +601,7 @@ class IncomeViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 class CreditCardViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = CreditCard.objects.all()
     serializer_class = CreditCardSerializer
 
@@ -600,6 +611,7 @@ class CreditCardViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 class ExpenseCategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = ExpenseCategory.objects.all()
     serializer_class = ExpenseCategorySerializer
 
@@ -609,6 +621,7 @@ class ExpenseCategoryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 class IncomeCategoryViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = IncomeCategory.objects.all()
     serializer_class = IncomeCategorySerializer
 
@@ -618,12 +631,14 @@ class IncomeCategoryViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 class ExpenseChangeLogViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = ExpenseChangeLog.objects.all()
     serializer_class = ExpenseChangeLogSerializer
     
     def get_queryset(self):
         return ExpenseChangeLog.objects.filter(expense__user=self.request.user)
 class IncomeChangeLogViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     queryset = IncomeChangeLog.objects.all()
     serializer_class = IncomeChangeLogSerializer
     

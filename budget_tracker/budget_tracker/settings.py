@@ -36,7 +36,7 @@ LOGOUT_REDIRECT_URL = '/login/' # Redirect to the login page after logout
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage' # Store messages in cookies
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'budget_tracker/my-budget-tracker-app/build/static'),
+    os.path.join(BASE_DIR, 'tracker/static'),
 ]
 
 
@@ -45,15 +45,26 @@ STATICFILES_DIRS = [
 INSTALLED_APPS = [
     'tracker',
     'rest_framework',
+    'rest_framework.authtoken',
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
+    
 ]
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
 
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',  # Default backend
+)
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',

@@ -13,7 +13,9 @@ router.register(r'expense_change_logs', views.ExpenseChangeLogViewSet)
 router.register(r'income_change_logs', views.IncomeChangeLogViewSet)
 
 urlpatterns = [
-    path('', views.login, name='login'),  # Pointing to a custom login view
+    path('api/', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('login/', views.login, name='login'),  # Pointing to a custom login view
     path('signup/', views.signup, name='signup'),  # Pointing to a custom signup view
     path('logout/', views.logout, name='logout'),  # Pointing to a custom logout view
     path('home/', views.home, name='home'),  # Function-based view for the home page

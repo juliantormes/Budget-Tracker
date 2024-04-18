@@ -15,7 +15,6 @@ import {
   ArcElement,
 } from 'chart.js';
 
-// Registering components for ChartJS
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -25,21 +24,6 @@ ChartJS.register(
   Legend,
   ArcElement
 );
-
-// Chart options as per your original setup
-const pieChartOptions = {
-  plugins: {
-    tooltip: {
-      callbacks: {
-        label: function(context) {
-          const label = context.label || '';
-          const value = context.parsed;
-          return `${label}: $${value.toLocaleString()}`;
-        }
-      }
-    }
-  }
-};
 
 const HomePage = () => {
   const [data, setData] = useState({
@@ -54,7 +38,6 @@ const HomePage = () => {
     fetchData(data.date);
   }, [data.date]);
 
-  // Fetch financial data from the API
   const fetchData = async (currentDate) => {
     const start = format(startOfMonth(currentDate), 'yyyy-MM-dd');
     const end = format(endOfMonth(currentDate), 'yyyy-MM-dd');
@@ -62,92 +45,64 @@ const HomePage = () => {
     try {
       const incomeResponse = await axiosInstance.get(`incomes/?start_date=${start}&end_date=${end}`);
       const expenseResponse = await axiosInstance.get(`expenses/?start_date=${start}&end_date=${end}`);
-      // Assume you have an endpoint for credit card expenses
-      // const creditCardResponse = await ...
-
-      setData({
-        ...data,
+      setData(prev => ({
+        ...prev,
         incomes: incomeResponse.data,
         expenses: expenseResponse.data,
-        // creditCardExpenses: creditCardResponse.data, // Uncomment when the endpoint is ready
-      });
+      }));
     } catch (error) {
       console.error('Failed to fetch financial data:', error);
     }
   };
 
-  // Logout the user and navigate to login page
   const handleLogout = () => {
     localStorage.removeItem('token');
     navigate('/login');
   };
 
-  // Navigate to previous month's data
-  const handlePrevMonth = () => {
-    setData({
-      ...data,
-      date: subMonths(data.date, 1),
-    });
+  const handleMonthChange = (direction) => {
+    setData(prev => ({
+      ...prev,
+      date: direction === 'prev' ? subMonths(prev.date, 1) : addMonths(prev.date, 1),
+    }));
   };
 
-  // Navigate to next month's data
-  const handleNextMonth = () => {
-    setData({
-      ...data,
-      date: addMonths(data.date, 1),
-    });
+  const ChartOptions = {
+    aspectRatio: 1.5,
+    plugins: {
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `${context.label}: $${context.parsed.toLocaleString()}`;
+          }
+        }
+      }
+    }
   };
 
-  // Prepare chart data for the Pie components
-  const incomeChartData = {
-    labels: data.incomes.map(item => item.category),
+  const prepareChartData = (dataItems) => ({
+    labels: dataItems.map(item => item.category || 'Undefined Category'),
     datasets: [{
-      label: 'Income',
-      data: data.incomes.map(item => item.amount),
+      label: dataItems[0]?.type || 'Data',
+      data: dataItems.map(item => item.amount),
       backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585'],
     }],
-  };
-
-  const expenseChartData = {
-    labels: data.expenses.map(item => item.category),
-    datasets: [{
-      label: 'Expenses',
-      data: data.expenses.map(item => item.amount),
-      backgroundColor: ['#6b4c9a', '#f28e2b', '#59a14f', '#edc948', '#b07aa1'],
-    }],
-  };
-
-  // Assuming you will set the credit card chart data similarly
-  // const creditCardChartData = { ... };
+  });
 
   return (
     <div className="homepage">
       <h1>Financial Overview for {format(data.date, 'MMMM yyyy')}</h1>
-      <button onClick={handlePrevMonth}>Previous Month</button>
-      <button onClick={handleNextMonth}>Next Month</button>
-      <header className="homepage-header">
-        <h1>Budget Tracker</h1>
-        <div className="date-navigation">
-          {/* Date navigation if needed */}
-        </div>
-        <button className="logout-button" onClick={handleLogout}>LOGOUT</button>
-      </header>
-      
+      <button onClick={() => handleMonthChange('prev')}>Previous Month</button>
+      <button onClick={() => handleMonthChange('next')}>Next Month</button>
       <div className="financial-summary">
-        <h2>Financial Summary</h2>
-        {data.incomes.length > 0 && <Pie data={incomeChartData} options={pieChartOptions} />}
-        {data.expenses.length > 0 && <Pie data={expenseChartData} options={pieChartOptions} />}
-        {/* Uncomment and use similar condition for credit card data */}
-        {/* {data.creditCardExpenses.length > 0 && <Pie data={creditCardChartData} options={pieChartOptions} />} */}
+        <div className="pie-chart-container">
+          <Pie data={prepareChartData(data.incomes)} options={ChartOptions} />
+        </div>
+        <div className="pie-chart-container">
+          <Pie data={prepareChartData(data.expenses)} options={ChartOptions} />
+        </div>
+        {/* Add similar container for credit card expenses if needed */}
       </div>
-      
-      <div className="charts">
-        {/* Additional charts can be included here */}
-      </div>
-
-      <nav className="navigation">
-        {/* Navigation links can go here */}
-      </nav>
     </div>
   );
 };

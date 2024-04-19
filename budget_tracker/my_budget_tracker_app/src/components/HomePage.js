@@ -81,7 +81,7 @@ const HomePage = () => {
   };
 
   const prepareChartData = (dataItems) => ({
-    labels: dataItems.map(item => item.category || 'Undefined Category'),
+    labels: dataItems.map(item => item.description || 'Undefined Category'),
     datasets: [{
       label: dataItems[0]?.type || 'Data',
       data: dataItems.map(item => item.amount),

@@ -33,20 +33,26 @@ class ExpenseCategorySerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
 class ExpenseSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='expense_category.name', read_only=True)
+
     class Meta:
         model = Expense
-        fields = '__all__'
+        fields = ('id', 'amount', 'date', 'user', 'expense_category', 'category_name')  # Similarly, list all fields explicitly
         extra_kwargs = {'user': {'read_only': True}}
+
 class IncomeCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = IncomeCategory
         fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
 class IncomeSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='income_category.name', read_only=True)
+
     class Meta:
         model = Income
-        fields = '__all__'
+        fields = ('id', 'amount', 'date', 'user', 'income_category', 'category_name')  # Explicitly listing all fields including the custom one
         extra_kwargs = {'user': {'read_only': True}}
+
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard

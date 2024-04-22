@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosApi';
-import { format, startOfMonth, endOfMonth, addMonths, subMonths, parse } from 'date-fns';
+import { format, startOfMonth, endOfMonth } from 'date-fns';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
@@ -12,32 +12,29 @@ const HomePage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const year = parseInt(searchParams.get('year')) || new Date().getFullYear();
-  const month = parseInt(searchParams.get('month')) || new Date().getMonth() + 1; // getMonth() is 0-indexed
+  const month = parseInt(searchParams.get('month')) || new Date().getMonth() + 1;
 
   const [data, setData] = useState({
     incomes: [],
     expenses: [],
-    creditCardExpenses: [],
   });
-  
-  useEffect(() => {
-    const currentDate = new Date(year, month - 1, 1); // Month is 1-indexed in URL, 0-indexed in Date
-    fetchData(currentDate);
-  }, [year, month]);
 
-  const fetchData = async (currentDate) => {
-    const start = format(startOfMonth(currentDate), 'yyyy-MM-dd');
-    const end = format(endOfMonth(currentDate), 'yyyy-MM-dd');
+  const fetchData = async (year, month) => {
     const token = localStorage.getItem('token');
-
+  
+    // No need to calculate start and end dates here. Let the backend handle it.
+    const params = new URLSearchParams({ year, month }).toString();
+    const config = {
+      headers: { Authorization: `Token ${token}` }
+    };
+  
     try {
-      const config = {
-        headers: { Authorization: `Token ${token}` }
-      };
-
-      const incomeResponse = await axiosInstance.get(`incomes/?start_date=${start}&end_date=${end}`, config);
-      const expenseResponse = await axiosInstance.get(`expenses/?start_date=${start}&end_date=${end}`, config);
-
+      const incomeResponse = await axiosInstance.get(`incomes/?${params}`, config);
+      const expenseResponse = await axiosInstance.get(`expenses/?${params}`, config);
+  
+      console.log('Income Response:', incomeResponse.data);  // Log to check fetched data
+      console.log('Expense Response:', expenseResponse.data);  // Log to check fetched data
+  
       setData({
         incomes: incomeResponse.data,
         expenses: expenseResponse.data,
@@ -50,9 +47,14 @@ const HomePage = () => {
       }
     }
   };
+  
+  useEffect(() => {
+    // Pass the year and month directly to the fetchData function
+    fetchData(year, month);
+  }, [year, month]);
 
   const handleMonthChange = (direction) => {
-    const newDate = direction === 'prev' ? subMonths(new Date(year, month - 1, 1), 1) : addMonths(new Date(year, month - 1, 1), 1);
+    const newDate = direction === 'prev' ? new Date(year, month - 2, 1) : new Date(year, month, 1);
     navigate(`/home?year=${newDate.getFullYear()}&month=${newDate.getMonth() + 1}`);
   };
 

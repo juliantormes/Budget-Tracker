@@ -9,7 +9,6 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
 from decimal import Decimal, InvalidOperation,ROUND_HALF_UP
-from datetime import datetime
 from .utils import get_effective_month, calculate_total_payment_with_surcharge
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -18,6 +17,9 @@ from rest_framework import viewsets, status
 from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer, UserSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
+from django.utils.dateparse import parse_date
+from rest_framework.exceptions import ValidationError
+
 
 @api_view(['POST'])
 def signup(request):
@@ -572,34 +574,51 @@ def record_recurring_income_change(request, income_id):
             raise ValueError("Invalid amount")
 
     return render(request, 'tracker/record_recurring_income_change.html', {'income': income})
-
 class ExpenseViewSet(viewsets.ModelViewSet):
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        # Filters the expenses to those belonging to the logged-in user
-        return Expense.objects.filter(user=self.request.user)
+        queryset = super().get_queryset()  # Assuming you inherit from a class that sets queryset.
+        year = self.request.query_params.get('year')
+        month = self.request.query_params.get('month')
+
+        if year and month:
+            try:
+                year = int(year)
+                month = int(month)
+                start_date = datetime(year, month, 1)
+                end_date = start_date + relativedelta(months=1, days=-1)
+                queryset = queryset.filter(date__gte=start_date, date__lte=end_date)
+            except ValueError:
+                raise ValidationError('Invalid year or month format.')
+
+        return queryset
 
     def perform_create(self, serializer):
-        # Automatically assign the logged-in user as the user of the expense
         serializer.save(user=self.request.user)
-    '''
-    @action(detail=True, methods=['post'])
-    def record_change(self, request, pk=None):
-        expense = self.get_object()
-        new_amount = request.data.get('new_amount')
-        # Logic to record change...
-        return Response({"message": "Change recorded successfully"})
-    '''
+
 class IncomeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Income.objects.all()
     serializer_class = IncomeSerializer
-
     def get_queryset(self):
-        return Income.objects.filter(user=self.request.user)
+        queryset = super().get_queryset()  # Assuming you inherit from a class that sets queryset.
+        year = self.request.query_params.get('year')
+        month = self.request.query_params.get('month')
+
+        if year and month:
+            try:
+                year = int(year)
+                month = int(month)
+                start_date = datetime(year, month, 1)
+                end_date = start_date + relativedelta(months=1, days=-1)
+                queryset = queryset.filter(date__gte=start_date, date__lte=end_date)
+            except ValueError:
+                raise ValidationError('Invalid year or month format.')
+
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -647,5 +666,3 @@ class IncomeChangeLogViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return IncomeChangeLog.objects.filter(income__user=self.request.user)
-
-

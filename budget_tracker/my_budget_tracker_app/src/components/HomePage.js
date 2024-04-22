@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../api/axiosApi';
-import { format, startOfMonth, endOfMonth } from 'date-fns';
+import { format } from 'date-fns';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement } from 'chart.js';
+import '../styles/HomePage.css'; 
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -17,27 +18,25 @@ const HomePage = () => {
   const [data, setData] = useState({
     incomes: [],
     expenses: [],
+    creditCardExpenses: [],
+    monthlyCreditCardExpenses: {}
   });
 
   const fetchData = async (year, month) => {
-    const token = localStorage.getItem('token');
-  
-    // No need to calculate start and end dates here. Let the backend handle it.
     const params = new URLSearchParams({ year, month }).toString();
-    const config = {
-      headers: { Authorization: `Token ${token}` }
-    };
   
     try {
-      const incomeResponse = await axiosInstance.get(`incomes/?${params}`, config);
-      const expenseResponse = await axiosInstance.get(`expenses/?${params}`, config);
-  
-      console.log('Income Response:', incomeResponse.data);  // Log to check fetched data
-      console.log('Expense Response:', expenseResponse.data);  // Log to check fetched data
-  
+      const responses = await Promise.all([
+        axiosInstance.get(`incomes/?${params}`),
+        axiosInstance.get(`expenses/?${params}`),
+        //axiosInstance.get(`credit-card-expenses/?year=${year}&month=${month}`)  // Adjust according to actual endpoint
+      ]);
+
       setData({
-        incomes: incomeResponse.data,
-        expenses: expenseResponse.data,
+        incomes: responses[0].data,
+        expenses: responses[1].data,
+        //creditCardExpenses: responses[2].data,
+        //monthlyCreditCardExpenses: calculateCreditCardExpenses(responses[2].data)
       });
     } catch (error) {
       console.error('Failed to fetch financial data:', error);
@@ -47,9 +46,14 @@ const HomePage = () => {
       }
     }
   };
-  
+
+  const calculateCreditCardExpenses = (expenses) => {
+    const monthlyExpenses = {};
+    // Implement calculation logic here
+    return monthlyExpenses;
+  };
+
   useEffect(() => {
-    // Pass the year and month directly to the fetchData function
     fetchData(year, month);
   }, [year, month]);
 

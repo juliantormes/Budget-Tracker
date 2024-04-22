@@ -75,14 +75,31 @@ const HomePage = () => {
       }
     }
   };
-
-  const prepareChartData = (dataItems) => ({
-    labels: dataItems.map(item => item.category_name || 'Undefined Category'),
-    datasets: [{
-      data: dataItems.map(item => item.amount),
-      backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585'],
-    }],
-  });
+  const prepareChartData = (dataItems) => {
+    const sumsByCategory = dataItems.reduce((acc, item) => {
+      const category_name = item.category_name || 'Undefined Category';
+      const amount = parseFloat(item.amount); // Ensure the amount is a number
+      if (!isNaN(amount)) { // Check if amount is a valid number
+        if (acc[category_name]) {
+          acc[category_name] += amount;
+        } else {
+          acc[category_name] = amount;
+        }
+      }
+      return acc;
+    }, {});
+    const labels = Object.keys(sumsByCategory);
+    const data = Object.values(sumsByCategory);
+  
+    return {
+      labels,
+      datasets: [{
+        data,
+        backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585'],
+      }],
+    };
+  };
+  
 
   return (
     <div className="homepage">

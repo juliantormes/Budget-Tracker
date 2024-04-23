@@ -575,12 +575,12 @@ def record_recurring_income_change(request, income_id):
 
     return render(request, 'tracker/record_recurring_income_change.html', {'income': income})
 class ExpenseViewSet(viewsets.ModelViewSet):
+
+    permission_classes = [IsAuthenticated]
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
-    permission_classes = [IsAuthenticated]
-
     def get_queryset(self):
-        queryset = super().get_queryset()  # Assuming you inherit from a class that sets queryset.
+        queryset = super().get_queryset().filter(user=self.request.user)
         year = self.request.query_params.get('year')
         month = self.request.query_params.get('month')
 
@@ -590,21 +590,22 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 month = int(month)
                 start_date = datetime(year, month, 1)
                 end_date = start_date + relativedelta(months=1, days=-1)
-                queryset = queryset.filter(date__gte=start_date, date__lte=end_date)
+
+                # Filter for transactions of the specific month or recurring transactions
+                monthly_transactions = Q(date__gte=start_date, date__lte=end_date)
+                recurring_transactions = Q(is_recurring=True)
+                queryset = queryset.filter(monthly_transactions | recurring_transactions)
             except ValueError:
                 raise ValidationError('Invalid year or month format.')
 
         return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class IncomeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Income.objects.all()
     serializer_class = IncomeSerializer
     def get_queryset(self):
-        queryset = super().get_queryset()  # Assuming you inherit from a class that sets queryset.
+        queryset = super().get_queryset().filter(user=self.request.user)  # Assuming you inherit from a class that sets queryset.
         year = self.request.query_params.get('year')
         month = self.request.query_params.get('month')
 
@@ -614,7 +615,9 @@ class IncomeViewSet(viewsets.ModelViewSet):
                 month = int(month)
                 start_date = datetime(year, month, 1)
                 end_date = start_date + relativedelta(months=1, days=-1)
-                queryset = queryset.filter(date__gte=start_date, date__lte=end_date)
+                monthly_transactions = Q(date__gte=start_date, date__lte=end_date)
+                recurring_transactions = Q(is_recurring=True)
+                queryset = queryset.filter(monthly_transactions | recurring_transactions)
             except ValueError:
                 raise ValidationError('Invalid year or month format.')
 

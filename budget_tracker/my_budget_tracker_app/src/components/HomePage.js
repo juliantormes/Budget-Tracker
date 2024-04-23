@@ -24,19 +24,19 @@ const HomePage = () => {
 
   const fetchData = async (year, month) => {
     const params = new URLSearchParams({ year, month }).toString();
-  
+    
     try {
       const responses = await Promise.all([
         axiosInstance.get(`incomes/?${params}`),
         axiosInstance.get(`expenses/?${params}`),
-        //axiosInstance.get(`credit-card-expenses/?year=${year}&month=${month}`)  // Adjust according to actual endpoint
+        axiosInstance.get(`credit-card-expenses/?year=${year}&month=${month}`) // Adjust according to actual endpoint
       ]);
-
+  
       setData({
         incomes: responses[0].data,
         expenses: responses[1].data,
-        //creditCardExpenses: responses[2].data,
-        //monthlyCreditCardExpenses: calculateCreditCardExpenses(responses[2].data)
+        creditCardExpenses: responses[2].data,
+        monthlyCreditCardExpenses: calculateCreditCardExpenses(responses[2].data)
       });
     } catch (error) {
       console.error('Failed to fetch financial data:', error);
@@ -46,13 +46,34 @@ const HomePage = () => {
       }
     }
   };
-
   const calculateCreditCardExpenses = (expenses) => {
     const monthlyExpenses = {};
-    // Implement calculation logic here
+  
+    expenses.forEach(expense => {
+      let effectiveDate = new Date(expense.date);
+      const closingDay = expense.credit_card.close_card_day;
+      if (effectiveDate.getDate() > closingDay) {
+        effectiveDate.setMonth(effectiveDate.getMonth() + 1); // Adjust for closing day
+      }
+  
+      const installmentCount = Math.max(expense.installments, 1); // Ensure there is at least one installment
+      const surcharge = expense.surcharge || 0; // Ensure surcharge is defined
+      const installmentAmount = (expense.amount + expense.amount * surcharge / 100) / installmentCount;
+  
+      for (let i = 0; i < installmentCount; i++) {
+        const monthIndex = effectiveDate.getMonth() + 1;
+        const monthKey = `${effectiveDate.getFullYear()}-${monthIndex < 10 ? `0${monthIndex}` : monthIndex}`;
+        monthlyExpenses[monthKey] = (monthlyExpenses[monthKey] || 0) + installmentAmount;
+        effectiveDate.setMonth(effectiveDate.getMonth() + 1);
+      }
+    });
+  
+    console.log('Monthly Credit Card Expenses:', monthlyExpenses);
     return monthlyExpenses;
   };
-
+  
+  
+  
   useEffect(() => {
     fetchData(year, month);
   }, [year, month]);
@@ -99,8 +120,27 @@ const HomePage = () => {
       }],
     };
   };
-  
 
+  const prepareCreditCardChartData = () => {
+    if (!data.monthlyCreditCardExpenses || Object.keys(data.monthlyCreditCardExpenses).length === 0) {
+      console.error('No credit card expense data available to display.');
+      return { labels: [], datasets: [] };
+    }
+  
+    const labels = Object.keys(data.monthlyCreditCardExpenses);
+    const values = Object.values(data.monthlyCreditCardExpenses).map(value => parseFloat(value.toFixed(2))); // Ensure clean number formatting
+  
+    return {
+      labels,
+      datasets: [{
+        label: 'Credit Card Expenses',
+        data: values,
+        backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
+        borderColor: ['#ff6384', '#36a2eb', '#cc65fe'],
+      }],
+    };
+  }
+  
   return (
     <div className="homepage">
       <header className="homepage-header">
@@ -121,6 +161,10 @@ const HomePage = () => {
         </div>
         <div className="pie-chart-container">
           <Pie data={prepareChartData(data.expenses)} options={ChartOptions} />
+        </div>
+        <div className="pie-chart-container">
+          <h3>Credit Card Expenses</h3>
+          <Pie data={prepareCreditCardChartData()} options={ChartOptions} />
         </div>
       </div>
     </div>

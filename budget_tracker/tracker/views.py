@@ -669,3 +669,27 @@ class IncomeChangeLogViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         return IncomeChangeLog.objects.filter(income__user=self.request.user)
+    
+class CreditCardExpenseViewSet(viewsets.ModelViewSet):
+    queryset = Expense.objects.filter(credit_card__isnull=False)
+    serializer_class = ExpenseSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        year = self.request.query_params.get('year', datetime.now().year)
+        month = self.request.query_params.get('month', datetime.now().month)
+
+        # Adjusting to the first day of the month for correct range comparison
+        start_date = datetime(year=int(year), month=int(month), day=1)
+        end_date = start_date + relativedelta(months=1) - relativedelta(days=1)
+
+        queryset = Expense.objects.filter(
+            user=user, 
+            credit_card__isnull=False, 
+            date__range=(start_date, end_date)
+        ).annotate(
+            total=F('amount') + (F('amount') * F('surcharge') / 100)
+        )
+
+        return queryset

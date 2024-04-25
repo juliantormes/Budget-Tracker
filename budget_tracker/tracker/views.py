@@ -17,8 +17,8 @@ from rest_framework import viewsets, status
 from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer, UserSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
-from django.utils.dateparse import parse_date
 from rest_framework.exceptions import ValidationError
+from django.utils.timezone import make_aware
 
 
 @api_view(['POST'])
@@ -671,25 +671,66 @@ class IncomeChangeLogViewSet(viewsets.ModelViewSet):
         return IncomeChangeLog.objects.filter(income__user=self.request.user)
     
 class CreditCardExpenseViewSet(viewsets.ModelViewSet):
-    queryset = Expense.objects.filter(credit_card__isnull=False)
-    serializer_class = ExpenseSerializer
     permission_classes = [IsAuthenticated]
+    serializer_class = ExpenseSerializer
 
     def get_queryset(self):
         user = self.request.user
         year = self.request.query_params.get('year', datetime.now().year)
         month = self.request.query_params.get('month', datetime.now().month)
+        
+        start_of_month = make_aware(datetime(int(year), int(month), 1))
+        end_of_month = start_of_month + relativedelta(months=1) - relativedelta(days=1)
 
-        # Adjusting to the first day of the month for correct range comparison
-        start_date = datetime(year=int(year), month=int(month), day=1)
-        end_date = start_date + relativedelta(months=1) - relativedelta(days=1)
-
-        queryset = Expense.objects.filter(
-            user=user, 
-            credit_card__isnull=False, 
-            date__range=(start_date, end_date)
-        ).annotate(
-            total=F('amount') + (F('amount') * F('surcharge') / 100)
+        # Fetch all credit card expenses for the user that are either recurring or within the month
+        expenses = Expense.objects.filter(
+            user=user,
+            credit_card__isnull=False,
+            date__range=[start_of_month, end_of_month]
+        ) | Expense.objects.filter(
+            user=user,
+            credit_card__isnull=False,
+            is_recurring=True
         )
 
-        return queryset
+        monthly_credit_card_expenses = []
+
+        # Process each expense to distribute it correctly across months
+        for expense in expenses:
+            # Determine the effective month for each expense based on the credit card's close day
+            if expense.date.day > expense.credit_card.close_card_day:
+                effective_month = expense.date + relativedelta(months=1)
+            else:
+                effective_month = expense.date
+
+            effective_month_str = effective_month.strftime('%B %Y')
+            card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
+
+            surcharge_rate = Decimal(expense.surcharge) / Decimal(100)
+            total_amount_with_surcharge = expense.amount * (Decimal(1) + surcharge_rate)
+
+            if expense.installments > 1:
+                # ... [code for distributing installments remains unchanged] ...
+                for i in range(expense.installments):
+                    amount_per_installment = total_amount_with_surcharge / expense.installments
+                    month_str = (effective_month + relativedelta(months=i)).strftime('%Y-%m')  # Use ISO format for sorting
+                    monthly_credit_card_expenses.append({
+                        'month': month_str,
+                        'amount': amount_per_installment,
+                        'label': card_label,
+                    })
+            else:
+                month_str = effective_month.strftime('%Y-%m')  # Use ISO format for sorting
+                monthly_credit_card_expenses.append({
+                    'month': month_str,
+                    'amount': total_amount_with_surcharge,
+                    'label': card_label,
+                })
+
+        # Sort by month
+        monthly_credit_card_expenses.sort(key=lambda x: x['month'])
+        return monthly_credit_card_expenses
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        return Response(queryset)

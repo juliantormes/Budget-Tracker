@@ -24,7 +24,6 @@ const HomePage = () => {
 
   const fetchData = async () => {
     const params = new URLSearchParams({ year, month }).toString();
-    
     try {
       const [incomeResponse, expenseResponse, creditCardExpenseResponse] = await Promise.all([
         axiosInstance.get(`incomes/?${params}`),
@@ -76,41 +75,31 @@ const HomePage = () => {
       console.error('No data available');
       return { labels: [], datasets: [] };
     }
-    
+    const sumsByCategory = {};
+
     if (Array.isArray(dataItems)) {
-      const sumsByCategory = dataItems.reduce((acc, item) => {
-        const category_name = item.category_name || 'Undefined Category';
-        const amount = parseFloat(item.amount);
-        if (!isNaN(amount)) {
-          acc[category_name] = (acc[category_name] || 0) + amount;
-        }
-        return acc;
-      }, {});
-      const labels = Object.keys(sumsByCategory);
-      const data = Object.values(sumsByCategory);
-      return {
-        labels,
-        datasets: [{
-          data,
-          backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585'],
-        }],
-      };
+      dataItems.forEach(item => {
+        const category = item.category_name || 'Undefined Category';
+        sumsByCategory[category] = (sumsByCategory[category] || 0) + parseFloat(item.amount || 0);
+      });
     } else if (typeof dataItems === 'object') {
-      const labels = Object.keys(dataItems).sort();
-      const data = labels.map(label => dataItems[label]);
-      return {
-        labels,
-        datasets: [{
-          label: 'Credit Card Expenses',
-          data,
-          backgroundColor: ['#ff6384', '#36a2eb', '#cc65fe'],
-          borderColor: ['#ff6384', '#36a2eb', '#cc65fe'],
-        }],
-      };
-    } else {
-      console.error('Unexpected data type:', dataItems);
-      return { labels: [], datasets: [] };
+      Object.keys(dataItems).forEach(month => {
+        sumsByCategory[month] = dataItems[month];
+      });
     }
+
+    const labels = Object.keys(sumsByCategory);
+    const data = Object.values(sumsByCategory);
+
+    return {
+      labels,
+      datasets: [{
+        label: 'Financial Data',
+        data,
+        backgroundColor: ['#7293cb', '#e1974c', '#84ba5b', '#d35e60', '#808585'],
+        borderColor: ['#4b4b4b']
+      }]
+    };
   };
 
   if (loading) {
@@ -139,7 +128,7 @@ const HomePage = () => {
           <Pie data={prepareChartData(data.expenses)} options={ChartOptions} />
         </div>
         <div className="pie-chart-container">
-          <h3>Credit Card Expenses</h3>
+
           <Pie data={prepareChartData(data.monthlyCreditCardExpenses)} options={ChartOptions} />
         </div>
       </div>

@@ -687,48 +687,40 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
             user=user,
             credit_card__isnull=False,
             date__range=[start_of_month, end_of_month]
-        ) | Expense.objects.filter(
+        ).union(Expense.objects.filter(
             user=user,
             credit_card__isnull=False,
             is_recurring=True
-        )
+        ))
 
         monthly_credit_card_expenses = []
 
-        # Process each expense to distribute it correctly across months
         for expense in expenses:
             # Determine the effective month for each expense based on the credit card's close day
-            if expense.date.day > expense.credit_card.close_card_day:
-                effective_month = expense.date + relativedelta(months=1)
-            else:
-                effective_month = expense.date
-
-            effective_month_str = effective_month.strftime('%B %Y')
+            effective_month = expense.date + relativedelta(months=1) if expense.date.day > expense.credit_card.close_card_day else expense.date
+            month_str = effective_month.strftime('%Y-%m')
             card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
 
-            surcharge_rate = Decimal(expense.surcharge) / Decimal(100)
+            surcharge_rate = Decimal(expense.surcharge or 0) / Decimal(100)
             total_amount_with_surcharge = expense.amount * (Decimal(1) + surcharge_rate)
 
             if expense.installments > 1:
-                # ... [code for distributing installments remains unchanged] ...
                 for i in range(expense.installments):
+                    projected_month = effective_month + relativedelta(months=i)
+                    projected_month_str = projected_month.strftime('%Y-%m')
                     amount_per_installment = total_amount_with_surcharge / expense.installments
-                    month_str = (effective_month + relativedelta(months=i)).strftime('%Y-%m')  # Use ISO format for sorting
                     monthly_credit_card_expenses.append({
-                        'month': month_str,
-                        'amount': amount_per_installment,
+                        'month': projected_month_str,
+                        'amount': float(amount_per_installment),
                         'label': card_label,
                     })
             else:
-                month_str = effective_month.strftime('%Y-%m')  # Use ISO format for sorting
                 monthly_credit_card_expenses.append({
                     'month': month_str,
-                    'amount': total_amount_with_surcharge,
+                    'amount': float(total_amount_with_surcharge),
                     'label': card_label,
                 })
 
-        # Sort by month
-        monthly_credit_card_expenses.sort(key=lambda x: x['month'])
         return monthly_credit_card_expenses
 
     def list(self, request, *args, **kwargs):

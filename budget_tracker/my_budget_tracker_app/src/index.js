@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App'; // Assuming App.js is in the src directory
+import './setup/chartSetup'; // Import the setup file for Chart.js
+import App from './App';
 
 ReactDOM.render(
   <React.StrictMode>

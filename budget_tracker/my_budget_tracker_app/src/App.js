@@ -1,18 +1,21 @@
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'; // Update imports
-import LoginForm from './components/Login';
-import HomePage from './components/HomePage';
-import RegisterForm from './components/Register';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { ProvideAuth } from './hooks/useAuth'; // Make sure this import path is correct
+import LoginForm from './views/Login';
+import HomePage from './views/HomePage';
+import RegisterForm from './views/Register';
 
 const App = () => {
   return (
-    <Router>
-      <Routes> {/* Replace Switch with Routes */}
-        <Route path="/home" element={<HomePage />} /> {/* Update Route syntax */}
-        <Route path="/login" element={<LoginForm />} /> {/* Update Route syntax */}
-        <Route path="/register" element={<RegisterForm />} /> {/* Update Route syntax */}
-      </Routes>
-    </Router>
+    <ProvideAuth> {/* Wrap everything within ProvideAuth */}
+      <Router>
+        <Routes>
+          <Route path="/home" element={<HomePage />} />
+          <Route path="/login" element={<LoginForm />} />
+          <Route path="/register" element={<RegisterForm />} />
+        </Routes>
+      </Router>
+    </ProvideAuth>
   );
 };
 

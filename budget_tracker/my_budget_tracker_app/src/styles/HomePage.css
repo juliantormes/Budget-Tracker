@@ -75,13 +75,6 @@
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-/* Adjusting the pie chart to fit Fluent Design aesthetics */
-.pie-chart-container h3 {
-  color: #323130;
-  font-weight: 600;
-  margin-bottom: 15px;
-}
-
 .pie-chart-container canvas {
   width: 100% !important;
   height: auto !important;

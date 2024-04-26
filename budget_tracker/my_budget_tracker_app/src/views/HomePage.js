@@ -18,25 +18,20 @@ const HomePage = () => {
     const { goToPreviousMonth, goToNextMonth } = useDateNavigation(year, month);  // Navigation hook for moving through months
 
     const prepareChartData = (dataItems) => {
-        if (!dataItems) {
+        if (!dataItems || !dataItems.length) {
             console.error('No data available');
             return { labels: [], datasets: [] };
         }
+        
         const sumsByCategory = {};
-        if (Array.isArray(dataItems)) {
-            dataItems.forEach(item => {
-                const category = item.category_name || 'Undefined Category';
-                sumsByCategory[category] = (sumsByCategory[category] || 0) + parseFloat(item.amount || 0);
-            });
-        } else if (typeof dataItems === 'object') {
-            Object.keys(dataItems).forEach(month => {
-                sumsByCategory[month] = dataItems[month];
-            });
-        }
-
+        dataItems.forEach(item => {
+            const category = item.category_name || 'Undefined Category';
+            sumsByCategory[category] = (sumsByCategory[category] || 0) + parseFloat(item.amount || 0);
+        });
+    
         const labels = Object.keys(sumsByCategory);
         const data = Object.values(sumsByCategory);
-
+    
         return {
             labels,
             datasets: [{
@@ -47,7 +42,6 @@ const HomePage = () => {
             }]
         };
     };
-
     const ChartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -61,9 +55,9 @@ const HomePage = () => {
             }
         }
     };
-
     if (loading) return <div>Loading...</div>;
     if (error) return <div>Error loading data.</div>;
+    
 
     return (
         <div className="homepage">
@@ -88,5 +82,4 @@ const HomePage = () => {
         </div>
     );
 };
-
 export default HomePage;

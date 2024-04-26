@@ -14,7 +14,7 @@ export function useFetchingFinancialData (year, month) {
                 const [incomeResponse, expenseResponse, creditCardExpenseResponse] = await Promise.all([
                     axiosInstance.get(`incomes/?${params}`),
                     axiosInstance.get(`expenses/?${params}`),
-                    axiosInstance.get(`credit-card-expenses/?year=${year}&month=${month}`)
+                    axiosInstance.get(`credit-card-expenses/?${params}`)
                 ]);
   
                 setData({

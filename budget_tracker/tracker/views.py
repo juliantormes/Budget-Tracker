@@ -682,7 +682,6 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         start_of_month = make_aware(datetime(int(year), int(month), 1))
         end_of_month = start_of_month + relativedelta(months=1) - relativedelta(days=1)
 
-        # Fetch all credit card expenses for the user that are either recurring or within the month
         expenses = Expense.objects.filter(
             user=user,
             credit_card__isnull=False,
@@ -696,11 +695,9 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         monthly_credit_card_expenses = []
 
         for expense in expenses:
-            # Determine the effective month for each expense based on the credit card's close day
             effective_month = expense.date + relativedelta(months=1) if expense.date.day > expense.credit_card.close_card_day else expense.date
             month_str = effective_month.strftime('%Y-%m')
             card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
-
             surcharge_rate = Decimal(expense.surcharge or 0) / Decimal(100)
             total_amount_with_surcharge = expense.amount * (Decimal(1) + surcharge_rate)
 
@@ -712,12 +709,14 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
                     monthly_credit_card_expenses.append({
                         'month': projected_month_str,
                         'amount': float(amount_per_installment),
+                        'category_name': expense.expense_category.name if expense.expense_category else 'Undefined',  # Include category name
                         'label': card_label,
                     })
             else:
                 monthly_credit_card_expenses.append({
                     'month': month_str,
                     'amount': float(total_amount_with_surcharge),
+                    'category_name': expense.expense_category.name if expense.expense_category else 'Undefined',  # Include category name
                     'label': card_label,
                 })
 

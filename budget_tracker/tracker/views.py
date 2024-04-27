@@ -605,7 +605,7 @@ class IncomeViewSet(viewsets.ModelViewSet):
     queryset = Income.objects.all()
     serializer_class = IncomeSerializer
     def get_queryset(self):
-        queryset = super().get_queryset().filter(user=self.request.user)  # Assuming you inherit from a class that sets queryset.
+        queryset = super().get_queryset().filter(user=self.request.user)
         year = self.request.query_params.get('year')
         month = self.request.query_params.get('month')
 
@@ -696,8 +696,6 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
 
         for expense in expenses:
             effective_month = expense.date + relativedelta(months=1) if expense.date.day > expense.credit_card.close_card_day else expense.date
-            month_str = effective_month.strftime('%Y-%m')
-            card_label = f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}"
             surcharge_rate = Decimal(expense.surcharge or 0) / Decimal(100)
             total_amount_with_surcharge = expense.amount * (Decimal(1) + surcharge_rate)
 
@@ -709,15 +707,14 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
                     monthly_credit_card_expenses.append({
                         'month': projected_month_str,
                         'amount': float(amount_per_installment),
-                        'category_name': expense.expense_category.name if expense.expense_category else 'Undefined',  # Include category name
-                        'label': card_label,
+                        'category_name': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
                     })
             else:
+                month_str = effective_month.strftime('%Y-%m')
                 monthly_credit_card_expenses.append({
                     'month': month_str,
                     'amount': float(total_amount_with_surcharge),
-                    'category_name': expense.expense_category.name if expense.expense_category else 'Undefined',  # Include category name
-                    'label': card_label,
+                    'category_name': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
                 })
 
         return monthly_credit_card_expenses

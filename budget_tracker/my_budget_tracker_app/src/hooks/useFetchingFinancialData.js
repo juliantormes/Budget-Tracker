@@ -11,16 +11,14 @@ export function useFetchingFinancialData (year, month) {
             setLoading(true);
             const params = new URLSearchParams({ year, month }).toString();
             try {
-                const [incomeResponse, expenseResponse, creditCardExpenseResponse] = await Promise.all([
+                const [incomeResponse, expenseResponse] = await Promise.all([
                     axiosInstance.get(`incomes/?${params}`),
                     axiosInstance.get(`expenses/?${params}`),
-                    axiosInstance.get(`credit-card-expenses/?${params}`)
                 ]);
   
                 setData({
                     incomes: incomeResponse.data,
                     expenses: expenseResponse.data,
-                    monthlyCreditCardExpenses: creditCardExpenseResponse.data
                 });
             } catch (error) {
                 console.error('Failed to fetch financial data:', error);

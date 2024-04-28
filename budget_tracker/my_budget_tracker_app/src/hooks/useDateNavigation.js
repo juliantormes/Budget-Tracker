@@ -1,17 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 
-export function useDateNavigation(year, month) {
-    const navigate = useNavigate();
+export function useDateNavigation() {
+  const navigate = useNavigate();
 
-    const goToPreviousMonth = () => {
-        const newDate = new Date(year, month - 2, 1);
-        navigate(`/home?year=${newDate.getFullYear()}&month=${newDate.getMonth() + 1}`);
-    };
+  const goToPreviousMonth = (year, month) => {
+    const newYear = month === 1 ? year - 1 : year;
+    const newMonth = month === 1 ? 12 : month - 1;
+    navigate(`/home?year=${newYear}&month=${newMonth}`);
+  };
 
-    const goToNextMonth = () => {
-        const newDate = new Date(year, month, 1);
-        navigate(`/home?year=${newDate.getFullYear()}&month=${newDate.getMonth() + 1}`);
-    };
+  const goToNextMonth = (year, month) => {
+    const newYear = month === 12 ? year + 1 : year;
+    const newMonth = month === 12 ? 1 : month + 1;
+    navigate(`/home?year=${newYear}&month=${newMonth}`);
+  };
 
-    return { goToPreviousMonth, goToNextMonth };
+  return { goToPreviousMonth, goToNextMonth };
 }

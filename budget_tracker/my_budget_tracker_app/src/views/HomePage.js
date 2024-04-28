@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chart from '../components/Chart';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
-import { useCreditCardExpenses } from '../hooks/useCreditCardExpenses';  // Import the new hook
+import { useCreditCardExpenses } from '../hooks/useCreditCardExpenses';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';
 import '../styles/HomePage.css';
@@ -44,6 +44,38 @@ const HomePage = () => {
             }]
         };
     };
+const prepareCreditCardChartData = (expenses, year, month) => {
+    const formattedMonth = `${year}-${String(month).padStart(2, '0')}`; // Ensures the month is in 'YYYY-MM' format
+    console.log('Current month:', month);
+    console.log('Current year:', year);
+    console.log('Expenses before filtering:', expenses);
+    // Filter out expenses that don't match the selected month and year.
+    const filteredExpenses = expenses.filter(expense => expense.month === formattedMonth);
+    console.log('Filtered expenses:', filteredExpenses);
+
+    const chartData = filteredExpenses.reduce((acc, expense) => {
+        // Use the category name for labels, not expense.labels
+        const categoryIndex = acc.labels.indexOf(expense.category_name);
+        if (categoryIndex === -1) {
+            acc.labels.push(expense.category_name); // Push the category_name to labels
+            acc.data.push(expense.amount);
+        } else {
+            acc.data[categoryIndex] += expense.amount;
+        }
+        return acc;
+    }, { labels: [], data: [] });
+
+    return {
+        labels: chartData.labels,
+        datasets: [{
+            label: 'Credit Card Expenses',
+            data: chartData.data,
+            backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6c757d'],
+            borderColor: ['#4b4b4b']
+        }]
+    };
+};
+    
 
     const ChartOptions = {
         responsive: true,
@@ -61,6 +93,7 @@ const HomePage = () => {
     if (loading || ccLoading) return <div>Loading...</div>;
     if (error) return <div>Error loading data: {error.message}</div>;
     if (ccError) return <div>Error loading credit card expenses: {ccError.message}</div>;
+    
 
     return (
         <div className="homepage">
@@ -79,7 +112,7 @@ const HomePage = () => {
                     <Chart data={prepareChartData(data.expenses)} options={ChartOptions} />
                 </div>
                 <div className="pie-chart-container">
-                    <Chart data={prepareChartData(creditCardExpenses)} options={ChartOptions} />
+                    <Chart data={prepareCreditCardChartData(creditCardExpenses,year,month)} options={ChartOptions} />
                 </div>
             </div>
         </div>

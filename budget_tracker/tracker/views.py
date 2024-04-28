@@ -686,11 +686,7 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
             user=user,
             credit_card__isnull=False,
             date__range=[start_of_month, end_of_month]
-        ).union(Expense.objects.filter(
-            user=user,
-            credit_card__isnull=False,
-            is_recurring=True
-        ))
+        )
 
         monthly_credit_card_expenses = []
 
@@ -707,14 +703,14 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
                     monthly_credit_card_expenses.append({
                         'month': projected_month_str,
                         'amount': float(amount_per_installment),
-                        'category_name': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
+                        'labels': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
                     })
             else:
                 month_str = effective_month.strftime('%Y-%m')
                 monthly_credit_card_expenses.append({
                     'month': month_str,
                     'amount': float(total_amount_with_surcharge),
-                    'category_name': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
+                    'labels': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
                 })
 
         return monthly_credit_card_expenses

@@ -682,39 +682,13 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         start_of_month = make_aware(datetime(int(year), int(month), 1))
         end_of_month = start_of_month + relativedelta(months=1) - relativedelta(days=1)
 
-        expenses = Expense.objects.filter(
+        return Expense.objects.filter(
             user=user,
             credit_card__isnull=False,
             date__range=[start_of_month, end_of_month]
         )
 
-        monthly_credit_card_expenses = []
-
-        for expense in expenses:
-            effective_month = expense.date + relativedelta(months=1) if expense.date.day > expense.credit_card.close_card_day else expense.date
-            surcharge_rate = Decimal(expense.surcharge or 0) / Decimal(100)
-            total_amount_with_surcharge = expense.amount * (Decimal(1) + surcharge_rate)
-
-            if expense.installments > 1:
-                for i in range(expense.installments):
-                    projected_month = effective_month + relativedelta(months=i)
-                    projected_month_str = projected_month.strftime('%Y-%m')
-                    amount_per_installment = total_amount_with_surcharge / expense.installments
-                    monthly_credit_card_expenses.append({
-                        'month': projected_month_str,
-                        'amount': float(amount_per_installment),
-                        'labels': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
-                    })
-            else:
-                month_str = effective_month.strftime('%Y-%m')
-                monthly_credit_card_expenses.append({
-                    'month': month_str,
-                    'amount': float(total_amount_with_surcharge),
-                    'labels': f"{expense.credit_card.brand} ending in {expense.credit_card.last_four_digits}",
-                })
-
-        return monthly_credit_card_expenses
-
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        return Response(queryset)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)

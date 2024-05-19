@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chart from '../components/Chart';
@@ -15,10 +15,7 @@ const HomePage = () => {
     const month = parseInt(searchParams.get('month'), 10) || new Date().getMonth() + 1;
     const { data, loading, error } = useFetchingFinancialData(year, month);
     const { goToPreviousMonth, goToNextMonth } = useDateNavigation(year, month);
-
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error loading data: {error.message}</div>;
-
+    
     const prepareIncomeChartData = (dataItems) => {
         if (!dataItems || !dataItems.length) {
             console.error('No data available');
@@ -71,36 +68,66 @@ const HomePage = () => {
         };
     };
     
-    const prepareCreditCardChartData = (expenses) => {
-        if (!expenses || !expenses.length) {
-            console.error('No credit card expenses available');
-            return { labels: [], datasets: [] };
-        }
+    const prepareCreditCardChartData = (expenses, year, month) => {
+        const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
+        console.log('Current month:', formattedMonth);
     
-        const sumsByCategory = {};
+        const processedExpenses = [];
         expenses.forEach(expense => {
-            const category = expense.category_name || 'Undefined Category';
+            const expenseDate = new Date(expense.date);
+            const closingDay = expense.credit_card.close_card_day;
             const surchargeRate = parseFloat(expense.surcharge || 0) / 100;
             const totalAmountWithSurcharge = parseFloat(expense.amount) * (1 + surchargeRate);
-            sumsByCategory[category] = (sumsByCategory[category] || 0) + totalAmountWithSurcharge;
+            const amountPerInstallment = totalAmountWithSurcharge / expense.installments;
+    
+            let startMonth;
+            if (expenseDate.getDate() <= closingDay) {
+                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1); // Next month
+            } else {
+                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1); // Month after next
+            }
+    
+            for (let i = 0; i < expense.installments; i++) {
+                const installmentMonth = new Date(startMonth);
+                installmentMonth.setMonth(startMonth.getMonth() + i);
+                const formattedInstallmentMonth = `${installmentMonth.getFullYear()}-${String(installmentMonth.getMonth() + 1).padStart(2, '0')}`;
+                processedExpenses.push({
+                    ...expense,
+                    month: formattedInstallmentMonth,
+                    amount: amountPerInstallment,
+                });
+            }
         });
     
-        const labels = Object.keys(sumsByCategory);
-        const data = Object.values(sumsByCategory);
+        // Filter expenses for the current month
+        const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
+        console.log('Filtered expenses:', filteredExpenses);
+    
+        const chartData = filteredExpenses.reduce((acc, expense) => {
+            const categoryIndex = acc.labels.indexOf(expense.category_name);
+            if (categoryIndex === -1) {
+                acc.labels.push(expense.category_name);
+                acc.data.push(expense.amount);
+            } else {
+                acc.data[categoryIndex] += expense.amount;
+            }
+            return acc;
+        }, { labels: [], data: [] });
     
         return {
-            labels,
+            labels: chartData.labels,
             datasets: [{
                 label: 'Credit Card Expenses',
-                data,
+                data: chartData.data,
                 backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545', '#6c757d'],
                 borderColor: ['#4b4b4b']
             }]
         };
     };
-    const incomeChartData = prepareIncomeChartData(data.incomes);
-    const expenseChartData = prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card));
-    const creditCardChartData = prepareCreditCardChartData(data.creditCardExpenses);
+    
+    const incomeChartData = useMemo(() => prepareIncomeChartData(data.incomes), [data.incomes]);
+    const expenseChartData = useMemo(() => prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card)), [data.expenses]);
+    const creditCardChartData = useMemo(() => prepareCreditCardChartData(data.creditCardExpenses, year, month), [data.creditCardExpenses, year, month]);
 
     const ChartOptions = {
         responsive: true,
@@ -115,6 +142,9 @@ const HomePage = () => {
             }
         }
     };
+
+    if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error loading data: {error.message}</div>;
 
     return (
         <div className="homepage">

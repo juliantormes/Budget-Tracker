@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '../api/axiosApi';
 
 export function useFetchingFinancialData(year, month) {
@@ -6,40 +6,60 @@ export function useFetchingFinancialData(year, month) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        console.log(`useFetchingFinancialData hook: mounted/updated - year: ${year}, month: ${month}`);
+    const fetchData = useCallback(async () => {
+        setLoading(true);
 
-        const fetchData = async () => {
-            setLoading(true);
-            const params = new URLSearchParams({ year, month }).toString();
-            try {
-                const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
+        // Generate an array of months and years for the last 24 months
+        const monthYearParams = [];
+        for (let i = 0; i < 24; i++) {
+            const date = new Date(year, month - 1 - i);
+            monthYearParams.push({ year: date.getFullYear(), month: date.getMonth() + 1 });
+        }
+
+        try {
+            const promises = monthYearParams.map(({ year, month }) => {
+                const params = new URLSearchParams({ year, month }).toString();
+                return Promise.all([
                     axiosInstance.get(`incomes/?${params}`),
                     axiosInstance.get(`expenses/?${params}`),
                     axiosInstance.get(`credit-card-expenses/?${params}`),
                 ]);
+            });
 
-                console.log('Credit card expenses fetched:', creditCardResponse.data);
+            const results = await Promise.all(promises);
 
-                setData({
-                    incomes: incomeResponse.data,
-                    expenses: expenseResponse.data,
-                    creditCardExpenses: creditCardResponse.data,
-                });
-            } catch (error) {
-                console.error('Failed to fetch credit card expenses:', error);
-                setError(error);
-            } finally {
-                setLoading(false);
-            }
-        };
+            const combinedIncomes = [];
+            const combinedExpenses = [];
+            const combinedCreditCardExpenses = [];
 
-        fetchData();
+            results.forEach(([incomeResponse, expenseResponse, creditCardResponse]) => {
+                combinedIncomes.push(...incomeResponse.data);
+                combinedExpenses.push(...expenseResponse.data);
+                combinedCreditCardExpenses.push(...creditCardResponse.data);
+            });
 
-        return () => {
-            console.log(`useFetchingFinancialData hook: cleanup - year: ${year}, month: ${month}`);
-        };
+            setData({
+                incomes: combinedIncomes,
+                expenses: combinedExpenses,
+                creditCardExpenses: combinedCreditCardExpenses,
+            });
+
+            console.log('Fetched data:', {
+                combinedIncomes,
+                combinedExpenses,
+                combinedCreditCardExpenses,
+            });
+        } catch (error) {
+            console.error('Failed to fetch financial data:', error);
+            setError(error);
+        } finally {
+            setLoading(false);
+        }
     }, [year, month]);
+
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     return { data, loading, error };
 }

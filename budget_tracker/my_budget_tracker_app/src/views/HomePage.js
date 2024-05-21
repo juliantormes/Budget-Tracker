@@ -18,27 +18,18 @@ const HomePage = () => {
 
     const prepareIncomeChartData = (incomes, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-        console.log('Current month:', formattedMonth);
-        console.log('Incomes before filtering:', incomes);
-
-        // Process recurring and non-recurring incomes separately
+        // Filter non-recurring incomes for the current month
         const nonRecurringIncomes = incomes.filter(income => {
             const incomeDate = new Date(income.date);
             const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
             return !income.is_recurring && incomeMonth === formattedMonth;
         });
 
-        // Filter and map recurring incomes to the current month
-        const recurringIncomes = incomes.filter(income => income.is_recurring).map(income => ({
-            ...income,
-            month: formattedMonth,
-            amount: parseFloat(income.amount)
-        }));
+        // Filter recurring incomes
+        const recurringIncomes = incomes.filter(income => income.is_recurring);
 
         // Combine non-recurring and recurring incomes, ensuring recurring incomes are only added once per month
         const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
-
-        console.log('Processed incomes:', processedIncomes);
 
         const sumsByCategory = processedIncomes.reduce((acc, income) => {
             const category = income.category_name || 'Undefined Category';
@@ -48,11 +39,6 @@ const HomePage = () => {
 
         const labels = Object.keys(sumsByCategory);
         const data = Object.values(sumsByCategory);
-
-        console.log('Prepared income chart data:', {
-            labels,
-            datasets: [{ label: 'Incomes', data }]
-        });
 
         return {
             labels,
@@ -67,27 +53,25 @@ const HomePage = () => {
 
     const prepareExpenseChartData = (expenses, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-        console.log('Current month:', formattedMonth);
-        console.log('Expenses before filtering:', expenses);
 
-        // Process recurring and non-recurring expenses separately
+        console.log('all',expenses);
+
+        // Filter non-recurring expenses for the current month
         const nonRecurringExpenses = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
             return !expense.is_recurring && expenseMonth === formattedMonth;
         });
+        console.log('Non recurring',nonRecurringExpenses);
 
-        // Filter and map recurring expenses to the current month
-        const recurringExpenses = expenses.filter(expense => expense.is_recurring).map(expense => ({
-            ...expense,
-            month: formattedMonth,
-            amount: parseFloat(expense.amount)
-        }));
+        // Filter recurring expenses
+        const recurringExpenses = expenses.filter(expense => expense.is_recurring);
+
+        console.log('recurring',recurringExpenses);
 
         // Combine non-recurring and recurring expenses, ensuring recurring expenses are only added once per month
         const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
-
-        console.log('Processed expenses:', processedExpenses);
+        console.log('processed',processedExpenses);
 
         const sumsByCategory = processedExpenses.reduce((acc, expense) => {
             const category = expense.category_name || 'Undefined Category';
@@ -97,11 +81,6 @@ const HomePage = () => {
 
         const labels = Object.keys(sumsByCategory);
         const data = Object.values(sumsByCategory);
-
-        console.log('Prepared expense chart data:', {
-            labels,
-            datasets: [{ label: 'Expenses', data }]
-        });
 
         return {
             labels,
@@ -116,8 +95,6 @@ const HomePage = () => {
 
     const prepareCreditCardChartData = (expenses, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-        console.log('Current month:', formattedMonth);
-        console.log('Expenses before filtering:', expenses);
 
         // Process installments and distribute them across the months based on the closing day logic
         const processedExpenses = [];
@@ -157,8 +134,6 @@ const HomePage = () => {
 
         const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
 
-        console.log('Filtered expenses:', filteredExpenses);
-
         const chartData = filteredExpenses.reduce((acc, expense) => {
             const categoryIndex = acc.labels.indexOf(expense.category_name);
             if (categoryIndex === -1) {
@@ -169,11 +144,6 @@ const HomePage = () => {
             }
             return acc;
         }, { labels: [], data: [] });
-
-        console.log('Prepared credit card chart data:', {
-            labels: chartData.labels,
-            datasets: [{ label: 'Credit Card Expenses', data: chartData.data }]
-        });
 
         return {
             labels: chartData.labels,

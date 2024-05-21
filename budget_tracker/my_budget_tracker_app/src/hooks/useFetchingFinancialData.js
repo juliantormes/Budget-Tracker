@@ -20,7 +20,7 @@ export function useFetchingFinancialData(year, month) {
         for (let i = 0; i < 240; i++) {
             const date = new Date(year, month - 1 - i);
             const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-            if (!cache.incomes[formattedDate]) {
+            if (!cache.incomes[formattedDate] || !cache.expenses[formattedDate] || !cache.creditCardExpenses[formattedDate]) {
                 monthYearParams.push({ year: date.getFullYear(), month: date.getMonth() + 1 });
             }
         }
@@ -41,13 +41,18 @@ export function useFetchingFinancialData(year, month) {
                 const { year, month } = monthYearParams[index];
                 const formattedDate = `${year}-${String(month).padStart(2, '0')}`;
 
-                cache.incomes[formattedDate] = incomeResponse.data.filter(income => !income.is_recurring);
-                cache.expenses[formattedDate] = expenseResponse.data.filter(expense => !expense.is_recurring);
-                cache.creditCardExpenses[formattedDate] = creditCardResponse.data;
+                if (!cache.incomes[formattedDate]) {
+                    cache.incomes[formattedDate] = incomeResponse.data.filter(income => !income.is_recurring);
+                }
+                if (!cache.expenses[formattedDate]) {
+                    cache.expenses[formattedDate] = expenseResponse.data.filter(expense => !expense.is_recurring);
+                }
+                if (!cache.creditCardExpenses[formattedDate]) {
+                    cache.creditCardExpenses[formattedDate] = creditCardResponse.data;
+                }
             });
 
             // Fetch current month's recurring incomes and expenses separately
-            const currentMonth = `${year}-${String(month).padStart(2, '0')}`;
             const [currentIncomeResponse, currentExpenseResponse] = await Promise.all([
                 axiosInstance.get(`incomes/?year=${year}&month=${month}&is_recurring=true`),
                 axiosInstance.get(`expenses/?year=${year}&month=${month}&is_recurring=true`)
@@ -55,11 +60,11 @@ export function useFetchingFinancialData(year, month) {
 
             const combinedIncomes = [
                 ...Object.values(cache.incomes).flat(),
-                ...currentIncomeResponse.data
+                ...currentIncomeResponse.data.filter(income => income.is_recurring)
             ];
             const combinedExpenses = [
                 ...Object.values(cache.expenses).flat(),
-                ...currentExpenseResponse.data
+                ...currentExpenseResponse.data.filter(expense => expense.is_recurring)
             ];
             const combinedCreditCardExpenses = Object.values(cache.creditCardExpenses).flat();
 

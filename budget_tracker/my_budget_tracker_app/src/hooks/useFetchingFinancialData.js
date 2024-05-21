@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '../api/axiosApi';
 
+const cache = {
+    incomes: {},
+    expenses: {},
+    creditCardExpenses: {},
+};
+
 export function useFetchingFinancialData(year, month) {
     const [data, setData] = useState({ incomes: [], expenses: [], creditCardExpenses: [] });
     const [loading, setLoading] = useState(true);
@@ -8,12 +14,15 @@ export function useFetchingFinancialData(year, month) {
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-
-        // Generate an array of months and years for the last 24 months
         const monthYearParams = [];
-        for (let i = 0; i < 24; i++) {
+
+        // Calculate months for the next 20 years (240 months)
+        for (let i = 0; i < 240; i++) {
             const date = new Date(year, month - 1 - i);
-            monthYearParams.push({ year: date.getFullYear(), month: date.getMonth() + 1 });
+            const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+            if (!cache.incomes[formattedDate]) {
+                monthYearParams.push({ year: date.getFullYear(), month: date.getMonth() + 1 });
+            }
         }
 
         try {
@@ -28,15 +37,31 @@ export function useFetchingFinancialData(year, month) {
 
             const results = await Promise.all(promises);
 
-            const combinedIncomes = [];
-            const combinedExpenses = [];
-            const combinedCreditCardExpenses = [];
+            results.forEach(([incomeResponse, expenseResponse, creditCardResponse], index) => {
+                const { year, month } = monthYearParams[index];
+                const formattedDate = `${year}-${String(month).padStart(2, '0')}`;
 
-            results.forEach(([incomeResponse, expenseResponse, creditCardResponse]) => {
-                combinedIncomes.push(...incomeResponse.data);
-                combinedExpenses.push(...expenseResponse.data);
-                combinedCreditCardExpenses.push(...creditCardResponse.data);
+                cache.incomes[formattedDate] = incomeResponse.data.filter(income => !income.is_recurring);
+                cache.expenses[formattedDate] = expenseResponse.data.filter(expense => !expense.is_recurring);
+                cache.creditCardExpenses[formattedDate] = creditCardResponse.data;
             });
+
+            // Fetch current month's recurring incomes and expenses separately
+            const currentMonth = `${year}-${String(month).padStart(2, '0')}`;
+            const [currentIncomeResponse, currentExpenseResponse] = await Promise.all([
+                axiosInstance.get(`incomes/?year=${year}&month=${month}&is_recurring=true`),
+                axiosInstance.get(`expenses/?year=${year}&month=${month}&is_recurring=true`)
+            ]);
+
+            const combinedIncomes = [
+                ...Object.values(cache.incomes).flat(),
+                ...currentIncomeResponse.data
+            ];
+            const combinedExpenses = [
+                ...Object.values(cache.expenses).flat(),
+                ...currentExpenseResponse.data
+            ];
+            const combinedCreditCardExpenses = Object.values(cache.creditCardExpenses).flat();
 
             setData({
                 incomes: combinedIncomes,

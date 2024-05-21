@@ -44,7 +44,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Expense
-        fields = ['id', 'amount', 'date', 'user', 'expense_category', 'category_name', 'credit_card', 'installments', 'surcharge']
+        fields = ['id', 'amount', 'date', 'user', 'expense_category', 'category_name', 'credit_card', 'installments', 'surcharge', 'is_recurring']
         extra_kwargs = {'user': {'read_only': True}}
 
 class IncomeCategorySerializer(serializers.ModelSerializer):
@@ -58,7 +58,7 @@ class IncomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Income
-        fields = ['id', 'amount', 'date', 'user', 'income_category', 'category_name']
+        fields = ['id', 'amount', 'date', 'user', 'income_category', 'category_name', 'is_recurring']
         extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseChangeLogSerializer(serializers.ModelSerializer):

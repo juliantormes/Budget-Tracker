@@ -18,19 +18,22 @@ const HomePage = () => {
 
     const prepareIncomeChartData = (incomes, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-        // Filter non-recurring incomes for the current month
         const nonRecurringIncomes = incomes.filter(income => {
             const incomeDate = new Date(income.date);
             const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
             return !income.is_recurring && incomeMonth === formattedMonth;
         });
 
-        // Filter recurring incomes
-        const recurringIncomes = incomes.filter(income => income.is_recurring);
+        const recurringIncomes = incomes.filter(income => {
+            const incomeDate = new Date(income.date);
+            const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
+            return income.is_recurring && incomeMonth <= formattedMonth;
+        }).map(income => ({
+            ...income,
+            amount: parseFloat(income.amount)
+        }));
 
-        // Combine non-recurring and recurring incomes, ensuring recurring incomes are only added once per month
         const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
-
         const sumsByCategory = processedIncomes.reduce((acc, income) => {
             const category = income.category_name || 'Undefined Category';
             acc[category] = (acc[category] || 0) + parseFloat(income.amount || 0);
@@ -53,26 +56,22 @@ const HomePage = () => {
 
     const prepareExpenseChartData = (expenses, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-
-        console.log('all',expenses);
-
-        // Filter non-recurring expenses for the current month
         const nonRecurringExpenses = expenses.filter(expense => {
             const expenseDate = new Date(expense.date);
             const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
             return !expense.is_recurring && expenseMonth === formattedMonth;
         });
-        console.log('Non recurring',nonRecurringExpenses);
 
-        // Filter recurring expenses
-        const recurringExpenses = expenses.filter(expense => expense.is_recurring);
+        const recurringExpenses = expenses.filter(expense => {
+            const expenseDate = new Date(expense.date);
+            const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+            return expense.is_recurring && expenseMonth <= formattedMonth;
+        }).map(expense => ({
+            ...expense,
+            amount: parseFloat(expense.amount)
+        }));
 
-        console.log('recurring',recurringExpenses);
-
-        // Combine non-recurring and recurring expenses, ensuring recurring expenses are only added once per month
         const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
-        console.log('processed',processedExpenses);
-
         const sumsByCategory = processedExpenses.reduce((acc, expense) => {
             const category = expense.category_name || 'Undefined Category';
             acc[category] = (acc[category] || 0) + parseFloat(expense.amount || 0);
@@ -95,9 +94,8 @@ const HomePage = () => {
 
     const prepareCreditCardChartData = (expenses, year, month) => {
         const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-
-        // Process installments and distribute them across the months based on the closing day logic
         const processedExpenses = [];
+
         expenses.forEach(expense => {
             const expenseDate = new Date(expense.date);
             const closingDay = expense.credit_card.close_card_day;
@@ -107,9 +105,9 @@ const HomePage = () => {
 
             let startMonth;
             if (expenseDate.getDate() <= closingDay) {
-                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1); // Next month
+                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1);
             } else {
-                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1); // Month after next
+                startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1);
             }
 
             if (expense.installments > 1) {
@@ -124,16 +122,26 @@ const HomePage = () => {
                     });
                 }
             } else {
-                processedExpenses.push({
-                    ...expense,
-                    month: formattedMonth,
-                    amount: totalAmountWithSurcharge,
-                });
+                if (expense.is_recurring) {
+                    const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+                    if (expenseMonth <= formattedMonth) {
+                        processedExpenses.push({
+                            ...expense,
+                            month: formattedMonth,
+                            amount: totalAmountWithSurcharge,
+                        });
+                    }
+                } else {
+                    processedExpenses.push({
+                        ...expense,
+                        month: formattedMonth,
+                        amount: totalAmountWithSurcharge,
+                    });
+                }
             }
         });
 
         const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
-
         const chartData = filteredExpenses.reduce((acc, expense) => {
             const categoryIndex = acc.labels.indexOf(expense.category_name);
             if (categoryIndex === -1) {
@@ -166,7 +174,7 @@ const HomePage = () => {
         plugins: {
             tooltip: {
                 callbacks: {
-                    label: function(context) {
+                    label: function (context) {
                         return `${context.label}: $${context.parsed.toLocaleString()}`;
                     }
                 }
@@ -179,11 +187,11 @@ const HomePage = () => {
 
     return (
         <div className="homepage">
-            <Header 
-                year={year} 
-                month={month} 
-                onLogout={logout} 
-                onPrevMonth={goToPreviousMonth} 
+            <Header
+                year={year}
+                month={month}
+                onLogout={logout}
+                onPrevMonth={goToPreviousMonth}
                 onNextMonth={goToNextMonth}
             />
             <div className="financial-summary">

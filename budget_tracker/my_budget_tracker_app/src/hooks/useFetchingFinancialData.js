@@ -73,12 +73,6 @@ export function useFetchingFinancialData(year, month) {
                 expenses: combinedExpenses,
                 creditCardExpenses: combinedCreditCardExpenses,
             });
-
-            console.log('Fetched data:', {
-                combinedIncomes,
-                combinedExpenses,
-                combinedCreditCardExpenses,
-            });
         } catch (error) {
             console.error('Failed to fetch financial data:', error);
             setError(error);
@@ -86,7 +80,6 @@ export function useFetchingFinancialData(year, month) {
             setLoading(false);
         }
     }, [year, month]);
-
     useEffect(() => {
         fetchData();
     }, [fetchData]);

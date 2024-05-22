@@ -1,10 +1,10 @@
 .homepage {
   font-family: 'Segoe UI', sans-serif;
   color: #333;
-  max-width: 1200px;
-  margin: 30px auto;
-  padding: 20px;
-  background: #ffffff; /* White background */
+  max-width: 95%;
+  margin: 10px auto;
+  padding: 5px;
+  background: #ffffff;
   border-radius: 8px;
   box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
 }
@@ -14,12 +14,12 @@
   justify-content: space-between;
   align-items: center;
   border-bottom: 2px solid #f3f2f1;
-  padding-bottom: 20px;
-  margin-bottom: 20px;
+  padding-bottom: 5px;
+  margin-bottom: 5px;
 }
 
 .homepage-header h1 {
-  font-size: 2em;
+  font-size: 1.2em;
   font-weight: 600;
   color: #4a90e2;
 }
@@ -27,14 +27,14 @@
 .date-navigation {
   display: flex;
   align-items: center;
-  font-size: 0.9em;
+  font-size: 0.8em;
 }
 
 .date-navigation button {
   background: #4a90e2;
   border: none;
   color: white;
-  padding: 8px 15px;
+  padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
@@ -47,16 +47,16 @@
 }
 
 .date-navigation span {
-  margin: 0 15px;
+  margin: 0 5px;
 }
 
 .logout-button {
   background-color: #e94e77;
   color: white;
   border: none;
-  padding: 8px 16px;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.9em;
+  font-size: 0.8em;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
 }
@@ -68,18 +68,18 @@
 
 .financial-summary {
   text-align: center;
-  margin: 20px 0;
+  margin: 5px 0;
 }
 
 .summary-item {
-  margin: 20px 0;
+  margin: 5px 0;
 }
 
 .pie-chart-container,
 .bar-chart-container {
-  margin: 20px 0;
-  padding: 20px;
-  background: #f9f9f9; /* Light background */
+  margin: 5px 0;
+  padding: 5px;
+  background: #f9f9f9;
   border-radius: 4px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
 }
@@ -89,28 +89,27 @@
   width: 100% !important;
   height: auto !important;
   max-width: 100%;
-  max-height: 400px;
+  max-height: 250px;
 }
 
-/* Responsive design for smaller screens */
 @media (max-width: 768px) {
   .homepage {
-    margin: 15px;
-    padding: 10px;
+      margin: 5px;
+      padding: 2px;
   }
 
   .homepage-header h1 {
-    font-size: 1.5em;
+      font-size: 1em;
   }
 
   .date-navigation button,
   .logout-button {
-    padding: 6px 12px;
-    font-size: 0.8em;
+      padding: 3px 6px;
+      font-size: 0.7em;
   }
 
   .pie-chart-container,
   .bar-chart-container {
-    padding: 10px;
+      padding: 5px;
   }
 }

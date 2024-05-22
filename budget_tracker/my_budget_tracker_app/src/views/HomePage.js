@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Chart from '../components/Chart';
+import { Bar } from 'react-chartjs-2';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';
@@ -49,6 +50,18 @@ const calculateTotalCreditCardDebt = (data) => {
 
 const calculateNet = (totalIncome, totalExpenses, totalCreditCardDebt) => {
     return totalIncome - totalExpenses - totalCreditCardDebt;
+};
+
+const calculatePercentages = (totalIncome, totalExpenses, totalCreditCardDebt) => {
+    const totalSpending = totalExpenses + totalCreditCardDebt;
+    const netPercentage = ((totalIncome - totalSpending) / totalIncome) * 100;
+    const cashFlowPercentage = (totalExpenses / totalIncome) * 100;
+    const creditCardPercentage = (totalCreditCardDebt / totalIncome) * 100;
+    return {
+        netPercentage: netPercentage.toFixed(2),
+        cashFlowPercentage: cashFlowPercentage.toFixed(2),
+        creditCardPercentage: creditCardPercentage.toFixed(2),
+    };
 };
 
 const prepareIncomeChartData = (incomes, year, month) => {
@@ -204,6 +217,25 @@ const prepareCreditCardChartData = (expenses, year, month) => {
     };
 };
 
+const prepareBarChartData = (percentages) => {
+    return {
+        labels: ['Net', 'Cash Flow', 'Credit Card'],
+        datasets: [
+            {
+                label: 'Financial Overview (%)',
+                data: [
+                    percentages.netPercentage,
+                    percentages.cashFlowPercentage,
+                    percentages.creditCardPercentage,
+                ],
+                backgroundColor: ['rgba(46, 204, 113, 0.6)', 'rgba(52, 152, 219, 0.6)', 'rgba(231, 76, 60, 0.6)'],
+                borderColor: ['rgba(46, 204, 113, 1)', 'rgba(52, 152, 219, 1)', 'rgba(231, 76, 60, 1)'],
+                borderWidth: 1,
+            },
+        ],
+    };
+};
+
 const HomePage = () => {
     const location = useLocation();
     const { logout } = useAuth();
@@ -222,14 +254,19 @@ const HomePage = () => {
     const totalCreditCardDebt = useMemo(() => calculateTotalCreditCardDebt(creditCardChartData), [creditCardChartData]);
     const net = useMemo(() => calculateNet(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
 
+    const percentages = useMemo(() => calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
+
+    const barChartData = useMemo(() => prepareBarChartData(percentages), [percentages]);
+
     const ChartOptions = {
         responsive: true,
         maintainAspectRatio: false,
+        indexAxis: 'y', // For horizontal bar chart
         plugins: {
             tooltip: {
                 callbacks: {
                     label: function (context) {
-                        return `${context.label}: $${context.parsed.toLocaleString()}`;
+                        return `${context.label}: ${context.parsed.toLocaleString()}%`;
                     }
                 }
             }
@@ -270,6 +307,9 @@ const HomePage = () => {
                 </div>
                 <div className="summary-item">
                     <h3>Net: ${net.toLocaleString()}</h3>
+                </div>
+                <div className="bar-chart-container">
+                    <Bar data={barChartData} options={ChartOptions} />
                 </div>
             </div>
         </div>

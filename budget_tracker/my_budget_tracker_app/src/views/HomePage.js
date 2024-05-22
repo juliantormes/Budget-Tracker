@@ -21,12 +21,34 @@ const blueShades = generateShades([52, 152, 219], 10); // Blue shades for income
 const greenShades = generateShades([46, 204, 113], 10); // Green shades for expenses
 const redShades = generateShades([231, 76, 60], 10); // Red shades for credit cards
 
-const generateColorMap = (labels, shades) => {
-    const colorMap = {};
-    labels.forEach((label, index) => {
-        colorMap[label] = shades[index % shades.length];
+// Function to generate a consistent color mapping
+const generateConsistentColorMap = (labels, shades) => {
+    let colorMap = JSON.parse(localStorage.getItem('colorMap')) || {};
+
+    labels.forEach(label => {
+        if (!colorMap[label]) {
+            colorMap[label] = shades[Object.keys(colorMap).length % shades.length];
+        }
     });
+
+    localStorage.setItem('colorMap', JSON.stringify(colorMap));
     return colorMap;
+};
+
+const calculateTotalIncome = (data) => {
+    return data.datasets[0].data.reduce((total, value) => total + value, 0);
+};
+
+const calculateTotalExpenses = (data) => {
+    return data.datasets[0].data.reduce((total, value) => total + value, 0);
+};
+
+const calculateTotalCreditCardDebt = (data) => {
+    return data.datasets[0].data.reduce((total, value) => total + value, 0);
+};
+
+const calculateNet = (totalIncome, totalExpenses, totalCreditCardDebt) => {
+    return totalIncome - totalExpenses - totalCreditCardDebt;
 };
 
 const prepareIncomeChartData = (incomes, year, month) => {
@@ -55,7 +77,7 @@ const prepareIncomeChartData = (incomes, year, month) => {
 
     const labels = Object.keys(sumsByCategory);
     const data = Object.values(sumsByCategory);
-    const colorMap = generateColorMap(labels, blueShades);
+    const colorMap = generateConsistentColorMap(labels, blueShades);
 
     return {
         labels,
@@ -94,7 +116,7 @@ const prepareExpenseChartData = (expenses, year, month) => {
 
     const labels = Object.keys(sumsByCategory);
     const data = Object.values(sumsByCategory);
-    const colorMap = generateColorMap(labels, greenShades);
+    const colorMap = generateConsistentColorMap(labels, greenShades);
 
     return {
         labels,
@@ -169,7 +191,7 @@ const prepareCreditCardChartData = (expenses, year, month) => {
         return acc;
     }, { labels: [], data: [] });
 
-    const colorMap = generateColorMap(chartData.labels, redShades);
+    const colorMap = generateConsistentColorMap(chartData.labels, redShades);
 
     return {
         labels: chartData.labels,
@@ -194,6 +216,11 @@ const HomePage = () => {
     const incomeChartData = useMemo(() => prepareIncomeChartData(data.incomes, year, month), [data.incomes, year, month]);
     const expenseChartData = useMemo(() => prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card), year, month), [data.expenses, year, month]);
     const creditCardChartData = useMemo(() => prepareCreditCardChartData(data.creditCardExpenses, year, month), [data.creditCardExpenses, year, month]);
+
+    const totalIncome = useMemo(() => calculateTotalIncome(incomeChartData), [incomeChartData]);
+    const totalExpenses = useMemo(() => calculateTotalExpenses(expenseChartData), [expenseChartData]);
+    const totalCreditCardDebt = useMemo(() => calculateTotalCreditCardDebt(creditCardChartData), [creditCardChartData]);
+    const net = useMemo(() => calculateNet(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
 
     const ChartOptions = {
         responsive: true,
@@ -222,14 +249,27 @@ const HomePage = () => {
                 onNextMonth={goToNextMonth}
             />
             <div className="financial-summary">
-                <div className="pie-chart-container">
-                    <Chart data={incomeChartData} options={ChartOptions} />
+                <h2>Financial Summary</h2>
+                <div className="summary-item">
+                    <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
+                    <div className="pie-chart-container">
+                        <Chart data={incomeChartData} options={ChartOptions} />
+                    </div>
                 </div>
-                <div className="pie-chart-container">
-                    <Chart data={expenseChartData} options={ChartOptions} />
+                <div className="summary-item">
+                    <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
+                    <div className="pie-chart-container">
+                        <Chart data={expenseChartData} options={ChartOptions} />
+                    </div>
                 </div>
-                <div className="pie-chart-container">
-                    <Chart data={creditCardChartData} options={ChartOptions} />
+                <div className="summary-item">
+                    <h3>Total Credit Card Debt: ${totalCreditCardDebt.toLocaleString()}</h3>
+                    <div className="pie-chart-container">
+                        <Chart data={creditCardChartData} options={ChartOptions} />
+                    </div>
+                </div>
+                <div className="summary-item">
+                    <h3>Net: ${net.toLocaleString()}</h3>
                 </div>
             </div>
         </div>

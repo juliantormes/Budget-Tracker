@@ -1,11 +1,10 @@
-/* HomePage.css - Microsoft Fluent Design Inspired */
 .homepage {
   font-family: 'Segoe UI', sans-serif;
-  color: #323130;
+  color: #333;
   max-width: 1200px;
   margin: 30px auto;
   padding: 20px;
-  background: #ffffff;
+  background: #ffffff; /* White background */
   border-radius: 8px;
   box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
 }
@@ -67,10 +66,19 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.financial-summary {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.summary-item {
+  margin: 20px 0;
+}
+
 .pie-chart-container {
   margin: 20px 0;
   padding: 20px;
-  background: #f3f2f1;
+  background: #f9f9f9; /* Light background */
   border-radius: 4px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
 }

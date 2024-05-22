@@ -52,11 +52,10 @@ const calculateNet = (totalIncome, totalExpenses, totalCreditCardDebt) => {
     return totalIncome - totalExpenses - totalCreditCardDebt;
 };
 
-const calculatePercentages = (totalIncome, totalExpenses, totalCreditCardDebt) => {
-    const totalSpending = totalExpenses + totalCreditCardDebt;
-    const netPercentage = ((totalIncome - totalSpending) / totalIncome) * 100;
+const calculatePercentages = (totalIncome, totalExpenses, totalCreditCardDebt, net) => {
     const cashFlowPercentage = (totalExpenses / totalIncome) * 100;
     const creditCardPercentage = (totalCreditCardDebt / totalIncome) * 100;
+    const netPercentage = (net / totalIncome) * 100;
     return {
         netPercentage: netPercentage.toFixed(2),
         cashFlowPercentage: cashFlowPercentage.toFixed(2),
@@ -254,11 +253,25 @@ const HomePage = () => {
     const totalCreditCardDebt = useMemo(() => calculateTotalCreditCardDebt(creditCardChartData), [creditCardChartData]);
     const net = useMemo(() => calculateNet(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
 
-    const percentages = useMemo(() => calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
+    const percentages = useMemo(() => calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt, net), [totalIncome, totalExpenses, totalCreditCardDebt, net]);
 
     const barChartData = useMemo(() => prepareBarChartData(percentages), [percentages]);
 
-    const ChartOptions = {
+    const pieChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                callbacks: {
+                    label: function (context) {
+                        return `${context.label}: $${context.parsed.toLocaleString()}`;
+                    }
+                }
+            }
+        }
+    };
+
+    const barChartOptions = {
         responsive: true,
         maintainAspectRatio: false,
         indexAxis: 'y', // For horizontal bar chart
@@ -266,7 +279,7 @@ const HomePage = () => {
             tooltip: {
                 callbacks: {
                     label: function (context) {
-                        return `${context.label}: ${context.parsed.toLocaleString()}%`;
+                        return `${context.label}: ${context.raw.toLocaleString()}%`;
                     }
                 }
             }
@@ -290,26 +303,26 @@ const HomePage = () => {
                 <div className="summary-item">
                     <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
                     <div className="pie-chart-container">
-                        <Chart data={incomeChartData} options={ChartOptions} />
+                        <Chart data={incomeChartData} options={pieChartOptions} />
                     </div>
                 </div>
                 <div className="summary-item">
                     <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
                     <div className="pie-chart-container">
-                        <Chart data={expenseChartData} options={ChartOptions} />
+                        <Chart data={expenseChartData} options={pieChartOptions} />
                     </div>
                 </div>
                 <div className="summary-item">
                     <h3>Total Credit Card Debt: ${totalCreditCardDebt.toLocaleString()}</h3>
                     <div className="pie-chart-container">
-                        <Chart data={creditCardChartData} options={ChartOptions} />
+                        <Chart data={creditCardChartData} options={pieChartOptions} />
                     </div>
                 </div>
                 <div className="summary-item">
                     <h3>Net: ${net.toLocaleString()}</h3>
                 </div>
                 <div className="bar-chart-container">
-                    <Bar data={barChartData} options={ChartOptions} />
+                    <Bar data={barChartData} options={barChartOptions} />
                 </div>
             </div>
         </div>

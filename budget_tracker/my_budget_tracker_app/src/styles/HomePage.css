@@ -22,7 +22,7 @@
 .homepage-header h1 {
   font-size: 2em;
   font-weight: 600;
-  color: #323130;
+  color: #4a90e2;
 }
 
 .date-navigation {
@@ -32,7 +32,7 @@
 }
 
 .date-navigation button {
-  background: #0078d4;
+  background: #4a90e2;
   border: none;
   color: white;
   padding: 8px 15px;
@@ -43,7 +43,7 @@
 }
 
 .date-navigation button:hover {
-  background-color: #005a9e;
+  background-color: #357ABD;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -52,7 +52,7 @@
 }
 
 .logout-button {
-  background-color: #d83b01;
+  background-color: #e94e77;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -63,7 +63,7 @@
 }
 
 .logout-button:hover {
-  background-color: #a4262c;
+  background-color: #d43a63;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 

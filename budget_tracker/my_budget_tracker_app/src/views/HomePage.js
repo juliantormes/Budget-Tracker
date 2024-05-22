@@ -6,6 +6,7 @@ import { Bar } from 'react-chartjs-2';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';
+import NavigationBar from '../components/NavigationBar';
 import '../styles/HomePage.css';
 
 // Utility function to generate shades of a base color
@@ -325,6 +326,7 @@ const HomePage = () => {
                     <Bar data={barChartData} options={barChartOptions} />
                 </div>
             </div>
+            <NavigationBar />
         </div>
     );
 };

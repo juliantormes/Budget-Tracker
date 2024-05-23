@@ -291,20 +291,6 @@ const HomePage = () => {
 
     return (
         <div className="homepage">
-            <div className="homepage-header">
-                <div className="header-left">
-                    <span className="header-title">Budget Tracker</span>
-                    <button className="house-button" style={{ background: 'transparent', border: 'none', color: 'white' }}>🏠</button>
-                </div>
-                <div className="header-right">
-                    <div className="date-navigation">
-                        <button onClick={goToPreviousMonth}>Previous Month</button>
-                        <span>{year} - {String(month).padStart(2, '0')}</span>
-                        <button onClick={goToNextMonth}>Next Month</button>
-                    </div>
-                    <button className="logout-button" onClick={logout}>Logout</button>
-                </div>
-            </div>
             <div className="sidebar">
                 <h3>Username</h3>
                 <div>
@@ -328,24 +314,36 @@ const HomePage = () => {
                 </div>
             </div>
             <div className="content">
+                <div className="homepage-header">
+                    <div className="header-left">
+                        <span className="header-title">Budget Tracker</span>
+                        <button className="house-button" style={{ background: 'transparent', border: 'none', color: 'white' }}>🏠</button>
+                    </div>
+                    <button className="logout-button" onClick={logout}>Logout</button>
+                </div>
+                <div className="date-navigation">
+                    <button onClick={goToPreviousMonth}>Previous Month</button>
+                    <span>{year} - {String(month).padStart(2, '0')}</span>
+                    <button onClick={goToNextMonth}>Next Month</button>
+                </div>
                 <div className="financial-summary">
                     <div className="summary-item">
                         <div className="chart-container">
                             <Chart data={incomeChartData} options={pieChartOptions} />
                         </div>
-                        <h3>Total Incomes</h3>
+                        <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
                     </div>
                     <div className="summary-item">
                         <div className="chart-container">
                             <Chart data={expenseChartData} options={pieChartOptions} />
                         </div>
-                        <h3>Total Expenses</h3>
+                        <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
                     </div>
                     <div className="summary-item">
                         <div className="chart-container">
                             <Chart data={creditCardChartData} options={pieChartOptions} />
                         </div>
-                        <h3>Total Credit Card</h3>
+                        <h3>Total Credit Card: ${totalCreditCardDebt.toLocaleString()}</h3>
                     </div>
                 </div>
                 <div className="bar-chart-container">

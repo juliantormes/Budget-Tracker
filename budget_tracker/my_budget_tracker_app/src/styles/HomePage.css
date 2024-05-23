@@ -50,8 +50,9 @@ body {
 .date-navigation {
   display: flex;
   justify-content: center;
-  width: 100%;
-  margin-top: 60px; /* Adjust for fixed header */
+  width: calc(100% - 220px); /* Adjust for sidebar width */
+  margin-top: -10px; /* Adjust for fixed header */
+  margin-left: 125px; /* Adjust for sidebar width */
   padding-bottom: 10px; /* Reduced spacing */
 }
 
@@ -132,8 +133,8 @@ body {
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: 10px 20px; /* Reduced padding */
-  margin-left: 220px; /* Offset for sidebar */
+  padding: 15px 20px; /* Reduced padding */
+  margin-left: 15px; /* Offset for sidebar */
   margin-top: 70px; /* Offset for fixed header */
   height: calc(100vh - 70px);
   overflow-y: auto;
@@ -158,7 +159,7 @@ body {
 .chart-container {
   background: #2c3e50;
   border-radius: 8px;
-  padding: 10px; /* Reduced padding */
+  padding: 3px; /* Reduced padding */
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
   width: 100%;
   height: 250px; /* Reduced height */
@@ -170,7 +171,7 @@ body {
   border-radius: 8px;
   padding: 10px; /* Reduced padding */
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
-  width: 100%;
+  width: 95%;
   height: 250px; /* Reduced height */
 }
 

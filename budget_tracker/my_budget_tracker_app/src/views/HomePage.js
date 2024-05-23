@@ -6,7 +6,8 @@ import { Bar } from 'react-chartjs-2';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';
-import '../styles/HomePage.css';
+import { Sidebar, Menu, MenuItem, SubMenu, ProSidebarProvider, sidebarClasses, menuClasses } from 'react-pro-sidebar';
+import '../styles/HomePage.css'; // Keep your custom styles
 
 // Utility function to generate shades of a base color
 const generateShades = (baseColor, numOfShades) => {
@@ -227,8 +228,8 @@ const prepareBarChartData = (percentages) => {
                     percentages.cashFlowPercentage,
                     percentages.creditCardPercentage,
                 ],
-                backgroundColor: ['rgba(46, 204, 113, 0.6)', 'rgba(52, 152, 219, 0.6)', 'rgba(231, 76, 60, 0.6)'],
-                borderColor: ['rgba(46, 204, 113, 1)', 'rgba(52, 152, 219, 1)', 'rgba(231, 76, 60, 1)'],
+                backgroundColor: [ 'rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)', 'rgba(231, 76, 60, 0.6)'],
+                borderColor: ['rgba(52, 152, 219, 1)', 'rgba(46, 204, 113, 1)', 'rgba(231, 76, 60, 1)'],
                 borderWidth: 1,
             },
         ],
@@ -290,67 +291,100 @@ const HomePage = () => {
     if (error) return <div>Error loading data: {error.message}</div>;
 
     return (
-        <div className="homepage">
-            <div className="sidebar">
-                <h3>Username</h3>
-                <div>
-                    <h3>Expenses</h3>
-                    <button>View Expenses</button>
-                    <button>Add Expenses</button>
-                    <button>View Expense Category</button>
-                    <button>Add Expense Category</button>
-                </div>
-                <div>
-                    <h3>Incomes</h3>
-                    <button>View Incomes</button>
-                    <button>Add Incomes</button>
-                    <button>View Income Category</button>
-                    <button>Add Income Category</button>
-                </div>
-                <div>
-                    <h3>Credit Card</h3>
-                    <button>View Credit Card</button>
-                    <button>Add Credit Card</button>
+        <ProSidebarProvider>
+            <div className="homepage">
+            <Sidebar
+                rootStyles={{
+                    [`.${sidebarClasses.container}`]: {
+                    backgroundColor: '#1f2a40',
+                    },
+                    [`.${menuClasses.subMenuContent}`]: {
+                    backgroundColor: '#1f2a40', // Set the background color for the submenu
+                    },
+                }}
+                >
+                <Menu
+                    menuItemStyles={{
+                    button: ({ level, active, disabled }) => {
+                        if (level === 0) {
+                        return {
+                            color: '#ffffff', // Ensure titles are always visible
+                            backgroundColor: active ? '#2c3e50' : undefined, // Active state
+                            '&:hover': {
+                            backgroundColor: '#2c3e50', // Hover state background
+                            color: '#ffffff', // Hover state text color
+                            },
+                        };
+                        }
+                        return {
+                        color: '#ffffff', // Ensure submenu items are always visible
+                        backgroundColor: active ? '#357ABD' : '#1f2a40', // Set background color for submenu items
+                        '&:hover': {
+                            backgroundColor: '#357ABD', // Hover state background for submenu items
+                            color: '#ffffff', // Hover state text color for submenu items
+                        },
+                        };
+                    },
+                    }}
+                >
+                    <MenuItem> Username </MenuItem>
+                    <SubMenu label="Expenses">
+                    <MenuItem>View Expenses</MenuItem>
+                    <MenuItem>Add Expenses</MenuItem>
+                    <MenuItem>View Expense Category</MenuItem>
+                    <MenuItem>Add Expense Category</MenuItem>
+                    </SubMenu>
+                    <SubMenu label="Incomes">
+                    <MenuItem>View Incomes</MenuItem>
+                    <MenuItem>Add Incomes</MenuItem>
+                    <MenuItem>View Income Category</MenuItem>
+                    <MenuItem>Add Income Category</MenuItem>
+                    </SubMenu>
+                    <SubMenu label="Credit Card">
+                    <MenuItem>View Credit Card</MenuItem>
+                    <MenuItem>Add Credit Card</MenuItem>
+                    </SubMenu>
+                </Menu>
+            </Sidebar>
+                <div className="content">
+                    <div className="homepage-header">
+                        <div className="header-left">
+                            <span className="header-title">Budget Tracker</span>
+                            <button className="house-button" style={{ background: 'transparent', border: 'none', color: 'white' }}>🏠</button>
+                        </div>
+                        <button className="logout-button" onClick={logout}>Logout</button>
+                    </div>
+                    <div className="date-navigation">
+                        <button onClick={goToPreviousMonth}>Previous Month</button>
+                        <span>{year} - {String(month).padStart(2, '0')}</span>
+                        <button onClick={goToNextMonth}>Next Month</button>
+                    </div>
+                    <div className="financial-summary">
+                        <div className="summary-item">
+                            <div className="chart-container">
+                                <Chart data={incomeChartData} options={pieChartOptions} />
+                            </div>
+                            <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
+                        </div>
+                        <div className="summary-item">
+                            <div className="chart-container">
+                                <Chart data={expenseChartData} options={pieChartOptions} />
+                            </div>
+                            <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
+                        </div>
+                        <div className="summary-item">
+                            <div className="chart-container">
+                                <Chart data={creditCardChartData} options={pieChartOptions} />
+                            </div>
+                            <h3>Total Credit Card: ${totalCreditCardDebt.toLocaleString()}</h3>
+                        </div>
+                    </div>
+                    <div className="bar-chart-container">
+                        <Bar data={barChartData} options={barChartOptions} />
+                    </div>
                 </div>
             </div>
-            <div className="content">
-                <div className="homepage-header">
-                    <div className="header-left">
-                        <span className="header-title">Budget Tracker</span>
-                        <button className="house-button" style={{ background: 'transparent', border: 'none', color: 'white' }}>🏠</button>
-                    </div>
-                    <button className="logout-button" onClick={logout}>Logout</button>
-                </div>
-                <div className="date-navigation">
-                    <button onClick={goToPreviousMonth}>Previous Month</button>
-                    <span>{year} - {String(month).padStart(2, '0')}</span>
-                    <button onClick={goToNextMonth}>Next Month</button>
-                </div>
-                <div className="financial-summary">
-                    <div className="summary-item">
-                        <div className="chart-container">
-                            <Chart data={incomeChartData} options={pieChartOptions} />
-                        </div>
-                        <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
-                    </div>
-                    <div className="summary-item">
-                        <div className="chart-container">
-                            <Chart data={expenseChartData} options={pieChartOptions} />
-                        </div>
-                        <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
-                    </div>
-                    <div className="summary-item">
-                        <div className="chart-container">
-                            <Chart data={creditCardChartData} options={pieChartOptions} />
-                        </div>
-                        <h3>Total Credit Card: ${totalCreditCardDebt.toLocaleString()}</h3>
-                    </div>
-                </div>
-                <div className="bar-chart-container">
-                    <Bar data={barChartData} options={barChartOptions} />
-                </div>
-            </div>
-        </div>
+        </ProSidebarProvider>
     );
 };
 

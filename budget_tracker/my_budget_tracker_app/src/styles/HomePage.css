@@ -1,40 +1,61 @@
-.homepage {
+/* HomePage.css */
+
+body {
+  background-color: #1f2a40;
+  color: #e0e6ed;
   font-family: 'Segoe UI', sans-serif;
-  color: #333;
-  max-width: 100%;
-  margin: 0 auto;
+  margin: 0;
   padding: 0;
+}
+
+.homepage {
+  display: flex;
+  height: 100vh;
 }
 
 .homepage-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  padding-bottom: 5px;
-  margin-bottom: 5px;
+  width: 100%;
+  padding: 20px;
+  background-color: #1f2a40;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  border-bottom: 1px solid #2c3e50;
 }
 
-.homepage-header h1 {
-  font-size: 1.2em;
-  font-weight: 600;
-  color: #4a90e2;
-}
-
-.date-navigation {
+.header-left, .header-right {
   display: flex;
   align-items: center;
-  font-size: 0.8em;
+}
+
+.header-left {
+  margin-left: 20px;
+}
+
+.header-right {
+  margin-right: 20px;
+}
+
+.header-title {
+  font-size: 1.5em;
+  font-weight: 600;
+  color: #4a90e2;
+  margin-right: auto;
 }
 
 .date-navigation button {
   background: #4a90e2;
   border: none;
   color: white;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
   font-weight: 600;
+  margin: 0 5px;
 }
 
 .date-navigation button:hover {
@@ -42,17 +63,13 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.date-navigation span {
-  margin: 0 5px;
-}
-
 .logout-button {
   background-color: #e94e77;
   color: white;
   border: none;
-  padding: 4px 8px;
+  padding: 6px 12px;
   border-radius: 4px;
-  font-size: 0.8em;
+  font-size: 0.9em;
   cursor: pointer;
   transition: background-color 0.3s, box-shadow 0.3s;
 }
@@ -62,47 +79,95 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 220px;
+  background-color: #1f2a40;
+  padding: 20px;
+  margin-top: 80px; /* Offset for fixed header */
+  border-right: 1px solid #2c3e50;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.sidebar h3 {
+  color: #ffffff;
+  margin-bottom: 10px;
+  font-size: 1.2em;
+  font-weight: 500;
+}
+
+.sidebar button {
+  background: transparent;
+  color: #e0e6ed;
+  border: none;
+  padding: 10px 0;
+  cursor: pointer;
+  text-align: left;
+  transition: color 0.3s;
+  font-size: 1em;
+  display: block;
+  width: 100%;
+}
+
+.sidebar button:hover {
+  color: #4a90e2;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+  padding: 20px;
+  margin-left: 220px; /* Offset for sidebar */
+  margin-top: 80px; /* Offset for fixed header */
+  overflow-y: auto;
+  height: calc(100vh - 80px);
+}
+
 .financial-summary {
-  text-align: center;
-  margin: 5px 0;
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 20px;
+  flex-wrap: wrap;
 }
 
 .summary-item {
-  margin: 5px 0;
+  text-align: center;
+  margin: 20px;
+  flex-grow: 1;
+  max-width: 30%;
 }
 
-.pie-chart-container,
+.chart-container {
+  background: #2c3e50;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 300px;
+}
+
 .bar-chart-container {
-  margin: 5px 0;
-  padding: 0;
+  margin-top: 20px;
+  background: #2c3e50;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+  width: 100%;
+  height: 300px;
 }
 
-.pie-chart-container canvas,
+.chart-container canvas,
 .bar-chart-container canvas {
   width: 100% !important;
-  height: auto !important;
-  max-width: 100%;
-  max-height: 250px;
+  height: 100% !important;
 }
 
-@media (max-width: 768px) {
-  .homepage {
-      margin: 5px;
-      padding: 2px;
-  }
-
-  .homepage-header h1 {
-      font-size: 1em;
-  }
-
-  .date-navigation button,
-  .logout-button {
-      padding: 3px 6px;
-      font-size: 0.7em;
-  }
-
-  .pie-chart-container,
-  .bar-chart-container {
-      padding: 5px;
-  }
+h3 {
+  color: #e0e6ed;
 }

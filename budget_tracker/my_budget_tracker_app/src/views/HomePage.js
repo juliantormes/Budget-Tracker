@@ -6,7 +6,6 @@ import { Bar } from 'react-chartjs-2';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';
-import NavigationBar from '../components/NavigationBar';
 import '../styles/HomePage.css';
 
 // Utility function to generate shades of a base color
@@ -292,41 +291,67 @@ const HomePage = () => {
 
     return (
         <div className="homepage">
-            <Header
-                year={year}
-                month={month}
-                onLogout={logout}
-                onPrevMonth={goToPreviousMonth}
-                onNextMonth={goToNextMonth}
-            />
-            <div className="financial-summary">
-                <h2>Financial Summary</h2>
-                <div className="summary-item">
-                    <h3>Total Incomes: ${totalIncome.toLocaleString()}</h3>
-                    <div className="pie-chart-container">
-                        <Chart data={incomeChartData} options={pieChartOptions} />
-                    </div>
+            <div className="homepage-header">
+                <div className="header-left">
+                    <span className="header-title">Budget Tracker</span>
+                    <button className="house-button" style={{ background: 'transparent', border: 'none', color: 'white' }}>🏠</button>
                 </div>
-                <div className="summary-item">
-                    <h3>Total Expenses: ${totalExpenses.toLocaleString()}</h3>
-                    <div className="pie-chart-container">
-                        <Chart data={expenseChartData} options={pieChartOptions} />
+                <div className="header-right">
+                    <div className="date-navigation">
+                        <button onClick={goToPreviousMonth}>Previous Month</button>
+                        <span>{year} - {String(month).padStart(2, '0')}</span>
+                        <button onClick={goToNextMonth}>Next Month</button>
                     </div>
+                    <button className="logout-button" onClick={logout}>Logout</button>
                 </div>
-                <div className="summary-item">
-                    <h3>Total Credit Card Debt: ${totalCreditCardDebt.toLocaleString()}</h3>
-                    <div className="pie-chart-container">
-                        <Chart data={creditCardChartData} options={pieChartOptions} />
+            </div>
+            <div className="sidebar">
+                <h3>Username</h3>
+                <div>
+                    <h3>Expenses</h3>
+                    <button>View Expenses</button>
+                    <button>Add Expenses</button>
+                    <button>View Expense Category</button>
+                    <button>Add Expense Category</button>
+                </div>
+                <div>
+                    <h3>Incomes</h3>
+                    <button>View Incomes</button>
+                    <button>Add Incomes</button>
+                    <button>View Income Category</button>
+                    <button>Add Income Category</button>
+                </div>
+                <div>
+                    <h3>Credit Card</h3>
+                    <button>View Credit Card</button>
+                    <button>Add Credit Card</button>
+                </div>
+            </div>
+            <div className="content">
+                <div className="financial-summary">
+                    <div className="summary-item">
+                        <div className="chart-container">
+                            <Chart data={incomeChartData} options={pieChartOptions} />
+                        </div>
+                        <h3>Total Incomes</h3>
                     </div>
-                </div>
-                <div className="summary-item">
-                    <h3>Net: ${net.toLocaleString()}</h3>
+                    <div className="summary-item">
+                        <div className="chart-container">
+                            <Chart data={expenseChartData} options={pieChartOptions} />
+                        </div>
+                        <h3>Total Expenses</h3>
+                    </div>
+                    <div className="summary-item">
+                        <div className="chart-container">
+                            <Chart data={creditCardChartData} options={pieChartOptions} />
+                        </div>
+                        <h3>Total Credit Card</h3>
+                    </div>
                 </div>
                 <div className="bar-chart-container">
                     <Bar data={barChartData} options={barChartOptions} />
                 </div>
             </div>
-            <NavigationBar />
         </div>
     );
 };

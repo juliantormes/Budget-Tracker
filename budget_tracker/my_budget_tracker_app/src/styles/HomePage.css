@@ -6,7 +6,7 @@ body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow: hidden; /* Prevent both horizontal and vertical scroll */
 }
 
 .homepage {
@@ -18,14 +18,14 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%; /* Full width */
+  width: calc(100% - 40px); /* Adjusted width to account for padding */
   padding: 10px 20px;
   background-color: #1f2a40;
   position: fixed;
   top: 0;
   left: 0;
   z-index: 1000;
-  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3); /* Cool border */
 }
 
 .header-left {
@@ -55,34 +55,48 @@ body {
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.sidebar {
+.sidebar-container {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  width: 220px;
+  width: 240px; /* Increased width */
   background-color: #1f2a40;
   padding: 10px;
-  margin-top: 70px;
-  border-right: none;
-  height: calc(100vh - 70px);
+  height: 100vh; /* Ensure full height */
   overflow-y: auto;
   position: fixed;
   top: 0;
   left: 0;
-  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3); /* Cool border */
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  background-color: #1f2a40;
+  padding-top: 70px; /* Match margin-top of sidebar-container */
+  border-right: none; /* Ensure no border on the right */
+  outline: none; /* Remove any outline */
+  overflow-y: auto;
+  box-shadow: none; /* Remove shadow from the sidebar itself */
 }
 
 .sidebar .pro-sidebar-inner {
   background-color: #1f2a40 !important;
-  border-right: none !important;
+  border-right: none !important; /* Ensure no border on the right */
+  outline: none !important; /* Remove any outline */
 }
 
 .sidebar .pro-menu-item {
   border-bottom: none !important;
+  outline: none !important; /* Remove any outline */
 }
 
 .sidebar .pro-menu .pro-sub-menu {
   border: none !important;
+  outline: none !important; /* Remove any outline */
 }
 
 .sidebar .pro-menu-item a {
@@ -93,11 +107,15 @@ body {
   padding: 10px;
   border-radius: 4px;
   transition: background-color 0.3s, color 0.3s;
+  border: none; /* Ensure no border */
+  outline: none; /* Remove any outline */
 }
 
 .sidebar .pro-menu-item a:hover {
   background-color: #2c3e50;
   color: #4a90e2;
+  border: none; /* Ensure no border */
+  outline: none; /* Remove any outline */
 }
 
 .content {
@@ -105,10 +123,10 @@ body {
   flex-direction: column;
   flex-grow: 1;
   padding: 20px;
-  margin-left: 240px;
+  margin-left: 270px; /* Adjusted to match new sidebar width */
   margin-top: 70px;
   height: calc(100vh - 70px);
-  overflow-y: auto;
+  overflow: hidden; /* Prevent vertical scroll */
 }
 
 .date-navigation-container {

@@ -82,64 +82,66 @@ const HomePage = () => {
     return (
         <ProSidebarProvider>
             <div className="homepage">
-                <Sidebar
-                    rootStyles={{
-                        [`.${sidebarClasses.container}`]: {
-                            backgroundColor: '#1f2a40',
-                            borderRight: 'none', // Remove the right border
-                        },
-                        [`.${menuClasses.subMenuContent}`]: {
-                            backgroundColor: '#1f2a40', // Set the background color for the submenu
-                        },
-                    }}
-                >
-                    <Menu
-                        menuItemStyles={{
-                            button: ({ level, active, disabled }) => {
-                                if (level === 0) {
-                                    return {
-                                        color: '#ffffff', // Ensure titles are always visible
-                                        backgroundColor: active ? '#2c3e50' : undefined, // Active state
-                                        '&:hover': {
-                                            backgroundColor: '#2c3e50', // Hover state background
-                                            color: '#ffffff', // Hover state text color
-                                        },
-                                    };
-                                }
-                                return {
-                                    color: '#ffffff', // Ensure submenu items are always visible
-                                    backgroundColor: active ? '#357ABD' : '#1f2a40', // Set background color for submenu items
-                                    '&:hover': {
-                                        backgroundColor: '#357ABD', // Hover state background for submenu items
-                                        color: '#ffffff', // Hover state text color for submenu items
-                                    },
-                                };
+                <div className="sidebar-container">
+                    <Sidebar
+                        rootStyles={{
+                            [`.${sidebarClasses.container}`]: {
+                                backgroundColor: '#1f2a40',
+                                borderRight: 'none', // Remove the right border
+                            },
+                            [`.${menuClasses.subMenuContent}`]: {
+                                backgroundColor: '#1f2a40', // Set the background color for the submenu
                             },
                         }}
                     >
-                        <MenuItem> Username </MenuItem>
-                        <SubMenu label="Expenses">
-                            <MenuItem>View Expenses</MenuItem>
-                            <MenuItem>Add Expenses</MenuItem>
-                            <MenuItem>View Expense Category</MenuItem>
-                            <MenuItem>Add Expense Category</MenuItem>
-                        </SubMenu>
-                        <SubMenu label="Incomes">
-                            <MenuItem>View Incomes</MenuItem>
-                            <MenuItem>Add Incomes</MenuItem>
-                            <MenuItem>View Income Category</MenuItem>
-                            <MenuItem>Add Income Category</MenuItem>
-                        </SubMenu>
-                        <SubMenu label="Credit Card">
-                            <MenuItem>View Credit Card</MenuItem>
-                            <MenuItem>Add Credit Card</MenuItem>
-                        </SubMenu>
-                        <SubMenu label="Graphics">
-                            <MenuItem>Pie Graphics</MenuItem>
-                            <MenuItem>Bar Graphics</MenuItem>
-                        </SubMenu>
-                    </Menu>
-                </Sidebar>
+                        <Menu
+                            menuItemStyles={{
+                                button: ({ level, active, disabled }) => {
+                                    if (level === 0) {
+                                        return {
+                                            color: '#ffffff', // Ensure titles are always visible
+                                            backgroundColor: active ? '#2c3e50' : undefined, // Active state
+                                            '&:hover': {
+                                                backgroundColor: '#2c3e50', // Hover state background
+                                                color: '#ffffff', // Hover state text color
+                                            },
+                                        };
+                                    }
+                                    return {
+                                        color: '#ffffff', // Ensure submenu items are always visible
+                                        backgroundColor: active ? '#357ABD' : '#1f2a40', // Set background color for submenu items
+                                        '&:hover': {
+                                            backgroundColor: '#357ABD', // Hover state background for submenu items
+                                            color: '#ffffff', // Hover state text color for submenu items
+                                        },
+                                    };
+                                },
+                            }}
+                        >
+                            <MenuItem> Username </MenuItem>
+                            <SubMenu label="Expenses">
+                                <MenuItem>View Expenses</MenuItem>
+                                <MenuItem>Add Expenses</MenuItem>
+                                <MenuItem>View Expense Category</MenuItem>
+                                <MenuItem>Add Expense Category</MenuItem>
+                            </SubMenu>
+                            <SubMenu label="Incomes">
+                                <MenuItem>View Incomes</MenuItem>
+                                <MenuItem>Add Incomes</MenuItem>
+                                <MenuItem>View Income Category</MenuItem>
+                                <MenuItem>Add Income Category</MenuItem>
+                            </SubMenu>
+                            <SubMenu label="Credit Card">
+                                <MenuItem>View Credit Card</MenuItem>
+                                <MenuItem>Add Credit Card</MenuItem>
+                            </SubMenu>
+                            <SubMenu label="Graphics">
+                                <MenuItem>Pie Graphics</MenuItem>
+                                <MenuItem>Bar Graphics</MenuItem>
+                            </SubMenu>
+                        </Menu>
+                    </Sidebar>
+                </div>
                 <div className="content">
                     <Header logout={logout} />
                     <FinancialSummary

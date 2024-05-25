@@ -32,13 +32,13 @@ export function useFetchingFinancialData(year, month) {
                 return limit(async () => {
                     const params = new URLSearchParams({ year: currentYear }).toString();
                     const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
-                        axiosInstance.get(`incomes/?${params}`),
-                        axiosInstance.get(`expenses/?${params}`),
+                        axiosInstance.get(`incomes/?${params}&month=${month}&include_recurring=true`),
+                        axiosInstance.get(`expenses/?${params}&month=${month}&include_recurring=true`),
                         axiosInstance.get(`credit-card-expenses/?${params}`),
                     ]);
 
-                    cache.incomes[currentYear] = incomeResponse.data.filter(income => !income.is_recurring);
-                    cache.expenses[currentYear] = expenseResponse.data.filter(expense => !expense.is_recurring);
+                    cache.incomes[currentYear] = incomeResponse.data;
+                    cache.expenses[currentYear] = expenseResponse.data;
                     cache.creditCardExpenses[currentYear] = creditCardResponse.data;
 
                     return [incomeResponse.data, expenseResponse.data, creditCardResponse.data];
@@ -47,16 +47,10 @@ export function useFetchingFinancialData(year, month) {
 
             await Promise.all(promises);
 
-            // Fetch current month's recurring incomes and expenses separately
-            const [currentIncomeResponse, currentExpenseResponse] = await Promise.all([
-                axiosInstance.get(`incomes/?year=${year}&month=${month}&is_recurring=true`),
-                axiosInstance.get(`expenses/?year=${year}&month=${month}&is_recurring=true`)
-            ]);
-
             const uniqueIncomes = new Map();
             const uniqueExpenses = new Map();
 
-            // Add non-recurring items to unique sets to avoid duplication
+            // Add items to unique sets to avoid duplication
             Object.values(cache.incomes).flat().forEach(income => {
                 if (!uniqueIncomes.has(income.id)) {
                     uniqueIncomes.set(income.id, income);
@@ -64,18 +58,6 @@ export function useFetchingFinancialData(year, month) {
             });
             Object.values(cache.expenses).flat().forEach(expense => {
                 if (!uniqueExpenses.has(expense.id)) {
-                    uniqueExpenses.set(expense.id, expense);
-                }
-            });
-
-            // Add recurring items from current month
-            currentIncomeResponse.data.forEach(income => {
-                if (income.is_recurring && !uniqueIncomes.has(income.id)) {
-                    uniqueIncomes.set(income.id, income);
-                }
-            });
-            currentExpenseResponse.data.forEach(expense => {
-                if (expense.is_recurring && !uniqueExpenses.has(expense.id)) {
                     uniqueExpenses.set(expense.id, expense);
                 }
             });

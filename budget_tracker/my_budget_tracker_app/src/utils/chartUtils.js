@@ -174,22 +174,11 @@ export const prepareCreditCardChartData = (expenses, year, month, redShades) => 
                 });
             }
         } else {
-            if (expense.is_recurring) {
-                const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
-                if (expenseMonth <= formattedMonth) {
-                    processedExpenses.push({
-                        ...expense,
-                        month: formattedMonth,
-                        amount: totalAmountWithSurcharge,
-                    });
-                }
-            } else {
-                processedExpenses.push({
-                    ...expense,
-                    month: formattedMonth,
-                    amount: totalAmountWithSurcharge,
-                });
-            }
+            processedExpenses.push({
+                ...expense,
+                month: formattedMonth,
+                amount: totalAmountWithSurcharge,
+            });
         }
     });
 
@@ -218,3 +207,4 @@ export const prepareCreditCardChartData = (expenses, year, month, redShades) => 
         }]
     };
 };
+

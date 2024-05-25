@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
-import { Bar } from 'react-chartjs-2';
 import { useFetchingFinancialData } from '../hooks/useFetchingFinancialData';
 import { useAuth } from '../hooks/useAuth';
 import { useDateNavigation } from '../hooks/useDateNavigation';

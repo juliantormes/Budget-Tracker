@@ -28,9 +28,8 @@ const HomePage = () => {
     const navigate = useNavigate();
     const { logout } = useAuth();
     const searchParams = new URLSearchParams(location.search);
-    const year = parseInt(searchParams.get('year'), 10) || new Date().getFullYear();
-    const month = parseInt(searchParams.get('month'), 10) || new Date().getMonth() + 1;
-    console.log(`Rendering HomePage for year: ${year}, month: ${month}`);
+    const year = useMemo(() => parseInt(searchParams.get('year'), 10) || new Date().getFullYear(), [searchParams]);
+    const month = useMemo(() => parseInt(searchParams.get('month'), 10) || new Date().getMonth() + 1, [searchParams]);
     const { data, loading, error } = useFetchingFinancialData(year, month);
 
     const goToPreviousMonth = useCallback(() => {

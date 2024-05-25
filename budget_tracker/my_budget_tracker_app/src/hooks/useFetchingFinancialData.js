@@ -7,7 +7,7 @@ export function useFetchingFinancialData(year, month) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    const fetchYearData = async (year) => {
+    const fetchYearData = useCallback(async (year) => {
         const params = new URLSearchParams({ year, include_recurring: true }).toString();
         const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
             axiosInstance.get(`incomes/?${params}`),
@@ -20,11 +20,10 @@ export function useFetchingFinancialData(year, month) {
             expenses: expenseResponse.data,
             creditCardExpenses: creditCardResponse.data,
         };
-    };
+    }, []);
 
     const fetchData = useCallback(async () => {
         setLoading(true);
-        console.log(`Fetching data for year: ${year}, month: ${month}`);
 
         try {
             const limit = pLimit(5); // Limit concurrency to 5 requests at a time
@@ -68,7 +67,7 @@ export function useFetchingFinancialData(year, month) {
         } finally {
             setLoading(false);
         }
-    }, [year]);
+    }, [year, fetchYearData]);
 
     useEffect(() => {
         fetchData();

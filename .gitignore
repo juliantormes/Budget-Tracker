@@ -1,8 +1,8 @@
-# Virtual environment
-myenv/
-
 # Node modules
 node_modules/
+
+# Virtual environment
+myenv/
 
 # Python cache
 __pycache__/

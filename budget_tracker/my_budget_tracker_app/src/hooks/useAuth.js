@@ -35,7 +35,7 @@ function useProvideAuth() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            // Validate token and load user
+            // Add logic to validate token and set user state
         }
     }, []);
 

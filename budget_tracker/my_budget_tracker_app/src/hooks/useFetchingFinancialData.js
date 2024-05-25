@@ -2,41 +2,32 @@ import { useState, useEffect, useCallback } from 'react';
 import axiosInstance from '../api/axiosApi';
 import pLimit from 'p-limit';
 
-const cache = {
-    incomes: {},
-    expenses: {},
-    creditCardExpenses: {},
-};
-
 export function useFetchingFinancialData(year, month) {
     const [data, setData] = useState({ incomes: [], expenses: [], creditCardExpenses: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const fetchYearData = async (year) => {
+        const params = new URLSearchParams({ year, include_recurring: true }).toString();
+        const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
+            axiosInstance.get(`incomes/?${params}`),
+            axiosInstance.get(`expenses/?${params}`),
+            axiosInstance.get(`credit-card-expenses/?${params}`),
+        ]);
+
+        return {
+            incomes: incomeResponse.data,
+            expenses: expenseResponse.data,
+            creditCardExpenses: creditCardResponse.data,
+        };
+    };
+
     const fetchData = useCallback(async () => {
         setLoading(true);
+        console.log(`Fetching data for year: ${year}, month: ${month}`);
 
         try {
             const limit = pLimit(5); // Limit concurrency to 5 requests at a time
-
-            const fetchYearData = async (year) => {
-                const params = new URLSearchParams({ year, include_recurring: true }).toString();
-                const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
-                    axiosInstance.get(`incomes/?${params}`),
-                    axiosInstance.get(`expenses/?${params}`),
-                    axiosInstance.get(`credit-card-expenses/?${params}`),
-                ]);
-
-                cache.incomes[year] = incomeResponse.data;
-                cache.expenses[year] = expenseResponse.data;
-                cache.creditCardExpenses[year] = creditCardResponse.data;
-
-                return {
-                    incomes: incomeResponse.data,
-                    expenses: expenseResponse.data,
-                    creditCardExpenses: creditCardResponse.data,
-                };
-            };
 
             // Fetch current year data
             const currentYearData = await fetchYearData(year);
@@ -77,7 +68,7 @@ export function useFetchingFinancialData(year, month) {
         } finally {
             setLoading(false);
         }
-    }, [year, month]);
+    }, [year]);
 
     useEffect(() => {
         fetchData();

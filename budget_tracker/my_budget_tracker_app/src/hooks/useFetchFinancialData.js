@@ -1,26 +1,13 @@
 import { useState, useEffect, useCallback } from 'react';
-import axiosInstance from '../api/axiosApi';
 import pLimit from 'p-limit';
+import { useFetchYearData } from './useFetchYearData';
+import { mergeData } from '../utils/mergeData';
 
-export function useFetchingFinancialData(year, month) {
+export function useFetchFinancialData(year, month) {
     const [data, setData] = useState({ incomes: [], expenses: [], creditCardExpenses: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const fetchYearData = useCallback(async (year) => {
-        const params = new URLSearchParams({ year, include_recurring: true }).toString();
-        const [incomeResponse, expenseResponse, creditCardResponse] = await Promise.all([
-            axiosInstance.get(`incomes/?${params}`),
-            axiosInstance.get(`expenses/?${params}`),
-            axiosInstance.get(`credit-card-expenses/?${params}`),
-        ]);
-
-        return {
-            incomes: incomeResponse.data,
-            expenses: expenseResponse.data,
-            creditCardExpenses: creditCardResponse.data,
-        };
-    }, []);
+    const fetchYearData = useFetchYearData();
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -72,17 +59,6 @@ export function useFetchingFinancialData(year, month) {
     useEffect(() => {
         fetchData();
     }, [fetchData]);
-
-    const mergeData = (currentData, pastData) => {
-        const uniqueData = new Map();
-        currentData.forEach(item => uniqueData.set(item.id, item));
-        pastData.forEach(item => {
-            if (!uniqueData.has(item.id)) {
-                uniqueData.set(item.id, item);
-            }
-        });
-        return Array.from(uniqueData.values());
-    };
 
     return { data, loading, error };
 }

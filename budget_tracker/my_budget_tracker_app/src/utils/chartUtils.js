@@ -208,3 +208,31 @@ export const prepareCreditCardChartData = (expenses, year, month, redShades) => 
     };
 };
 
+export const pieChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    return `${context.label}: $${context.parsed.toLocaleString()}`;
+                }
+            }
+        }
+    }
+};
+
+export const barChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: 'y',
+    plugins: {
+        tooltip: {
+            callbacks: {
+                label: function (context) {
+                    return `${context.label}: ${context.raw.toLocaleString()}%`;
+                }
+            }
+        }
+    }
+};

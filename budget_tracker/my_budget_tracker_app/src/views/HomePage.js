@@ -131,7 +131,6 @@ const HomePage = () => {
                             },
                         }}
                     >
-                        <MenuItem> Username </MenuItem>
                         <SubMenu label="Expenses">
                             <MenuItem>View Expenses</MenuItem>
                             <MenuItem>Add Expenses</MenuItem>

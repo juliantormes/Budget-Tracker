@@ -68,7 +68,9 @@ body {
   top: 0;
   left: 0;
   box-shadow: 2px 0px 10px rgba(0, 0, 0, 0.3); /* Cool border */
+  margin-top: 40px; /* Adjust this value as needed */
 }
+
 
 .sidebar {
   display: flex;

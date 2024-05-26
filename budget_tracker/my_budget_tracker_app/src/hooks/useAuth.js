@@ -15,9 +15,9 @@ export function useAuth() {
 function useProvideAuth() {
     const [user, setUser] = useState(null);
 
-    const login = async (email, password) => {
+    const login = async (username, password) => {
         try {
-            const response = await axiosInstance.post('/login', { email, password });
+            const response = await axiosInstance.post('/login', { username, password });
             setUser(response.data.user);
             localStorage.setItem('token', response.data.token);
             return response.data;
@@ -35,7 +35,7 @@ function useProvideAuth() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            // Add logic to validate token and set user state
+            // Validate token and load user
         }
     }, []);
 

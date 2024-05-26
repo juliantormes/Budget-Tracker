@@ -79,6 +79,7 @@ const HomePage = () => {
                     pieChartOptions={pieChartOptions}
                     barChartData={barChartData}
                     barChartOptions={barChartOptions}
+                    net={net}
                     year={year}
                     month={month}
                     goToPreviousMonth={goToPreviousMonth}

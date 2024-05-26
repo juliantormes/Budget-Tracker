@@ -1,6 +1,6 @@
 import React from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
-import { sidebarClasses, menuClasses } from 'react-pro-sidebar'; // Ensure you import these classes
+import { sidebarClasses, menuClasses } from 'react-pro-sidebar';
 
 const SidebarMenu = () => (
     <ProSidebar
@@ -38,7 +38,6 @@ const SidebarMenu = () => (
                 },
             }}
         >
-            <MenuItem>Username</MenuItem>
             <SubMenu label="Expenses">
                 <MenuItem>View Expenses</MenuItem>
                 <MenuItem>Add Expenses</MenuItem>

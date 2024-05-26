@@ -14,6 +14,7 @@ const FinancialSummary = ({
     pieChartOptions, 
     barChartData,
     barChartOptions,
+    net,
     year, 
     month, 
     goToPreviousMonth, 
@@ -54,6 +55,7 @@ const FinancialSummary = ({
         <div className="bar-chart-container">
             <Bar data={barChartData} options={barChartOptions} />
         </div>
+            <h3>Net: ${net.toLocaleString()}</h3>
     </div>
 );
 

@@ -6,7 +6,7 @@ import { useAuth } from '../hooks/useAuth';
 import SidebarMenu from '../components/SidebarMenu';
 import FinancialSummary from '../components/FinancialSummary';
 import {
-    generateShades,
+    generateVibrantShades,
     pieChartOptions,
     barChartOptions,
     prepareBarChartData,
@@ -46,9 +46,9 @@ const HomePage = () => {
         navigate(`/home?year=${newYear}&month=${newMonth}`);
     }, [year, month, navigate]);
 
-    const incomeChartData = useMemo(() => prepareIncomeChartData(data.incomes, year, month, generateShades([52, 152, 219], 10)), [data.incomes, year, month]);
-    const expenseChartData = useMemo(() => prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card), year, month, generateShades([46, 204, 113], 10)), [data.expenses, year, month]);
-    const creditCardChartData = useMemo(() => prepareCreditCardChartData(data.creditCardExpenses, year, month, generateShades([231, 76, 60], 10)), [data.creditCardExpenses, year, month]);
+    const incomeChartData = useMemo(() => prepareIncomeChartData(data.incomes, year, month, generateVibrantShades([52, 152, 219], 10)), [data.incomes, year, month]);
+    const expenseChartData = useMemo(() => prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card), year, month, generateVibrantShades([46, 204, 113], 10)), [data.expenses, year, month]);
+    const creditCardChartData = useMemo(() => prepareCreditCardChartData(data.creditCardExpenses, year, month, generateVibrantShades([231, 76, 60], 10)), [data.creditCardExpenses, year, month]);
 
     const totalIncome = useMemo(() => calculateTotalIncome(incomeChartData), [incomeChartData]);
     const totalExpenses = useMemo(() => calculateTotalExpenses(expenseChartData), [expenseChartData]);

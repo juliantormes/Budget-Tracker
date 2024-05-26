@@ -1,7 +1,9 @@
-export const generateShades = (baseColor, numOfShades) => {
+export const generateVibrantShades = (baseColor, numOfShades) => {
     const shades = [];
+    const colorStep = 0.6 / numOfShades; // Increase the step for more vibrant shades
     for (let i = 0; i < numOfShades; i++) {
-        const shade = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${(i + 1) / numOfShades})`;
+        const alpha = (0.4 + (i * colorStep)).toFixed(2); // Ensure the alpha starts at 0.4 and increases
+        const shade = `rgba(${baseColor[0]}, ${baseColor[1]}, ${baseColor[2]}, ${alpha})`;
         shades.push(shade);
     }
     return shades;
@@ -58,15 +60,15 @@ export const prepareBarChartData = (percentages) => {
                     percentages.cashFlowPercentage,
                     percentages.creditCardPercentage,
                 ],
-                backgroundColor: ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)', 'rgba(231, 76, 60, 0.6)'],
-                borderColor: ['rgba(52, 152, 219, 1)', 'rgba(46, 204, 113, 1)', 'rgba(231, 76, 60, 1)'],
+                backgroundColor: ['rgba(34, 98, 177, 0.6)', 'rgba(40, 143, 87, 0.6)', 'rgba(177, 43, 38, 0.6)'],
+                borderColor: ['rgba(34, 98, 177, 1)', 'rgba(40, 143, 87, 1)', 'rgba(177, 43, 38, 1)'],
                 borderWidth: 1,
             },
         ],
     };
 };
 
-export const prepareIncomeChartData = (incomes, year, month, blueShades) => {
+export const prepareIncomeChartData = (incomes, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const nonRecurringIncomes = incomes.filter(income => {
         const incomeDate = new Date(income.date);
@@ -92,7 +94,7 @@ export const prepareIncomeChartData = (incomes, year, month, blueShades) => {
 
     const labels = Object.keys(sumsByCategory);
     const data = Object.values(sumsByCategory);
-    const colorMap = generateConsistentColorMap(labels, blueShades);
+    const colorMap = generateConsistentColorMap(labels, shades);
 
     return {
         labels,
@@ -105,7 +107,7 @@ export const prepareIncomeChartData = (incomes, year, month, blueShades) => {
     };
 };
 
-export const prepareExpenseChartData = (expenses, year, month, greenShades) => {
+export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const nonRecurringExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
@@ -131,7 +133,7 @@ export const prepareExpenseChartData = (expenses, year, month, greenShades) => {
 
     const labels = Object.keys(sumsByCategory);
     const data = Object.values(sumsByCategory);
-    const colorMap = generateConsistentColorMap(labels, greenShades);
+    const colorMap = generateConsistentColorMap(labels, shades);
 
     return {
         labels,
@@ -144,7 +146,7 @@ export const prepareExpenseChartData = (expenses, year, month, greenShades) => {
     };
 };
 
-export const prepareCreditCardChartData = (expenses, year, month, redShades) => {
+export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const processedExpenses = [];
 
@@ -195,7 +197,7 @@ export const prepareCreditCardChartData = (expenses, year, month, redShades) => 
         return acc;
     }, { labels: [], data: [] });
 
-    const colorMap = generateConsistentColorMap(chartData.labels, redShades);
+    const colorMap = generateConsistentColorMap(chartData.labels, shades);
 
     return {
         labels: chartData.labels,
@@ -218,6 +220,25 @@ export const pieChartOptions = {
                     return `${context.label}: $${context.parsed.toLocaleString()}`;
                 }
             }
+        },
+        legend: {
+            labels: {
+                color: 'white' // Set legend text color to white
+            }
+        }
+    },
+    layout: {
+        padding: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+        }
+    },
+    elements: {
+        arc: {
+            backgroundColor: generateVibrantShades([34, 98, 177], 10), // Example background color for pie slices
+            borderColor: '#1f2a40' // Example border color for pie slices
         }
     }
 };
@@ -232,6 +253,37 @@ export const barChartOptions = {
                 label: function (context) {
                     return `${context.label}: ${context.raw.toLocaleString()}%`;
                 }
+            }
+        },
+        legend: {
+            labels: {
+                color: 'white' // Set legend text color to white
+            }
+        }
+    },
+    layout: {
+        padding: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+        }
+    },
+    scales: {
+        x: {
+            ticks: {
+                color: 'white' // Set x-axis tick color to white
+            },
+            grid: {
+                color: '#444' // Set x-axis grid color
+            }
+        },
+        y: {
+            ticks: {
+                color: 'white' // Set y-axis tick color to white
+            },
+            grid: {
+                color: '#444' // Set y-axis grid color
             }
         }
     }

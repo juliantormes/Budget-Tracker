@@ -25,7 +25,7 @@ const HomePage = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const { logout } = useAuth();
-    const searchParams = new URLSearchParams(location.search);
+    const searchParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
     const year = useMemo(() => parseInt(searchParams.get('year'), 10) || new Date().getFullYear(), [searchParams]);
     const month = useMemo(() => parseInt(searchParams.get('month'), 10) || new Date().getMonth() + 1, [searchParams]);
     const { data, loading, error } = useFetchFinancialData(year, month);

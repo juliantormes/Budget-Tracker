@@ -1,34 +1,36 @@
 import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { Bar } from 'react-chartjs-2';
 import Chart from '../components/Chart';
 
-const FinancialSummary = ({ 
-    incomeChartData, 
-    expenseChartData, 
-    creditCardChartData, 
-    totalIncome, 
-    totalExpenses, 
-    totalCreditCardDebt, 
-    pieChartOptions, 
+const FinancialSummary = ({
+    incomeChartData,
+    expenseChartData,
+    creditCardChartData,
+    totalIncome,
+    totalExpenses,
+    totalCreditCardDebt,
+    pieChartOptions,
     barChartData,
     barChartOptions,
     net,
-    year, 
-    month, 
-    goToPreviousMonth, 
-    goToNextMonth 
+    year,
+    month,
+    goToPreviousMonth,
+    goToNextMonth
 }) => (
     <div className="financial-summary">
         <div className="date-navigation-container">
             <div className="date-navigation">
                 <button onClick={goToPreviousMonth}>
-                    <FontAwesomeIcon icon={faArrowLeft} /> Previous Month
+                    <ArrowBackIcon />
+                    <span>Previous Month</span>
                 </button>
                 <span>{year} - {String(month).padStart(2, '0')}</span>
                 <button onClick={goToNextMonth}>
-                    Next Month <FontAwesomeIcon icon={faArrowRight} />
+                    <span>Next Month</span>
+                    <ArrowForwardIcon />
                 </button>
             </div>
         </div>
@@ -55,7 +57,7 @@ const FinancialSummary = ({
         <div className="bar-chart-container">
             <Bar data={barChartData} options={barChartOptions} />
         </div>
-            <h3>Net: ${net.toLocaleString()}</h3>
+        <h3>Net: ${net.toLocaleString()}</h3>
     </div>
 );
 

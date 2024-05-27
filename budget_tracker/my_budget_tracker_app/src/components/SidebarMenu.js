@@ -42,6 +42,7 @@ const SidebarMenu = () => (
             </SubMenu>
             <SubMenu label="Graphics" icon={<PieChartIcon />}>
                 <MenuItem>Pie Graphics</MenuItem>
+                <MenuItem>Bar Graphics</MenuItem>
             </SubMenu>
         </Menu>
     </ProSidebar>

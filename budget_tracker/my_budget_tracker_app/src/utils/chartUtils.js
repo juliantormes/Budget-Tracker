@@ -13,8 +13,9 @@ export const generateConsistentColorMap = (labels, shades) => {
     let colorMap = JSON.parse(localStorage.getItem('colorMap')) || {};
 
     labels.forEach(label => {
-        if (!colorMap[label]) {
-            colorMap[label] = shades[Object.keys(colorMap).length % shades.length];
+        const formattedLabel = label.toLowerCase(); // Ensure consistent formatting
+        if (!colorMap[formattedLabel]) {
+            colorMap[formattedLabel] = shades[Object.keys(colorMap).length % shades.length];
         }
     });
 
@@ -87,7 +88,7 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
 
     const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
     const sumsByCategory = processedIncomes.reduce((acc, income) => {
-        const category = income.category_name || 'Undefined Category';
+        const category = (income.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
         acc[category] = (acc[category] || 0) + parseFloat(income.amount || 0);
         return acc;
     }, {});
@@ -101,7 +102,7 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         datasets: [{
             label: 'Incomes',
             data,
-            backgroundColor: labels.map(label => colorMap[label]),
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
             borderColor: ['#4b4b4b']
         }]
     };
@@ -126,7 +127,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
     const sumsByCategory = processedExpenses.reduce((acc, expense) => {
-        const category = expense.category_name || 'Undefined Category';
+        const category = (expense.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
         acc[category] = (acc[category] || 0) + parseFloat(expense.amount || 0);
         return acc;
     }, {});
@@ -140,7 +141,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Expenses',
             data,
-            backgroundColor: labels.map(label => colorMap[label]),
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
             borderColor: ['#4b4b4b']
         }]
     };
@@ -186,7 +187,7 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
 
     const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
     const chartData = filteredExpenses.reduce((acc, expense) => {
-        const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`;
+        const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`.toLowerCase(); // Ensure consistent formatting
         const categoryIndex = acc.labels.indexOf(label);
         if (categoryIndex === -1) {
             acc.labels.push(label);
@@ -204,11 +205,12 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Credit Card Expenses',
             data: chartData.data,
-            backgroundColor: chartData.labels.map(label => colorMap[label]),
+            backgroundColor: chartData.labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
             borderColor: ['#4b4b4b']
         }]
     };
 };
+
 
 export const pieChartOptions = {
     responsive: true,
@@ -237,7 +239,7 @@ export const pieChartOptions = {
     },
     elements: {
         arc: {
-            backgroundColor: generateVibrantShades([34, 98, 177], 10), // Example background color for pie slices
+            backgroundColor: generateVibrantShades([34, 98, 177], 10),
             borderColor: '#1f2a40' // Example border color for pie slices
         }
     }

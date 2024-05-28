@@ -53,9 +53,7 @@ const HomePage = () => {
     const totalExpenses = useMemo(() => calculateTotalExpenses(expenseChartData), [expenseChartData]);
     const totalCreditCardDebt = useMemo(() => calculateTotalCreditCardDebt(creditCardChartData), [creditCardChartData]);
     const net = useMemo(() => calculateNet(totalIncome, totalExpenses, totalCreditCardDebt), [totalIncome, totalExpenses, totalCreditCardDebt]);
-
     const percentages = useMemo(() => calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt, net), [totalIncome, totalExpenses, totalCreditCardDebt, net]);
-
     const barChartData = useMemo(() => prepareBarChartData(percentages), [percentages]);
 
     if (loading) return <div>Loading...</div>;

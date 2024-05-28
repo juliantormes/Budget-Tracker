@@ -4,6 +4,7 @@ import CreditCardIcon from '@mui/icons-material/CreditCard';
 import PieChartIcon from '@mui/icons-material/PieChart';
 import ExpenseIcon from '@mui/icons-material/Receipt';
 import IncomeIcon from '@mui/icons-material/AttachMoney';
+import { Link } from 'react-router-dom';
 
 const SidebarMenu = () => (
     <ProSidebar
@@ -24,25 +25,25 @@ const SidebarMenu = () => (
                 }),
             }}
         >
-            <SubMenu label="Expenses" icon={<ExpenseIcon />}>
-                <MenuItem>View Expenses</MenuItem>
-                <MenuItem>Add Expenses</MenuItem>
-                <MenuItem>View Expense Category</MenuItem>
-                <MenuItem>Add Expense Category</MenuItem>
-            </SubMenu>
             <SubMenu label="Incomes" icon={<IncomeIcon />}>
-                <MenuItem>View Incomes</MenuItem>
-                <MenuItem>Add Incomes</MenuItem>
-                <MenuItem>View Income Category</MenuItem>
-                <MenuItem>Add Income Category</MenuItem>
+                <MenuItem component={<Link to="/view-incomes" />}>View Incomes</MenuItem>
+                <MenuItem component={<Link to="/add-incomes" />}>Add Incomes</MenuItem>
+                <MenuItem component={<Link to="/view-income-category" />}>View Income Category</MenuItem>
+                <MenuItem component={<Link to="/add-income-category" />}>Add Income Category</MenuItem>
+            </SubMenu>
+            <SubMenu label="Expenses" icon={<ExpenseIcon />}>
+                <MenuItem component={<Link to="/view-expenses" />}>View Expenses</MenuItem>
+                <MenuItem component={<Link to="/add-expenses" />}>Add Expenses</MenuItem>
+                <MenuItem component={<Link to="/view-expense-category" />}>View Expense Category</MenuItem>
+                <MenuItem component={<Link to="/add-expense-category" />}>Add Expense Category</MenuItem>
             </SubMenu>
             <SubMenu label="Credit Card" icon={<CreditCardIcon />}>
-                <MenuItem>View Credit Card</MenuItem>
-                <MenuItem>Add Credit Card</MenuItem>
+                <MenuItem component={<Link to="/view-credit-card" />}>View Credit Card</MenuItem>
+                <MenuItem component={<Link to="/add-credit-card" />}>Add Credit Card</MenuItem>
             </SubMenu>
             <SubMenu label="Graphics" icon={<PieChartIcon />}>
-                <MenuItem>Pie Graphics</MenuItem>
-                <MenuItem>Bar Graphics</MenuItem>
+                <MenuItem component={<Link to="/pie-graphics" />}>Pie Graphics</MenuItem>
+                <MenuItem component={<Link to="/bar-graphics" />}>Bar Graphics</MenuItem>
             </SubMenu>
         </Menu>
     </ProSidebar>

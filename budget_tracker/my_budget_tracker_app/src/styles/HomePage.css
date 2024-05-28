@@ -64,7 +64,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  width: 240px; /* Increased width */
+  width: 240px; /* Adjusted width */
   background-color: #1f2a40;
   height: 100vh; /* Ensure full height */
   overflow-y: auto;

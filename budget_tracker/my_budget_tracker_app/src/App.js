@@ -1,7 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { ProvideAuth } from './hooks/useAuth';
-import HomePage from './views/HomePage';
 import LoginForm from './views/Login';
 import RegisterForm from './views/Register';
 import ViewIncomes from './views/ViewIncomes';
@@ -16,15 +15,25 @@ import ViewCreditCard from './views/ViewCreditCard';
 import AddCreditCard from './views/AddCreditCard';
 import PieGraphics from './views/PieGraphics';
 import BarGraphics from './views/BarGraphics';
+import PrivateRoute from './components/PrivateRoute';
+import HomePage from './views/HomePage';
 
 const App = () => {
   return (
     <ProvideAuth>
       <Router>
         <Routes>
+          <Route path="/login" element={
+            <PrivateRoute>
+              <LoginForm />
+            </PrivateRoute>
+          } />
+          <Route path="/register" element={
+            <PrivateRoute>
+              <RegisterForm />
+            </PrivateRoute>
+          } />
           <Route path="/home" element={<HomePage />} />
-          <Route path="/login" element={<LoginForm />} />
-          <Route path="/register" element={<RegisterForm />} />
           <Route path="/view-incomes" element={<ViewIncomes />} />
           <Route path="/add-incomes" element={<AddIncomes />} />
           <Route path="/view-income-category" element={<ViewIncomeCategory />} />

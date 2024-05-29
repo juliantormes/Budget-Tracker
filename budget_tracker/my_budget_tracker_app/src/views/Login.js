@@ -38,22 +38,26 @@ const LoginForm = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="form">
-            {error && <div className="error-message">{error}</div>}
-            <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-            />
-            <button type="submit">Log In</button>
-        </form>
+        <div className="form-container">
+            <form onSubmit={handleSubmit} className="form">
+                <h2>Login</h2>
+                {error && <div className="error-message">{error}</div>}
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                />
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                />
+                <button type="submit">Log In</button>
+            </form>
+            <button onClick={() => navigate('/register')} className="redirect-button">Don't have an account? Register</button>
+        </div>
     );
 };
 

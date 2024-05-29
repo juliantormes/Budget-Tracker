@@ -13,7 +13,9 @@ const Header = ({ logout }) => {
     return (
         <header className="homepage-header">
             <div className="header-left">
-                <span className="header-title">Budget Tracker</span>
+                <button className="header-title" onClick={() => navigate('/home')}>
+                    Budget Tracker
+                </button>
             </div>
             <button className="logout-button" onClick={handleLogout}>
                 <LogoutIcon /> Logout

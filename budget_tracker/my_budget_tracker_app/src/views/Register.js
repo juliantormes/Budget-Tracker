@@ -52,28 +52,32 @@ const RegisterForm = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="form">
-            {error && <div className="error-message">{error}</div>}
-            <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
-            />
-            <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm Password"
-            />
-            <button type="submit">Register</button>
-        </form>
+        <div className="form-container">
+            <form onSubmit={handleSubmit} className="form">
+                <h2>Register</h2>
+                {error && <div className="error-message">{error}</div>}
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                />
+                <input
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Password"
+                />
+                <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Confirm Password"
+                />
+                <button type="submit">Register</button>
+            </form>
+            <button onClick={() => navigate('/login')} className="redirect-button">Already have an account? Login</button>
+        </div>
     );
 };
 

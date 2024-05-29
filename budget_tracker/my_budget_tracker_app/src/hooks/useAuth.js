@@ -1,5 +1,5 @@
 import { useState, useContext, createContext, useEffect } from 'react';
-import axiosInstance from '../api/axiosApi';
+import axios from 'axios';
 
 const authContext = createContext();
 
@@ -17,9 +17,16 @@ function useProvideAuth() {
 
     const login = async (username, password) => {
         try {
-            const response = await axiosInstance.post('/login', { username, password });
-            setUser(response.data.user);
-            localStorage.setItem('token', response.data.token);
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}login/`, {
+                username,
+                password,
+            });
+            const token = response.data.token;
+            localStorage.setItem('token', token);
+
+            // Set user as logged in
+            setUser({ username });
+
             return response.data;
         } catch (error) {
             throw error;
@@ -35,7 +42,8 @@ function useProvideAuth() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
-            // Validate token and load user
+            // Assuming token is valid if present
+            setUser({ username: "dummy" });
         }
     }, []);
 

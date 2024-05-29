@@ -19,23 +19,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import ValidationError
 from django.utils.timezone import make_aware
+from django.views.decorators.csrf import csrf_exempt
 
 
 @api_view(['POST'])
-def signup(request):
-    if request.user.is_authenticated:
-        return Response({'message': 'You are already authenticated'}, status=400)
-    serializer = SignUpSerializer(data=request.data)
-    if serializer.is_valid():
-        user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)  # Unpack the tuple here
-        return Response({'token': token.key})  # Access the token's key correctly
-    else:
-        if 'username' in serializer.errors:
-            return Response({'username': 'This username is already in use.'}, status=status.HTTP_409_CONFLICT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['POST'])
+@csrf_exempt
 def login(request):
     if request.user.is_authenticated:
         return Response({'message': 'You are already logged in'}, status=400)
@@ -51,6 +39,21 @@ def login(request):
             return Response({'error': 'Invalid Credentials'}, status=401)
     return Response(serializer.errors, status=400)
 
+
+@api_view(['POST'])
+@csrf_exempt
+def signup(request):
+    if request.user.is_authenticated:
+        return Response({'message': 'You are already authenticated'}, status=400)
+    serializer = SignUpSerializer(data=request.data)
+    if serializer.is_valid():
+        user = serializer.save()
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key})
+    else:
+        if 'username' in serializer.errors:
+            return Response({'username': 'This username is already in use.'}, status=status.HTTP_409_CONFLICT)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

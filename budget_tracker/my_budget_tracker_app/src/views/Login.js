@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/FormStyles.css';
 
 const LoginForm = () => {
@@ -8,18 +8,14 @@ const LoginForm = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
+    const { login } = useAuth();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
         setError('');  // Reset error message
 
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}login/`, {
-                username,
-                password,
-            });
-            const token = response.data.token;
-            localStorage.setItem('token', token);
+            await login(username, password);
             navigate('/home');  // Navigate to home after successful login
         } catch (error) {
             console.error('Login failed:', error);

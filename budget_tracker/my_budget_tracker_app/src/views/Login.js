@@ -55,7 +55,7 @@ const LoginForm = () => {
                 />
                 <SubmitButton text="Log In" />
             </form>
-            <SubmitButton onClick={() => navigate('/register')} text="Don't have an account? Register" />
+            <SubmitButton onClick={() => navigate('/register')} text="Don't have an account? Register" type="button" />
         </div>
     );
 };

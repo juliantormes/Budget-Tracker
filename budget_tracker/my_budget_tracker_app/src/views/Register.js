@@ -79,7 +79,7 @@ const RegisterForm = () => {
                 />
                 <SubmitButton text="Register" />
             </form>
-            <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" />
+            <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" type="button" />
         </div>
     );
 };

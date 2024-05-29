@@ -1,12 +1,9 @@
 import React from 'react';
-import '../styles/FormStyles.css';
 
-const SubmitButton = ({ onClick, text }) => {
-    return (
-        <button onClick={onClick} className="submit-button">
-            {text}
-        </button>
-    );
-};
+const SubmitButton = ({ text, onClick, type = "submit" }) => (
+    <button type={type} onClick={onClick} className={type === "button" ? "redirect-button" : "form-button"}>
+        {text}
+    </button>
+);
 
 export default SubmitButton;

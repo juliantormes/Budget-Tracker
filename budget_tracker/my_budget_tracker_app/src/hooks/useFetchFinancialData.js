@@ -2,6 +2,18 @@ import { useState, useEffect, useCallback } from 'react';
 import pLimit from 'p-limit';
 import { useFetchYearData } from './useFetchYearData';
 import { mergeData } from '../utils/mergeData';
+import {
+    generateVibrantShades,
+    prepareBarChartData,
+    prepareIncomeChartData,
+    prepareExpenseChartData,
+    prepareCreditCardChartData,
+    calculateTotalIncome,
+    calculateTotalExpenses,
+    calculateTotalCreditCardDebt,
+    calculateNet,
+    calculatePercentages
+} from '../utils/chartUtils';
 
 export function useFetchFinancialData(year, month) {
     const [data, setData] = useState({ incomes: [], expenses: [], creditCardExpenses: [] });
@@ -13,17 +25,14 @@ export function useFetchFinancialData(year, month) {
         setLoading(true);
 
         try {
-            const limit = pLimit(5); // Limit concurrency to 5 requests at a time
+            const limit = pLimit(5);
 
-            // Fetch current year data
             const currentYearData = await fetchYearData(year);
 
-            // Determine the maximum number of installments
             const maxInstallments = currentYearData.expenses.reduce((max, expense) => {
                 return Math.max(max, expense.installments || 0);
             }, 0);
 
-            // Determine the number of past years to fetch based on the maximum installments
             const yearsToFetch = Math.ceil(maxInstallments / 12);
 
             let pastDataResults = [];
@@ -37,7 +46,6 @@ export function useFetchFinancialData(year, month) {
                 pastDataResults = await Promise.all(pastDataPromises);
             }
 
-            // Combine past data with current data and avoid duplicates
             const allIncomes = mergeData(currentYearData.incomes, pastDataResults.flatMap(res => res.incomes || []));
             const allExpenses = mergeData(currentYearData.expenses, pastDataResults.flatMap(res => res.expenses || []));
             const allCreditCardExpenses = mergeData(currentYearData.creditCardExpenses, pastDataResults.flatMap(res => res.creditCardExpenses || []));
@@ -60,5 +68,28 @@ export function useFetchFinancialData(year, month) {
         fetchData();
     }, [fetchData]);
 
-    return { data, loading, error };
+    const incomeChartData = prepareIncomeChartData(data.incomes, year, month, generateVibrantShades([52, 152, 219], 10));
+    const expenseChartData = prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card), year, month, generateVibrantShades([46, 204, 113], 10));
+    const creditCardChartData = prepareCreditCardChartData(data.creditCardExpenses, year, month, generateVibrantShades([231, 76, 60], 10));
+
+    const totalIncome = calculateTotalIncome(incomeChartData);
+    const totalExpenses = calculateTotalExpenses(expenseChartData);
+    const totalCreditCardDebt = calculateTotalCreditCardDebt(creditCardChartData);
+    const net = calculateNet(totalIncome, totalExpenses, totalCreditCardDebt);
+    const percentages = calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt, net);
+    const barChartData = prepareBarChartData(percentages);
+
+    return { 
+        data, 
+        loading, 
+        error, 
+        incomeChartData, 
+        expenseChartData, 
+        creditCardChartData, 
+        totalIncome, 
+        totalExpenses, 
+        totalCreditCardDebt, 
+        net, 
+        barChartData 
+    };
 }

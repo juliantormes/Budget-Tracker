@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import InputField from '../components/InputField';
+import ErrorMessage from '../components/ErrorMessage';
+import SubmitButton from '../components/SubmitButton';
 import '../styles/FormStyles.css';
 
 const LoginForm = () => {
@@ -37,22 +40,22 @@ const LoginForm = () => {
         <div className="form-container">
             <form onSubmit={handleSubmit} className="form">
                 <h2>Login</h2>
-                {error && <div className="error-message">{error}</div>}
-                <input
+                <ErrorMessage error={error} />
+                <InputField
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                 />
-                <input
+                <InputField
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                 />
-                <button type="submit">Log In</button>
+                <SubmitButton text="Log In" />
             </form>
-            <button onClick={() => navigate('/register')} className="redirect-button">Don't have an account? Register</button>
+            <SubmitButton onClick={() => navigate('/register')} text="Don't have an account? Register" />
         </div>
     );
 };

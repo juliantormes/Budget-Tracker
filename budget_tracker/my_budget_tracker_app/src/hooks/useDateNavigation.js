@@ -4,18 +4,18 @@ export function useDateNavigation(year, month) {
     const navigate = useNavigate();
 
     const goToPreviousMonth = () => {
-        const newDate = new Date(year, month - 1, 1); // JavaScript months are zero-based
-        newDate.setMonth(newDate.getMonth() - 1); // Move to the previous month
+        const newDate = new Date(year, month - 1, 1);
+        newDate.setMonth(newDate.getMonth() - 1);
         const newYear = newDate.getFullYear();
-        const newMonth = newDate.getMonth() + 1; // Adjust back to 1-based month
+        const newMonth = newDate.getMonth() + 1;
         navigate(`/home?year=${newYear}&month=${newMonth}`);
     };
 
     const goToNextMonth = () => {
-        const newDate = new Date(year, month - 1, 1); // JavaScript months are zero-based
-        newDate.setMonth(newDate.getMonth() + 1); // Move to the next month
+        const newDate = new Date(year, month - 1, 1);
+        newDate.setMonth(newDate.getMonth() + 1);
         const newYear = newDate.getFullYear();
-        const newMonth = newDate.getMonth() + 1; // Adjust back to 1-based month
+        const newMonth = newDate.getMonth() + 1;
         navigate(`/home?year=${newYear}&month=${newMonth}`);
     };
 

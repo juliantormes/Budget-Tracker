@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import InputField from '../components/InputField';
+import ErrorMessage from '../components/ErrorMessage';
+import SubmitButton from '../components/SubmitButton';
 import '../styles/FormStyles.css';
 
 const RegisterForm = () => {
@@ -55,28 +58,28 @@ const RegisterForm = () => {
         <div className="form-container">
             <form onSubmit={handleSubmit} className="form">
                 <h2>Register</h2>
-                {error && <div className="error-message">{error}</div>}
-                <input
+                <ErrorMessage error={error} />
+                <InputField
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
                 />
-                <input
+                <InputField
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
                 />
-                <input
+                <InputField
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm Password"
                 />
-                <button type="submit">Register</button>
+                <SubmitButton text="Register" />
             </form>
-            <button onClick={() => navigate('/login')} className="redirect-button">Already have an account? Login</button>
+            <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" />
         </div>
     );
 };

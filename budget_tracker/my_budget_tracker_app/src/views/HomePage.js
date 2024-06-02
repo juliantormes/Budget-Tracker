@@ -17,7 +17,6 @@ const HomePage = () => {
 
     const { goToPreviousMonth, goToNextMonth } = useDateNavigation(year, month);
     const {
-        data,
         loading,
         error,
         incomeChartData,

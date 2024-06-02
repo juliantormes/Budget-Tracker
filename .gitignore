@@ -1,5 +1,6 @@
 # dependencies
 /node_modules
+/src/node_modules
 /.pnp
 .pnp.js
 
@@ -35,6 +36,7 @@ dist/
 
 # Dependency directories
 node_modules/
+src/node_modules/
 jspm_packages/
 
 # Next.js build output

@@ -1,6 +1,6 @@
 # dependencies
 /node_modules
-/src/node_modules
+/my_budget_tracker_app/node_modules
 /.pnp
 .pnp.js
 
@@ -35,8 +35,6 @@ build/
 dist/
 
 # Dependency directories
-node_modules/
-src/node_modules/
 jspm_packages/
 
 # Next.js build output

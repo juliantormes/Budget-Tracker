@@ -64,7 +64,7 @@ budget_tracker/media/
 *.pyc
 budget_tracker/__pycache__/
 budget_tracker/local_settings.py
-budget_tracker/.env
+budget_tracker/my_budget_tracker_app/.env
 
 # Editor directories and files
 .vscode/

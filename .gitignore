@@ -1,63 +1,70 @@
 # Node modules
-node_modules/
-my_budget_tracker_app/node_modules/
+budget_tracker/my_budget_tracker_app/node_modules/
 
 # Yarn PnP
-.pnp
-.pnp.js
+budget_tracker/.pnp
+budget_tracker/.pnp.js
 
 # Testing
-coverage/
-*.cover
-*.py,cover
-.tox/
-nosetests.xml
-coverage.xml
-.hypothesis/
+budget_tracker/coverage/
 
 # Production
-build/
-dist/
-.next/
-out/
+budget_tracker/build/
 
 # Misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-Thumbs.db
+budget_tracker/.env.local
+budget_tracker/.env.development.local
+budget_tracker/.env.test.local
+budget_tracker/.env.production.local
 
 # Log files
-logs/
+budget_tracker/logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-*.log
 
 # OS generated files
 Thumbs.db
 
+# Build directories
+budget_tracker/build/
+budget_tracker/dist/
+
+# Dependency directories
+budget_tracker/node_modules/
+budget_tracker/my_budget_tracker_app/node_modules/
+budget_tracker/jspm_packages/
+
+# Next.js build output
+budget_tracker/.next/
+budget_tracker/out/
+
 # Static files
-static/
+budget_tracker/static/
 
 # Environment variables
-my_budget_tracker_app/.env
+budget_tracker/.env
+
+# Virtual environment
+budget_tracker/.venv/
 
 # Python specific
 *.pyc
 *.pyo
-__pycache__/
-*.so
+budget_tracker/__pycache__/
+budget_tracker/*.so
 
 # Django specific
 *.log
-db.sqlite3
-/media
+budget_tracker/db.sqlite3
+budget_tracker/media/
 *.pot
-local_settings.py
+*.pyc
+budget_tracker/__pycache__/
+budget_tracker/local_settings.py
+budget_tracker/.env
 
 # Editor directories and files
 .vscode/
@@ -66,11 +73,17 @@ local_settings.py
 # Sphinx documentation
 docs/_build/
 
+# Testing
+coverage/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+
 # MySQL
 *.sql
 
 # MacOS specific
 .DS_Store
-
-# Virtual environment
-budget_tracker/.venv/

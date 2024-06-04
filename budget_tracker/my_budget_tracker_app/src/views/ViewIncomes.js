@@ -16,14 +16,15 @@ const ViewIncomes = () => {
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [startDate, setStartDate] = useState(dayjs().startOf('month'));
   const [endDate, setEndDate] = useState(dayjs().endOf('month'));
-  const { data, loading, error } = useFetchFinancialData(dayjs().year(), dayjs().month() + 1);
+  const { data, loading, error } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
+  const [isValidRange, setIsValidRange] = useState(true);
 
   useEffect(() => {
-    if (data.incomes.length > 0) {
+    if (isValidRange && data.incomes.length > 0) {
       fetchIncomes(startDate, endDate);
     }
-  }, [startDate, endDate, data]);
+  }, [startDate, endDate, data, isValidRange]);
 
   const fetchIncomes = (start, end) => {
     const fetchedIncomes = data.incomes.filter(income =>
@@ -34,26 +35,39 @@ const ViewIncomes = () => {
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-    // Check if the selected date is outside the current range
-    if (!date.isBetween(startDate, endDate, null, '[]')) {
-      const newStartDate = date.startOf('month');
-      const newEndDate = date.endOf('month');
-      handleDateRangeChange(newStartDate, newEndDate);
-    } else {
-      const incomesForSelectedDate = data.incomes.filter(income => dayjs(income.date).isSame(date, 'day'));
-      setSelectedIncomes(incomesForSelectedDate);
-    }
+    const incomesForSelectedDate = data.incomes.filter(income => dayjs(income.date).isSame(date, 'day'));
+    setSelectedIncomes(incomesForSelectedDate);
   };
 
   const handleDateRangeChange = (start, end) => {
     if (dayjs(end).diff(dayjs(start), 'day') > 31) {
-      alert('Please select a date range within 31 days.');
-      return;
+      setIsValidRange(false);
+    } else {
+      setIsValidRange(true);
+      setStartDate(start);
+      setEndDate(end);
+      fetchIncomes(start, end);
+      setSelectedDate(start); // Update selected date to reflect the new range
     }
-    setStartDate(start);
-    setEndDate(end);
-    fetchIncomes(start, end);
-    setSelectedDate(start); // Update selected date to reflect the new range
+  };
+
+  const handleStartDateChange = (newValue) => {
+    handleDateRangeChange(newValue, endDate);
+    setSelectedDate(newValue); // Update the calendar display
+  };
+
+  const handleEndDateChange = (newValue) => {
+    handleDateRangeChange(startDate, newValue);
+    setSelectedDate(startDate); // Update the calendar display
+  };
+
+  const handleMonthChange = (date) => {
+    const newStartDate = date.startOf('month');
+    const newEndDate = date.endOf('month');
+    setStartDate(newStartDate);
+    setEndDate(newEndDate);
+    setSelectedDate(newStartDate);
+    fetchIncomes(newStartDate, newEndDate);
   };
 
   const handleEdit = (id) => {
@@ -94,7 +108,7 @@ const ViewIncomes = () => {
             <DatePicker
               label="Start Date"
               value={startDate}
-              onChange={(newValue) => handleDateRangeChange(newValue, endDate)}
+              onChange={handleStartDateChange}
               renderInput={(params) => <TextField {...params} />}
               sx={{
                 flex: 1,
@@ -121,7 +135,7 @@ const ViewIncomes = () => {
             <DatePicker
               label="End Date"
               value={endDate}
-              onChange={(newValue) => handleDateRangeChange(startDate, newValue)}
+              onChange={handleEndDateChange}
               renderInput={(params) => <TextField {...params} />}
               sx={{
                 flex: 1,
@@ -146,36 +160,39 @@ const ViewIncomes = () => {
               }}
             />
           </Box>
-          <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
-            <DateCalendar
-              date={selectedDate}
-              onChange={handleDateChange}
-              renderDay={renderDay}
-              sx={{
-                backgroundColor: '#1c2330',
-                color: '#fff',
-                '& .MuiPickersDay-root': {
+          {isValidRange && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+              <DateCalendar
+                date={selectedDate}
+                onChange={handleDateChange}
+                onMonthChange={handleMonthChange}
+                renderDay={renderDay}
+                sx={{
+                  backgroundColor: '#1c2330',
                   color: '#fff',
-                },
-                '& .MuiPickersDay-root.Mui-selected': {
-                  backgroundColor: '#1976d2',
-                  color: '#fff',
-                },
-                '& .MuiPickersCalendarHeader-root': {
-                  color: '#fff',
-                },
-                '& .MuiPickersCalendarHeader-label': {
-                  color: '#fff',
-                },
-                '& .MuiSvgIcon-root': {
-                  color: '#fff',
-                },
-                '& .MuiTypography-root': {
-                  color: '#fff',
-                },
-              }}
-            />
-          </Box>
+                  '& .MuiPickersDay-root': {
+                    color: '#fff',
+                  },
+                  '& .MuiPickersDay-root.Mui-selected': {
+                    backgroundColor: '#1976d2',
+                    color: '#fff',
+                  },
+                  '& .MuiPickersCalendarHeader-root': {
+                    color: '#fff',
+                  },
+                  '& .MuiPickersCalendarHeader-label': {
+                    color: '#fff',
+                  },
+                  '& .MuiSvgIcon-root': {
+                    color: '#fff',
+                  },
+                  '& .MuiTypography-root': {
+                    color: '#fff',
+                  },
+                }}
+              />
+            </Box>
+          )}
         </LocalizationProvider>
         <Container>
           {loading ? (

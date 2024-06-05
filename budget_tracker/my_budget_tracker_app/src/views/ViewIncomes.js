@@ -16,7 +16,7 @@ const ViewIncomes = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
-  const { data, loading, error } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
+  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
 
@@ -58,12 +58,24 @@ const ViewIncomes = () => {
     fetchIncomes(newStartDate, newEndDate);
   };
 
-  const handleEdit = (id) => {
-    // Implement edit income functionality
+  const handleEdit = async (updatedIncome) => {
+    // Implement API call to save the edited income
+    await fetch(`/api/incomes/${updatedIncome.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(updatedIncome)
+    });
+    refetch();
   };
 
-  const handleDelete = (id) => {
-    // Implement delete income functionality
+  const handleDelete = async (id) => {
+    // Implement API call to delete the income
+    await fetch(`/api/incomes/${id}`, {
+      method: 'DELETE'
+    });
+    refetch();
   };
 
   return (

@@ -1,0 +1,58 @@
+/* General dialog styles */
+.MuiDialog-root {
+    color: #ffffff; /* Ensure all text is white */
+}
+
+/* Edit dialog specific styles */
+.edit-dialog .MuiPaper-root {
+    background-color: #0d47a1 ; /* Light blue background */
+    color: #ffffff; /* White text */
+}
+
+.edit-dialog .MuiDialogTitle-root {
+    color: #ffffff; /* White text for the dialog title */
+}
+
+.edit-dialog .MuiDialogContent-root {
+    color: #ffffff; /* White text for the dialog content */
+}
+
+.edit-dialog .MuiTextField-root {
+    color: #ffffff; /* White text for the text fields */
+}
+
+.edit-dialog .MuiInputBase-input {
+    color: #ffffff; /* White text inside input fields */
+}
+
+.edit-dialog .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff; /* White border for input fields */
+}
+
+.edit-dialog .MuiButton-root {
+    color: #ffffff; /* White text for buttons */
+    border-color: #ffffff; /* White border for buttons */
+}
+
+/* Delete dialog specific styles */
+.delete-dialog .MuiPaper-root {
+    background-color: #1976d2; /* Light blue background */
+    color: #ffffff; /* White text */
+}
+
+.delete-dialog .MuiDialogTitle-root {
+    color: #ffffff; /* White text for the dialog title */
+}
+
+.delete-dialog .MuiDialogContent-root {
+    color: #ffffff; /* White text for the dialog content */
+}
+
+.delete-dialog .MuiTypography-root {
+    color: #ffffff; /* White text for the confirmation message */
+}
+
+.delete-dialog .MuiButton-root {
+    color: #ffffff; /* White text for buttons */
+    border-color: #ffffff; /* White border for buttons */
+}

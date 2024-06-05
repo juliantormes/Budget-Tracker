@@ -68,6 +68,8 @@ export function useFetchFinancialData(year, month) {
         fetchData();
     }, [fetchData]);
 
+    const refetch = fetchData;
+
     const incomeChartData = prepareIncomeChartData(data.incomes, year, month, generateVibrantShades([52, 152, 219], 10));
     const expenseChartData = prepareExpenseChartData(data.expenses.filter(expense => !expense.credit_card), year, month, generateVibrantShades([46, 204, 113], 10));
     const creditCardChartData = prepareCreditCardChartData(data.creditCardExpenses, year, month, generateVibrantShades([231, 76, 60], 10));
@@ -83,6 +85,7 @@ export function useFetchFinancialData(year, month) {
         data, 
         loading, 
         error, 
+        refetch,  // Ensure refetch is included here
         incomeChartData, 
         expenseChartData, 
         creditCardChartData, 

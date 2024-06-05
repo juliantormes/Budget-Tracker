@@ -10,15 +10,21 @@ import DatePicker from '../components/DatePicker';
 import Calendar from '../components/Calendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import EditIncomeDialog from '../components/EditIncomeDialog';
+import DeleteConfirmDialog from '../components/DeleteConfirmDialog';
 import '../styles/ViewIncomes.css';
+import axiosInstance from '../api/axiosApi';
 
 const ViewIncomes = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
-  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
+  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);  // Make sure refetch is part of the returned object
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
+  const [openEditDialog, setOpenEditDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [currentIncome, setCurrentIncome] = useState(null);
 
   useEffect(() => {
     if (isValidRange && data.incomes.length > 0) {
@@ -58,24 +64,42 @@ const ViewIncomes = () => {
     fetchIncomes(newStartDate, newEndDate);
   };
 
-  const handleEdit = async (updatedIncome) => {
-    // Implement API call to save the edited income
-    await fetch(`/api/incomes/${updatedIncome.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(updatedIncome)
-    });
-    refetch();
+  const handleEdit = (income) => {
+    setCurrentIncome(income);
+    setOpenEditDialog(true);
   };
 
-  const handleDelete = async (id) => {
-    // Implement API call to delete the income
-    await fetch(`/api/incomes/${id}`, {
-      method: 'DELETE'
-    });
-    refetch();
+  const handleDelete = (income) => {
+    setCurrentIncome(income);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleSave = async (updatedIncome) => {
+    try {
+      const response = await axiosInstance.put(`/api/incomes/${updatedIncome.id}/`, updatedIncome);
+      if (response.status === 200) {
+        refetch();  // Call refetch to update data after edit
+        setOpenEditDialog(false);
+      } else {
+        throw new Error('Failed to update income');
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleConfirmDelete = async (incomeId) => {
+    try {
+      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
+      if (response.status === 204) {
+        refetch();  // Call refetch to update data after delete
+        setOpenDeleteDialog(false);
+      } else {
+        throw new Error('Failed to delete income');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -109,6 +133,22 @@ const ViewIncomes = () => {
           )}
         </Container>
       </div>
+      {currentIncome && (
+        <EditIncomeDialog
+          open={openEditDialog}
+          income={currentIncome}
+          onClose={() => setOpenEditDialog(false)}
+          onSave={handleSave}
+        />
+      )}
+      {currentIncome && (
+        <DeleteConfirmDialog
+          open={openDeleteDialog}
+          incomeId={currentIncome.id}
+          onClose={() => setOpenDeleteDialog(false)}
+          onConfirm={handleConfirmDelete}
+        />
+      )}
     </div>
   );
 };

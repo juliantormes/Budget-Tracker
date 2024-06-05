@@ -4,27 +4,43 @@ import { TextField, IconButton, Container, Box, Typography, List, ListItem, List
 import { Edit, Delete } from '@mui/icons-material';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import { useFetchFinancialData } from '../hooks/useFetchFinancialData';
 import dayjs from 'dayjs';
 
+const IncomeList = ({ incomes, handleEdit, handleDelete }) => (
+  <List>
+    {incomes.map(income => (
+      <ListItem key={income.id} className="income-list-item">
+        <ListItemText primary={income.category_name} secondary={dayjs(income.date).format('MMMM D, YYYY')} />
+        <ListItemText primary={`$${Number(income.amount).toFixed(2)}`} />
+        <IconButton onClick={() => handleEdit(income.id)}>
+          <Edit />
+        </IconButton>
+        <IconButton onClick={() => handleDelete(income.id)}>
+          <Delete />
+        </IconButton>
+      </ListItem>
+    ))}
+  </List>
+);
+
 const ViewIncomes = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [startDate, setStartDate] = useState(dayjs().startOf('month'));
-  const [endDate, setEndDate] = useState(dayjs().endOf('month'));
+  const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
   const { data, loading, error } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
 
   useEffect(() => {
     if (isValidRange && data.incomes.length > 0) {
-      fetchIncomes(startDate, endDate);
+      fetchIncomes(dateRange[0], dateRange[1]);
     }
-  }, [startDate, endDate, data, isValidRange]);
+  }, [dateRange, data, isValidRange]);
 
   const fetchIncomes = (start, end) => {
     const fetchedIncomes = data.incomes.filter(income =>
@@ -39,33 +55,21 @@ const ViewIncomes = () => {
     setSelectedIncomes(incomesForSelectedDate);
   };
 
-  const handleDateRangeChange = (start, end) => {
-    if (dayjs(end).diff(dayjs(start), 'day') > 31) {
+  const handleDateRangeChange = (newValue) => {
+    if (dayjs(newValue[1]).diff(dayjs(newValue[0]), 'day') > 31) {
       setIsValidRange(false);
     } else {
       setIsValidRange(true);
-      setStartDate(start);
-      setEndDate(end);
-      fetchIncomes(start, end);
-      setSelectedDate(start); // Update selected date to reflect the new range
+      setDateRange(newValue);
+      fetchIncomes(newValue[0], newValue[1]);
+      setSelectedDate(newValue[0]);
     }
-  };
-
-  const handleStartDateChange = (newValue) => {
-    handleDateRangeChange(newValue, endDate);
-    setSelectedDate(newValue); // Update the calendar display
-  };
-
-  const handleEndDateChange = (newValue) => {
-    handleDateRangeChange(startDate, newValue);
-    setSelectedDate(startDate); // Update the calendar display
   };
 
   const handleMonthChange = (date) => {
     const newStartDate = date.startOf('month');
     const newEndDate = date.endOf('month');
-    setStartDate(newStartDate);
-    setEndDate(newEndDate);
+    setDateRange([newStartDate, newEndDate]);
     setSelectedDate(newStartDate);
     fetchIncomes(newStartDate, newEndDate);
   };
@@ -104,92 +108,28 @@ const ViewIncomes = () => {
         <Header logout={logout} />
         <Typography variant="h4" gutterBottom>View Incomes</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box sx={{ display: 'flex', gap: 2, mb: 4, justifyContent: 'center' }}>
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              onChange={handleStartDateChange}
-              renderInput={(params) => <TextField {...params} />}
-              sx={{
-                flex: 1,
-                maxWidth: 200,
-                '& .MuiInputBase-input': {
-                  color: '#fff',
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#fff',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#fff',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#fff',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#fff',
-                  },
-                }
-              }}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              onChange={handleEndDateChange}
-              renderInput={(params) => <TextField {...params} />}
-              sx={{
-                flex: 1,
-                maxWidth: 200,
-                '& .MuiInputBase-input': {
-                  color: '#fff',
-                },
-                '& .MuiInputLabel-root': {
-                  color: '#fff',
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: '#fff',
-                  },
-                  '&:hover fieldset': {
-                    borderColor: '#fff',
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: '#fff',
-                  },
-                }
-              }}
+          <Box className="date-picker-container">
+            <DateRangePicker
+              startText="Start Date"
+              endText="End Date"
+              value={dateRange}
+              onChange={handleDateRangeChange}
+              renderInput={(startProps, endProps) => (
+                <>
+                  <TextField {...startProps} className="date-picker-input" />
+                  <Box sx={{ mx: 2 }}> to </Box>
+                  <TextField {...endProps} className="date-picker-input" />
+                </>
+              )}
             />
           </Box>
           {isValidRange && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
+            <Box className="calendar-container">
               <DateCalendar
-                date={selectedDate}
+                value={selectedDate}
                 onChange={handleDateChange}
                 onMonthChange={handleMonthChange}
                 renderDay={renderDay}
-                sx={{
-                  backgroundColor: '#1c2330',
-                  color: '#fff',
-                  '& .MuiPickersDay-root': {
-                    color: '#fff',
-                  },
-                  '& .MuiPickersDay-root.Mui-selected': {
-                    backgroundColor: '#1976d2',
-                    color: '#fff',
-                  },
-                  '& .MuiPickersCalendarHeader-root': {
-                    color: '#fff',
-                  },
-                  '& .MuiPickersCalendarHeader-label': {
-                    color: '#fff',
-                  },
-                  '& .MuiSvgIcon-root': {
-                    color: '#fff',
-                  },
-                  '& .MuiTypography-root': {
-                    color: '#fff',
-                  },
-                }}
               />
             </Box>
           )}
@@ -200,20 +140,7 @@ const ViewIncomes = () => {
           ) : error ? (
             <Typography variant="h6" color="error">Error: {error.message}</Typography>
           ) : selectedIncomes.length > 0 ? (
-            <List>
-              {selectedIncomes.map(income => (
-                <ListItem key={income.id} sx={{ justifyContent: 'space-between', backgroundColor: '#1c2330', color: '#fff', mb: 2, borderRadius: 1 }}>
-                  <ListItemText primary={income.category_name} secondary={dayjs(income.date).format('MMMM D, YYYY')} sx={{ color: '#fff' }} />
-                  <ListItemText primary={`$${Number(income.amount).toFixed(2)}`} sx={{ color: '#fff' }} />
-                  <IconButton onClick={() => handleEdit(income.id)} sx={{ color: '#fff' }}>
-                    <Edit />
-                  </IconButton>
-                  <IconButton onClick={() => handleDelete(income.id)} sx={{ color: '#fff' }}>
-                    <Delete />
-                  </IconButton>
-                </ListItem>
-              ))}
-            </List>
+            <IncomeList incomes={selectedIncomes} handleEdit={handleEdit} handleDelete={handleDelete} />
           ) : (
             <Typography variant="h6" color="textSecondary">No incomes for the selected date.</Typography>
           )}

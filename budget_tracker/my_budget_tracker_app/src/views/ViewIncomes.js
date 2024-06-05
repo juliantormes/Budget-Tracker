@@ -1,32 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { DateCalendar } from '@mui/x-date-pickers';
-import { TextField, IconButton, Container, Box, Typography, List, ListItem, ListItemText } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
+import { Container, Box, Typography } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import { useFetchFinancialData } from '../hooks/useFetchFinancialData';
 import dayjs from 'dayjs';
-
-const IncomeList = ({ incomes, handleEdit, handleDelete }) => (
-  <List>
-    {incomes.map(income => (
-      <ListItem key={income.id} className="income-list-item">
-        <ListItemText primary={income.category_name} secondary={dayjs(income.date).format('MMMM D, YYYY')} />
-        <ListItemText primary={`$${Number(income.amount).toFixed(2)}`} />
-        <IconButton onClick={() => handleEdit(income.id)}>
-          <Edit />
-        </IconButton>
-        <IconButton onClick={() => handleDelete(income.id)}>
-          <Delete />
-        </IconButton>
-      </ListItem>
-    ))}
-  </List>
-);
+import IncomeList from '../components/IncomeList';
+import DatePicker from '../components/DatePicker';
+import Calendar from '../components/Calendar';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import '../styles/ViewIncomes.css';
 
 const ViewIncomes = () => {
   const { logout } = useAuth();
@@ -82,23 +66,6 @@ const ViewIncomes = () => {
     // Implement delete income functionality
   };
 
-  const renderDay = (date, selectedDates, pickersDayProps) => {
-    const isRecurring = data.incomes.some(income => income.recurring && dayjs(income.date).date() === date.date());
-    const isIncomeDay = data.incomes.some(income => !income.recurring && dayjs(income.date).isSame(date, 'day'));
-
-    return (
-      <Box
-        {...pickersDayProps}
-        sx={{
-          border: (isRecurring || isIncomeDay) ? '2px solid #1976d2' : undefined,
-          borderRadius: '50%',
-          backgroundColor: (isRecurring || isIncomeDay) ? '#1976d2' : undefined,
-          color: (isRecurring || isIncomeDay) ? '#fff' : undefined,
-        }}
-      />
-    );
-  };
-
   return (
     <div className="view-incomes">
       <div className="sidebar-container">
@@ -108,30 +75,14 @@ const ViewIncomes = () => {
         <Header logout={logout} />
         <Typography variant="h4" gutterBottom>View Incomes</Typography>
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <Box className="date-picker-container">
-            <DateRangePicker
-              startText="Start Date"
-              endText="End Date"
-              value={dateRange}
-              onChange={handleDateRangeChange}
-              renderInput={(startProps, endProps) => (
-                <>
-                  <TextField {...startProps} className="date-picker-input" />
-                  <Box sx={{ mx: 2 }}> to </Box>
-                  <TextField {...endProps} className="date-picker-input" />
-                </>
-              )}
-            />
-          </Box>
+          <DatePicker dateRange={dateRange} handleDateRangeChange={handleDateRangeChange} isValidRange={isValidRange} />
           {isValidRange && (
-            <Box className="calendar-container">
-              <DateCalendar
-                value={selectedDate}
-                onChange={handleDateChange}
-                onMonthChange={handleMonthChange}
-                renderDay={renderDay}
-              />
-            </Box>
+            <Calendar
+              selectedDate={selectedDate}
+              handleDateChange={handleDateChange}
+              handleMonthChange={handleMonthChange}
+              data={data}
+            />
           )}
         </LocalizationProvider>
         <Container>

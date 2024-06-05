@@ -1,0 +1,153 @@
+.view-incomes {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    color: #ffffff; /* Use white or a lighter color for text */
+}
+
+.content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.date-picker-container,
+.calendar-container {
+    margin: 20px 0;
+    display: flex;
+    justify-content: center;
+}
+
+.date-picker-input {
+    border-radius: 4px;
+    color: #ffffff; /* White text color */
+    border: 1px solid #e0e0e0; /* Light border */
+}
+
+.date-picker-input .MuiInputLabel-root {
+    color: #1976d2; /* Blue color for the labels */
+}
+
+.income-list-item {
+    border-radius: 4px;
+    margin: 5px 0;
+    padding: 10px;
+    color: #ffffff; /* White text color */
+}
+
+.MuiIconButton-root {
+    color: #ffffff !important; /* White icons */
+}
+
+.MuiTypography-root {
+    color: #ffffff !important; /* White text */
+}
+
+/* Additional styles for better visibility */
+.MuiOutlinedInput-root {
+    color: #ffffff !important; /* White text inside input fields */
+}
+
+.MuiInputBase-input {
+    color: #ffffff !important; /* White text inside input fields */
+}
+
+.MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important; /* White border for input fields */
+}
+
+.MuiPickersDay-dayWithMargin {
+    color: #ffffff !important; /* White text in calendar days */
+}
+
+.MuiPickersDay-dayOutsideMonth {
+    color: #bbbbbb !important; /* Lighter color for days outside the month */
+}
+
+.MuiPickersCalendarHeader-switchViewButton {
+    color: #1976d2 !important; /* Blue color for month/year switch button */
+}
+
+.MuiPickersArrowSwitcher-root {
+    color: #1976d2 !important; /* Blue color for calendar navigation arrows */
+}
+
+.MuiPickersArrowSwitcher-root .MuiSvgIcon-root {
+    color: #1976d2 !important; /* Blue color for navigation arrows */
+}
+
+/* Specific styles for date range labels */
+.MuiFormLabel-root.Mui-focused {
+    color: #1976d2 !important; /* Blue color for focused labels */
+}
+
+.MuiInputBase-root {
+    color: #ffffff !important; /* White color for input base */
+}
+
+/* Fixing visibility for calendar labels */
+.MuiPickersCalendarHeader-label {
+    color: #1976d2 !important; /* Blue color for calendar labels */
+}
+
+.MuiInputLabel-root {
+    color: #1976d2 !important; /* Blue color for input labels */
+}
+
+.MuiPickersMonth-root, .MuiPickersYear-root {
+    color: #1976d2 !important; /* Blue color for text in month/year picker */
+}
+
+.MuiPickersDay-root.Mui-selected {
+    background-color: #1976d2 !important; /* Blue background for selected day */
+    color: #ffffff !important; /* White text for selected day */
+}
+
+.MuiPickersDay-root.Mui-selected:hover {
+    background-color: #1976d2 !important; /* Blue background for hovered selected day */
+    color: #ffffff !important; /* White text for hovered selected day */
+}
+
+.MuiPickersDay-root:hover {
+    background-color: rgba(25, 118, 210, 0.15) !important; /* Light blue hover background */
+}
+
+.MuiPickersArrowSwitcher-button {
+    color: #1976d2 !important; /* Blue color for the arrow buttons */
+}
+
+.MuiPickersCalendarHeader-labelContainer {
+    color: #1976d2 !important; /* Blue color for the month and year label */
+}
+
+.MuiPickersSlideTransition-transitionContainer .MuiTypography-root {
+    color: #1976d2 !important; /* Blue color for text in slide transition */
+}
+
+.MuiPickersDay-daySelected {
+    color: #ffffff !important; /* White text for selected day */
+    background-color: #1976d2 !important; /* Blue background for selected day */
+}
+
+.MuiPickersCalendarHeader-dayLabel {
+    color: #1976d2 !important; /* Blue color for day labels */
+}
+
+.MuiTypography-root.MuiPickersMonth-root, 
+.MuiTypography-root.MuiPickersYear-root, 
+.MuiPickersCalendarHeader-labelContainer, 
+.MuiPickersSlideTransition-transitionContainer, 
+.MuiTypography-root.MuiDayCalendar-weekDayLabel {
+    color: #1976d2 !important; /* Blue color for all calendar text */
+}
+
+.MuiPickersCalendar-weekDayLabel {
+    color: #1976d2 !important; /* Blue color for weekday labels */
+}
+
+.MuiPickersCalendarHeader-label {
+    color: #1976d2 !important; /* Blue color for the month and year text */
+}
+
+.MuiTypography-root.MuiTypography-subtitle1 {
+    color: #1976d2 !important; /* Blue color for the date picker subtitle */
+}

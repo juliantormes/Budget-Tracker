@@ -64,11 +64,14 @@ const IncomeList = ({ incomes, handleEdit, handleDelete }) => {
           onSave={handleSave}
         />
       )}
-      <DeleteConfirmDialog
-        open={deleteDialogOpen}
-        onClose={closeDeleteDialog}
-        onConfirm={handleConfirmDelete}
-      />
+      {selectedIncome && (
+        <DeleteConfirmDialog
+          open={deleteDialogOpen}
+          onClose={closeDeleteDialog}
+          onConfirm={handleConfirmDelete}
+          incomeId={selectedIncome.id}
+        />
+      )}
     </div>
   );
 };

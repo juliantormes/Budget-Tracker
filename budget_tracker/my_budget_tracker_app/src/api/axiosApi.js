@@ -1,14 +1,18 @@
 import axios from 'axios';
 
-const token = localStorage.getItem('token'); // Assuming the token is stored in localStorage
-
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8000/',
-  headers: {
-    'Authorization': `Token ${token}`,
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  }
+  baseURL: process.env.REACT_APP_API_BASE_URL,
 });
+
+axiosInstance.interceptors.request.use(
+  config => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Token ${token}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+);
 
 export default axiosInstance;

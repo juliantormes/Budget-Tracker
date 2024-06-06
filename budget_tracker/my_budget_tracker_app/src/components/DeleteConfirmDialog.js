@@ -2,7 +2,7 @@ import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material';
 import '../styles/Dialogs.css';
 
-const DeleteConfirmDialog = ({ open, onClose, onConfirm }) => {
+const DeleteConfirmDialog = ({ open, onClose, onConfirm, incomeId }) => {
   return (
     <Dialog open={open} onClose={onClose} className="delete-dialog">
       <DialogTitle>Confirm Deletion</DialogTitle>
@@ -11,7 +11,10 @@ const DeleteConfirmDialog = ({ open, onClose, onConfirm }) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="secondary">Cancel</Button>
-        <Button onClick={onConfirm} color="primary">Delete</Button>
+        <Button onClick={() => {
+          console.log('Delete button clicked, incomeId:', incomeId);
+          onConfirm(incomeId);
+        }} color="primary">Delete</Button>
       </DialogActions>
     </Dialog>
   );

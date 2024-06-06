@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Container, Box, Typography } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Typography } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -19,25 +19,25 @@ const ViewIncomes = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
-  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);  // Make sure refetch is part of the returned object
+  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
   const [openEditDialog, setOpenEditDialog] = useState(false);
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [currentIncome, setCurrentIncome] = useState(null);
 
-  useEffect(() => {
-    if (isValidRange && data.incomes.length > 0) {
-      fetchIncomes(dateRange[0], dateRange[1]);
-    }
-  }, [dateRange, data, isValidRange]);
-
-  const fetchIncomes = (start, end) => {
+  const fetchIncomes = useCallback((start, end) => {
     const fetchedIncomes = data.incomes.filter(income =>
       dayjs(income.date).isBetween(start, end, null, '[]')
     );
     setSelectedIncomes(fetchedIncomes);
-  };
+  }, [data]);
+
+  useEffect(() => {
+    if (isValidRange && data.incomes.length > 0) {
+      fetchIncomes(dateRange[0], dateRange[1]);
+    }
+  }, [dateRange, data, isValidRange, fetchIncomes]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -78,8 +78,9 @@ const ViewIncomes = () => {
     try {
       const response = await axiosInstance.put(`/api/incomes/${updatedIncome.id}/`, updatedIncome);
       if (response.status === 200) {
-        refetch();  // Call refetch to update data after edit
+        refetch();
         setOpenEditDialog(false);
+        setCurrentIncome(null); // Reset currentIncome after saving
       } else {
         throw new Error('Failed to update income');
       }
@@ -92,13 +93,14 @@ const ViewIncomes = () => {
     try {
       const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
       if (response.status === 204) {
-        refetch();  // Call refetch to update data after delete
+        refetch();
         setOpenDeleteDialog(false);
+        setCurrentIncome(null); // Reset currentIncome after deletion
       } else {
         throw new Error('Failed to delete income');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error deleting income:', error);
     }
   };
 

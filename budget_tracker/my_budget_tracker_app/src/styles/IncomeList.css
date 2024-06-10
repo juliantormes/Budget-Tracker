@@ -13,13 +13,43 @@
     background-color: #0d47a1; /* Dark blue background for table cells */
 }
 
-.income-list .MuiTableCell-root input {
-    color: #ffffff; /* Ensure input text is white */
-    background-color: transparent; /* Transparent background for input */
+.income-list .MuiTableCell-root input,
+.income-list .MuiTableCell-root .MuiSelect-root {
+    color: #ffffff !important; /* Ensure input text is white */
+    background-color: transparent !important; /* Transparent background for input */
 }
 
 .income-list .MuiIconButton-root {
     color: #ffffff; /* White icons */
+}
+
+/* Dropdown menu styles */
+.MuiSelect-root {
+    color: #ffffff !important; /* White text */
+}
+
+.MuiSelect-icon {
+    color: #ffffff !important; /* White dropdown icon */
+}
+
+.MuiInputLabel-root {
+    color: #ffffff !important; /* White label text */
+}
+
+.MuiFormControl-root .MuiInputLabel-root.Mui-focused {
+    color: #ffffff !important; /* White label text when focused */
+}
+
+.MuiFormControl-root .MuiInputLabel-root {
+    top: -6px; /* Adjust label position */
+}
+
+.MuiPaper-root {
+    color: #1976d2 !important; /* White text for dropdown options */
+}
+
+.MuiMenuItem-root {
+    color: #1976d2 !important; /* White text for dropdown options */
 }
 
 /* Confirm action dialog styles */

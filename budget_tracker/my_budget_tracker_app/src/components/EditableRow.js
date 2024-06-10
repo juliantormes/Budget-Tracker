@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { TableCell, TableRow, TextField, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { TableCell, TableRow, TextField, IconButton, MenuItem, Select, FormControl } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
@@ -7,14 +7,24 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
-const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete }) => {
+const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, categories }) => {
   const [formData, setFormData] = useState({ ...income });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
 
+  useEffect(() => {
+    if (isEditing) {
+      setFormData({ ...income });
+    }
+  }, [isEditing, income]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
+  };
+
+  const handleCategoryChange = (event) => {
+    setFormData({ ...formData, income_category: event.target.value });
   };
 
   const handleActionConfirm = () => {
@@ -31,19 +41,29 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete }) 
     setConfirmActionOpen(true);
   };
 
+  const currentCategory = categories.find((category) => category.id === income.income_category?.id)?.name || 'N/A';
+
   return (
     <>
       <TableRow key={income.id}>
         <TableCell>
           {isEditing ? (
-            <TextField
-              name="category_name"
-              value={formData.category_name}
-              onChange={handleChange}
-              fullWidth
-            />
+            <FormControl fullWidth>
+              <Select
+                name="income_category"
+                value={formData.income_category}
+                onChange={handleCategoryChange}
+                displayEmpty
+              >
+                {categories.map((category) => (
+                  <MenuItem key={category.id} value={category.id}>
+                    {category.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           ) : (
-            income.category_name
+            categories.find((category) => category.id === income.income_category)?.name || 'N/A'
           )}
         </TableCell>
         <TableCell>

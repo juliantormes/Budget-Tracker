@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import axiosInstance from '../api/axiosApi';
 import EditableRow from './EditableRow';
@@ -6,6 +6,20 @@ import '../styles/IncomeList.css';
 
 const IncomeList = ({ incomes, refetch }) => {
   const [editingIncomeId, setEditingIncomeId] = useState(null);
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axiosInstance.get('/api/income_categories/');
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleEditClick = (income) => {
     setEditingIncomeId(income.id);
@@ -62,6 +76,7 @@ const IncomeList = ({ incomes, refetch }) => {
             onCancel={handleCancelClick}
             onSave={handleSaveClick}
             onDelete={handleDeleteClick}
+            categories={categories}
           />
         ))}
       </TableBody>

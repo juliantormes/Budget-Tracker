@@ -1,0 +1,27 @@
+/* Confirm action dialog styles */
+.confirm-dialog .MuiPaper-root {
+    background-color: #1976d2; /* Light blue background */
+    color: #ffffff; /* White text */
+}
+
+.confirm-dialog .MuiDialogTitle-root {
+    color: #ffffff; /* White text for the dialog title */
+}
+
+.confirm-dialog .MuiDialogContent-root {
+    color: #ffffff; /* White text for the dialog content */
+}
+
+.confirm-dialog .MuiTypography-root {
+    color: #ffffff; /* White text for the confirmation message */
+}
+
+.confirm-dialog .MuiButton-root {
+    color: #ffffff; /* White text for buttons */
+    border-color: #ffffff; /* White border for buttons */
+}
+
+.confirm-dialog .MuiButton-containedPrimary {
+    background-color: #ffffff; /* White background for contained primary button */
+    color: #1976d2; /* Text color for contained primary button */
+}

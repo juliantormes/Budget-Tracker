@@ -1,78 +1,71 @@
 import React, { useState } from 'react';
-import { List, ListItem, ListItemText, IconButton } from '@mui/material';
-import { Edit, Delete } from '@mui/icons-material';
-import dayjs from 'dayjs';
-import EditIncomeDialog from './EditIncomeDialog';
-import DeleteConfirmDialog from './DeleteConfirmDialog';
+import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import axiosInstance from '../api/axiosApi';
+import EditableRow from './EditableRow';
+import '../styles/IncomeList.css';
 
-const IncomeList = ({ incomes, handleEdit, handleDelete }) => {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [selectedIncome, setSelectedIncome] = useState(null);
+const IncomeList = ({ incomes, refetch }) => {
+  const [editingIncomeId, setEditingIncomeId] = useState(null);
 
-  const openEditDialog = (income) => {
-    setSelectedIncome(income);
-    setEditDialogOpen(true);
+  const handleEditClick = (income) => {
+    setEditingIncomeId(income.id);
   };
 
-  const closeEditDialog = () => {
-    setEditDialogOpen(false);
-    setSelectedIncome(null);
+  const handleCancelClick = () => {
+    setEditingIncomeId(null);
   };
 
-  const openDeleteDialog = (income) => {
-    setSelectedIncome(income);
-    setDeleteDialogOpen(true);
+  const handleSaveClick = async (formData) => {
+    try {
+      const response = await axiosInstance.put(`/api/incomes/${formData.id}/`, formData);
+      if (response.status === 200) {
+        refetch();
+        setEditingIncomeId(null);
+      } else {
+        throw new Error('Failed to update income');
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
 
-  const closeDeleteDialog = () => {
-    setDeleteDialogOpen(false);
-    setSelectedIncome(null);
-  };
-
-  const handleSave = (updatedIncome) => {
-    handleEdit(updatedIncome);
-    closeEditDialog();
-  };
-
-  const handleConfirmDelete = () => {
-    handleDelete(selectedIncome.id);
-    closeDeleteDialog();
+  const handleDeleteClick = async (incomeId) => {
+    try {
+      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
+      if (response.status === 204) {
+        refetch();
+      } else {
+        throw new Error('Failed to delete income');
+      }
+    } catch (error) {
+      console.error('Error deleting income:', error);
+    }
   };
 
   return (
-    <div>
-      <List>
-        {incomes.map(income => (
-          <ListItem key={income.id} className="income-list-item">
-            <ListItemText primary={income.category_name} secondary={dayjs(income.date).format('MMMM D, YYYY')} />
-            <ListItemText primary={`$${Number(income.amount).toFixed(2)}`} />
-            <IconButton onClick={() => openEditDialog(income)}>
-              <Edit />
-            </IconButton>
-            <IconButton onClick={() => openDeleteDialog(income)}>
-              <Delete />
-            </IconButton>
-          </ListItem>
+    <Table>
+      <TableHead>
+        <TableRow>
+          <TableCell>Category</TableCell>
+          <TableCell>Date</TableCell>
+          <TableCell>Amount</TableCell>
+          <TableCell>Actions</TableCell>
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        {incomes.map((income) => (
+          <EditableRow
+            key={income.id}
+            income={income}
+            isEditing={editingIncomeId === income.id}
+            onEdit={handleEditClick}
+            onCancel={handleCancelClick}
+            onSave={handleSaveClick}
+            onDelete={handleDeleteClick}
+          />
         ))}
-      </List>
-      {selectedIncome && (
-        <EditIncomeDialog
-          open={editDialogOpen}
-          onClose={closeEditDialog}
-          income={selectedIncome}
-          onSave={handleSave}
-        />
-      )}
-      {selectedIncome && (
-        <DeleteConfirmDialog
-          open={deleteDialogOpen}
-          onClose={closeDeleteDialog}
-          onConfirm={handleConfirmDelete}
-          incomeId={selectedIncome.id}
-        />
-      )}
-    </div>
+      </TableBody>
+    </Table>
   );
 };
 

@@ -34,6 +34,16 @@
     color: #ffffff; /* White text color */
 }
 
+.income-list .MuiTableCell-root input {
+    color: #ffffff; /* Ensure input text is white */
+    background-color: transparent; /* Transparent background for input */
+}
+
+.income-list .MuiIconButton-root {
+    color: #ffffff; /* White icons */
+}
+
+
 .MuiIconButton-root {
     color: #ffffff !important; /* White icons */
 }

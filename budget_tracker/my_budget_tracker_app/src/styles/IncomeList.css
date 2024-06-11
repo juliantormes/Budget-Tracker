@@ -31,10 +31,18 @@
 .MuiSelect-icon {
     color: #ffffff !important; /* White dropdown icon */
 }
-
+.Mui
 .MuiInputLabel-root {
     color: #ffffff !important; /* White label text */
 }
+/* Other styles remain unchanged */
+
+/* Targeting the calendar icon in the TextField for type="date" */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}
+
+
 
 .MuiFormControl-root .MuiInputLabel-root.Mui-focused {
     color: #ffffff !important; /* White label text when focused */

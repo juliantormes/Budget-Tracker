@@ -45,7 +45,7 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
 
   return (
     <>
-      <TableRow key={income.id}>
+      <TableRow key={income.id} className={isEditing ? 'editing' : ''}>
         <TableCell>
           {isEditing ? (
             <FormControl fullWidth>
@@ -63,7 +63,7 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
               </Select>
             </FormControl>
           ) : (
-            categories.find((category) => category.id === income.income_category)?.name || 'N/A'
+            currentCategory
           )}
         </TableCell>
         <TableCell>

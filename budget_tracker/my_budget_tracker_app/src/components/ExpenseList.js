@@ -2,16 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import axiosInstance from '../api/axiosApi';
 import EditableRow from './EditableRow';
-import '../styles/IncomeList.css';
 
-const IncomeList = ({ incomes, refetch }) => {
-  const [editingIncomeId, setEditingIncomeId] = useState(null);
+const ExpenseList = ({ expenses, refetch }) => {
+  const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/income_categories/');
+        const response = await axiosInstance.get('/api/expense_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -21,38 +20,38 @@ const IncomeList = ({ incomes, refetch }) => {
     fetchCategories();
   }, []);
 
-  const handleEditClick = (income) => {
-    setEditingIncomeId(income.id);
+  const handleEditClick = (expense) => {
+    setEditingExpenseId(expense.id);
   };
 
   const handleCancelClick = () => {
-    setEditingIncomeId(null);
+    setEditingExpenseId(null);
   };
 
   const handleSaveClick = async (formData) => {
     try {
-      const response = await axiosInstance.put(`/api/incomes/${formData.id}/`, formData);
+      const response = await axiosInstance.put(`/api/expenses/${formData.id}/`, formData);
       if (response.status === 200) {
         refetch();
-        setEditingIncomeId(null);
+        setEditingExpenseId(null);
       } else {
-        throw new Error('Failed to update income');
+        throw new Error('Failed to update expense');
       }
     } catch (error) {
       console.error(error);
     }
   };
 
-  const handleDeleteClick = async (incomeId) => {
+  const handleDeleteClick = async (expenseId) => {
     try {
-      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
+      const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
       if (response.status === 204) {
         refetch();
       } else {
-        throw new Error('Failed to delete income');
+        throw new Error('Failed to delete expense');
       }
     } catch (error) {
-      console.error('Error deleting income:', error);
+      console.error('Error deleting expense:', error);
     }
   };
 
@@ -67,17 +66,17 @@ const IncomeList = ({ incomes, refetch }) => {
         </TableRow>
       </TableHead>
       <TableBody>
-        {incomes.map((income) => (
+        {expenses.map((expense) => (
           <EditableRow
-            key={income.id}
-            item={income}
-            isEditing={editingIncomeId === income.id}
+            key={expense.id}
+            item={expense}
+            isEditing={editingExpenseId === expense.id}
             onEdit={handleEditClick}
             onCancel={handleCancelClick}
             onSave={handleSaveClick}
             onDelete={handleDeleteClick}
             categories={categories}
-            type="income"
+            type="expense"
           />
         ))}
       </TableBody>
@@ -85,4 +84,4 @@ const IncomeList = ({ incomes, refetch }) => {
   );
 };
 
-export default IncomeList;
+export default ExpenseList;

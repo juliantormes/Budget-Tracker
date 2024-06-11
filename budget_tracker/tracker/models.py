@@ -5,12 +5,6 @@ from decimal import Decimal
 from django.utils import timezone
 from .utils import calculate_total_payment_with_surcharge
 
-class ExpenseCategory(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
 class CreditCard(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_four_digits = models.CharField(max_length=4)
@@ -48,9 +42,16 @@ class CreditCard(models.Model):
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
+class ExpenseCategory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Expense(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    expense_category = models.ForeignKey(ExpenseCategory, related_name='expense', on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(ExpenseCategory, related_name='expense', on_delete=models.CASCADE, null=True)
     description = models.CharField(max_length=255, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
@@ -59,6 +60,7 @@ class Expense(models.Model):
     credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True)
     installments = models.IntegerField(default=1)
     surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
+
     def update_amount(self, new_amount):
         if self.is_recurring:
             ExpenseChangeLog.objects.create(
@@ -68,14 +70,14 @@ class Expense(models.Model):
             )
             self.amount = new_amount
             self.save()
+
     def save(self, *args, **kwargs):
         if self.is_recurring and self.credit_card and self.installments:
             self.end_date = self.date + relativedelta(months=self.installments-1)
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.expense_category.name}: {self.amount} on {self.date}"
-
+        return f"{self.category.name}: {self.amount} on {self.date}"
 
 class IncomeCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -83,25 +85,28 @@ class IncomeCategory(models.Model):
 
     def __str__(self):
         return self.name    
+
 class Income(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    income_category = models.ForeignKey(IncomeCategory, related_name='income', on_delete=models.CASCADE, null=True)
+    category = models.ForeignKey(IncomeCategory, related_name='income', on_delete=models.CASCADE, null=True)
     description = models.CharField(max_length=255, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     is_recurring = models.BooleanField(default=False)
+
     def update_amount(self, new_amount):
         if self.is_recurring:
             IncomeChangeLog.objects.create(
                 income=self,
                 previous_amount=self.amount,
-                new_amount=new_amount
+                new_amount = new_amount
             )
             self.amount = new_amount
             self.save()
 
     def __str__(self):
-        return f"{self.income_category.name}: {self.amount} on {self.date}"
+        return f"{self.category.name}: {self.amount} on {self.date}"
+
 class ExpenseChangeLog(models.Model):
     expense = models.ForeignKey('Expense', on_delete=models.CASCADE, related_name='change_logs')
     previous_amount = models.DecimalField(max_digits=10, decimal_places=2)

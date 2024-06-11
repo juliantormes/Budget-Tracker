@@ -7,16 +7,16 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
-const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, categories }) => {
-  const [formData, setFormData] = useState({ ...income });
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type }) => {
+  const [formData, setFormData] = useState({ ...item });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
 
   useEffect(() => {
     if (isEditing) {
-      setFormData({ ...income });
+      setFormData({ ...item });
     }
-  }, [isEditing, income]);
+  }, [isEditing, item]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,12 +24,12 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
   };
 
   const handleCategoryChange = (event) => {
-    setFormData({ ...formData, income_category: event.target.value });
+    setFormData({ ...formData, category: event.target.value });
   };
 
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
-      onDelete(income.id);
+      onDelete(item.id);
     } else if (actionType === 'edit') {
       onSave(formData);
     }
@@ -41,17 +41,17 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
     setConfirmActionOpen(true);
   };
 
-  const currentCategory = categories.find((category) => category.id === income.income_category?.id)?.name || 'N/A';
+  const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
 
   return (
     <>
-      <TableRow key={income.id} className={isEditing ? 'editing' : ''}>
+      <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
         <TableCell>
           {isEditing ? (
             <FormControl fullWidth>
               <Select
-                name="income_category"
-                value={formData.income_category}
+                name="category"
+                value={formData.category || ''}
                 onChange={handleCategoryChange}
                 displayEmpty
               >
@@ -71,12 +71,12 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
             <TextField
               name="date"
               type="date"
-              value={dayjs(formData.date).format('YYYY-MM-DD')}
+              value={formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : ''}
               onChange={handleChange}
               fullWidth
             />
           ) : (
-            dayjs(income.date).format('YYYY-MM-DD')
+            formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : 'N/A'
           )}
         </TableCell>
         <TableCell>
@@ -84,12 +84,12 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
             <TextField
               name="amount"
               type="number"
-              value={formData.amount}
+              value={formData.amount || ''}
               onChange={handleChange}
               fullWidth
             />
           ) : (
-            income.amount
+            formData.amount !== undefined ? formData.amount : 'N/A'
           )}
         </TableCell>
         <TableCell>
@@ -104,7 +104,7 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
             </>
           ) : (
             <>
-              <IconButton onClick={() => onEdit(income)}>
+              <IconButton onClick={() => onEdit(item)}>
                 <EditIcon />
               </IconButton>
               <IconButton onClick={() => openConfirmDialog('delete')}>
@@ -119,7 +119,7 @@ const EditableRow = ({ income, isEditing, onEdit, onCancel, onSave, onDelete, ca
         onClose={() => setConfirmActionOpen(false)}
         onConfirm={handleActionConfirm}
         title={actionType === 'delete' ? 'Confirm Deletion' : 'Confirm Edit'}
-        message={actionType === 'delete' ? 'Are you sure you want to delete this income?' : 'Are you sure you want to save changes?'}
+        message={actionType === 'delete' ? `Are you sure you want to delete this ${type}?` : `Are you sure you want to save changes to this ${type}?`}
       />
     </>
   );

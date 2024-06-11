@@ -39,12 +39,12 @@ class CreditCardSerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='expense_category.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
     credit_card = CreditCardSerializer(read_only=True)
 
     class Meta:
         model = Expense
-        fields = ['id', 'amount', 'date', 'user', 'expense_category', 'category_name', 'credit_card', 'installments', 'surcharge', 'is_recurring']
+        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'credit_card', 'installments', 'surcharge', 'is_recurring']
         extra_kwargs = {'user': {'read_only': True}}
 
 class IncomeCategorySerializer(serializers.ModelSerializer):
@@ -54,11 +54,11 @@ class IncomeCategorySerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'read_only': True}}
 
 class IncomeSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='income_category.name', read_only=True)
+    category_name = serializers.CharField(source='category.name', read_only=True)
 
     class Meta:
         model = Income
-        fields = ['id', 'amount', 'date', 'user', 'income_category', 'category_name', 'is_recurring']
+        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring']
         extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseChangeLogSerializer(serializers.ModelSerializer):

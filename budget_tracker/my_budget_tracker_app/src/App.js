@@ -7,7 +7,6 @@ import RegisterForm from './views/Register';
 import ViewIncomes from './views/ViewIncomes';
 import AddIncomes from './views/AddIncomes';
 import ViewIncomeCategory from './views/ViewIncomeCategory';
-import AddIncomeCategory from './views/AddIncomeCategory';
 import ViewExpenses from './views/ViewExpenses';
 import AddExpenses from './views/AddExpenses';
 import ViewExpenseCategory from './views/ViewExpenseCategory';
@@ -38,7 +37,6 @@ const App = () => {
           <Route path="/view-incomes" element={<PrivateRoute element={ViewIncomes} />} />
           <Route path="/add-incomes" element={<PrivateRoute element={AddIncomes} />} />
           <Route path="/view-income-category" element={<PrivateRoute element={ViewIncomeCategory} />} />
-          <Route path="/add-income-category" element={<PrivateRoute element={AddIncomeCategory} />} />
           <Route path="/view-expenses" element={<PrivateRoute element={ViewExpenses} />} />
           <Route path="/add-expenses" element={<PrivateRoute element={AddExpenses} />} />
           <Route path="/view-expense-category" element={<PrivateRoute element={ViewExpenseCategory} />} />

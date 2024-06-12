@@ -29,13 +29,13 @@ const SidebarMenu = () => (
                 <MenuItem component={<Link to="/view-incomes" />}>View Incomes</MenuItem>
                 <MenuItem component={<Link to="/add-incomes" />}>Add Incomes</MenuItem>
                 <MenuItem component={<Link to="/view-income-category" />}>View Income Category</MenuItem>
-                <MenuItem component={<Link to="/add-income-category" />}>Add Income Category</MenuItem>
+                <MenuItem component={<Link to="/view-income-category?add=true" />}>Add Income Category</MenuItem>
             </SubMenu>
             <SubMenu label="Expenses" icon={<ExpenseIcon />}>
                 <MenuItem component={<Link to="/view-expenses" />}>View Expenses</MenuItem>
                 <MenuItem component={<Link to="/add-expenses" />}>Add Expenses</MenuItem>
                 <MenuItem component={<Link to="/view-expense-category" />}>View Expense Category</MenuItem>
-                <MenuItem component={<Link to="/add-expense-category" />}>Add Expense Category</MenuItem>
+                <MenuItem component={<Link to="/view-expense-category?add=true" />}>Add Expense Category</MenuItem>
             </SubMenu>
             <SubMenu label="Credit Card" icon={<CreditCardIcon />}>
                 <MenuItem component={<Link to="/view-credit-card" />}>View Credit Card</MenuItem>

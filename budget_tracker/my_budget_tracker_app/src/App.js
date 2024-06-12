@@ -40,7 +40,6 @@ const App = () => {
           <Route path="/view-expenses" element={<PrivateRoute element={ViewExpenses} />} />
           <Route path="/add-expenses" element={<PrivateRoute element={AddExpenses} />} />
           <Route path="/view-expense-category" element={<PrivateRoute element={ViewExpenseCategory} />} />
-          <Route path="/add-expense-category" element={<PrivateRoute element={AddExpenseCategory} />} />
           <Route path="/view-credit-card" element={<PrivateRoute element={ViewCreditCard} />} />
           <Route path="/add-credit-card" element={<PrivateRoute element={AddCreditCard} />} />
           <Route path="/pie-graphics" element={<PrivateRoute element={PieGraphics} />} />

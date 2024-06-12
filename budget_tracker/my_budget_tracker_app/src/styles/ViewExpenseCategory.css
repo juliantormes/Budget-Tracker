@@ -1,0 +1,49 @@
+.view-expense-category {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    color: #ffffff; /* Use white or a lighter color for text */
+  }
+  
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start; /* Align items to the top */
+    align-items: center;
+  }
+  
+  .container-top {
+    margin-top: 50px;
+    text-align: center; /* Center align the text */
+  }
+  
+  .category-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .add-button-container {
+    margin-top: 20px;
+  }
+  
+  .text-field .MuiOutlinedInput-input {
+    color: #ffffff !important; /* Ensure input text is white */
+  }
+  
+  .text-field .MuiOutlinedInput-notchedOutline {
+    border-color: #ffffff !important; /* Ensure border is white */
+  }
+  
+  .text-field .MuiInputLabel-root {
+    color: #ffffff !important; /* Ensure label is white */
+  }
+  
+  .actions {
+    display: flex;
+    gap: 5px;
+  }
+  

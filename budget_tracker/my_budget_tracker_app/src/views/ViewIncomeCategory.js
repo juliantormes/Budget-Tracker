@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Container, Typography, IconButton, Button, TextField } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
@@ -10,11 +11,16 @@ import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
 import '../styles/ViewIncomeCategory.css';
 
+const useQuery = () => {
+  return new URLSearchParams(useLocation().search);
+};
+
 const ViewIncomeCategory = () => {
   const { logout } = useAuth();
   const [categories, setCategories] = useState([]);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
+  const query = useQuery();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -27,7 +33,12 @@ const ViewIncomeCategory = () => {
     };
 
     fetchCategories();
-  }, []);
+
+    if (query.get('add')) {
+      setEditingCategoryId('new');
+      setFormData({ name: '' });
+    }
+  }, [query]);
 
   const handleEditClick = (category) => {
     setEditingCategoryId(category.id);
@@ -67,11 +78,6 @@ const ViewIncomeCategory = () => {
     } catch (error) {
       console.error('Error deleting category:', error);
     }
-  };
-
-  const handleAddCategoryClick = () => {
-    setEditingCategoryId('new');
-    setFormData({ name: '' });
   };
 
   const handleNewCategorySave = async () => {
@@ -152,7 +158,7 @@ const ViewIncomeCategory = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={handleAddCategoryClick}
+              onClick={() => setEditingCategoryId('new')}
               className="add-button"
             >
               Add Income Category

@@ -78,6 +78,7 @@ const IncomeList = ({ incomes, refetch }) => {
             onDelete={handleDeleteClick}
             categories={categories}
             type="income"
+            showType={false}
           />
         ))}
       </TableBody>

@@ -4,10 +4,12 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import CreditCardIcon from '@mui/icons-material/CreditCard';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type }) => {
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type, showType }) => {
   const [formData, setFormData] = useState({ ...item });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
@@ -42,6 +44,7 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
+  const expenseType = formData.credit_card ? <CreditCardIcon /> : <AttachMoneyIcon />;
 
   return (
     <>
@@ -92,6 +95,11 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
             formData.amount !== undefined ? formData.amount : 'N/A'
           )}
         </TableCell>
+        {showType && (
+          <TableCell>
+            {expenseType}
+          </TableCell>
+        )}
         <TableCell>
           {isEditing ? (
             <>

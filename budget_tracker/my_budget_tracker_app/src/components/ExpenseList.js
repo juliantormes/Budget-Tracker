@@ -62,6 +62,7 @@ const ExpenseList = ({ expenses, refetch }) => {
           <TableCell>Category</TableCell>
           <TableCell>Date</TableCell>
           <TableCell>Amount</TableCell>
+          <TableCell>Type</TableCell>
           <TableCell>Actions</TableCell>
         </TableRow>
       </TableHead>
@@ -77,6 +78,7 @@ const ExpenseList = ({ expenses, refetch }) => {
             onDelete={handleDeleteClick}
             categories={categories}
             type="expense"
+            showType={true}
           />
         ))}
       </TableBody>

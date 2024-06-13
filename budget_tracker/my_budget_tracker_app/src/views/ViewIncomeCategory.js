@@ -21,6 +21,7 @@ const ViewIncomeCategory = () => {
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
   const query = useQuery();
+  const addMode = query.get('add');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -33,12 +34,14 @@ const ViewIncomeCategory = () => {
     };
 
     fetchCategories();
+  }, []);
 
-    if (query.get('add')) {
+  useEffect(() => {
+    if (addMode) {
       setEditingCategoryId('new');
       setFormData({ name: '' });
     }
-  }, [query]);
+  }, [addMode]);
 
   const handleEditClick = (category) => {
     setEditingCategoryId(category.id);

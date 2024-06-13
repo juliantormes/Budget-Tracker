@@ -10,7 +10,6 @@ import ViewIncomeCategory from './views/ViewIncomeCategory';
 import ViewExpenses from './views/ViewExpenses';
 import AddExpenses from './views/AddExpenses';
 import ViewExpenseCategory from './views/ViewExpenseCategory';
-import AddExpenseCategory from './views/AddExpenseCategory';
 import ViewCreditCard from './views/ViewCreditCard';
 import AddCreditCard from './views/AddCreditCard';
 import PieGraphics from './views/PieGraphics';

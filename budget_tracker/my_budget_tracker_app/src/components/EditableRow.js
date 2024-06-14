@@ -6,17 +6,32 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
+import axiosInstance from '../api/axiosApi';
 
 const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type }) => {
   const [formData, setFormData] = useState({ ...item });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
+  const [payWithCreditCard, setPayWithCreditCard] = useState(item.pay_with_credit_card || false);
+  const [creditCards, setCreditCards] = useState([]);
 
   useEffect(() => {
     if (isEditing) {
       setFormData({ ...item });
+      setPayWithCreditCard(item.pay_with_credit_card || false);
+      fetchCreditCards();
     }
   }, [isEditing, item]);
+
+  const fetchCreditCards = async () => {
+    try {
+      const response = await axiosInstance.get('/api/credit_cards/');
+      console.log('Credit cards fetched:', response.data); // Debugging log
+      setCreditCards(response.data);
+    } catch (error) {
+      console.error('Error fetching credit cards:', error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -29,6 +44,12 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
 
   const handleCheckboxChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.checked });
+  };
+
+  const handlePayWithCreditCardChange = (e) => {
+    const isChecked = e.target.checked;
+    setPayWithCreditCard(isChecked);
+    setFormData({ ...formData, pay_with_credit_card: isChecked });
   };
 
   const handleActionConfirm = () => {
@@ -46,6 +67,7 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
+  const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card)?.last_four_digits || 'N/A';
 
   return (
     <>
@@ -126,32 +148,68 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
             </TableCell>
             <TableCell className="table-cell">
               {isEditing ? (
-                <TextField
-                  name="installments"
-                  type="number"
-                  value={formData.installments || ''}
-                  onChange={handleChange}
-                  fullWidth
-                  className="text-field"
+                <Checkbox
+                  name="pay_with_credit_card"
+                  checked={payWithCreditCard}
+                  onChange={handlePayWithCreditCardChange}
                 />
               ) : (
-                formData.installments !== undefined ? formData.installments : 'N/A'
+                formData.pay_with_credit_card ? 'Yes' : 'No'
               )}
             </TableCell>
-            <TableCell className="table-cell">
-              {isEditing ? (
-                <TextField
-                  name="surcharge"
-                  type="number"
-                  value={formData.surcharge || ''}
-                  onChange={handleChange}
-                  fullWidth
-                  className="text-field"
-                />
-              ) : (
-                formData.surcharge !== undefined ? formData.surcharge : 'N/A'
-              )}
-            </TableCell>
+            {isEditing && payWithCreditCard && (
+              <>
+                <TableCell className="table-cell">
+                  <FormControl fullWidth>
+                    <Select
+                      name="credit_card"
+                      value={formData.credit_card || ''}
+                      onChange={handleChange}
+                      displayEmpty
+                    >
+                      {creditCards.map((card) => (
+                        <MenuItem key={card.id} value={card.id}>
+                          {`${card.brand} **** ${card.last_four_digits}`}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </TableCell>
+                <TableCell className="table-cell">
+                  <TextField
+                    name="installments"
+                    type="number"
+                    value={formData.installments || ''}
+                    onChange={handleChange}
+                    fullWidth
+                    className="text-field"
+                  />
+                </TableCell>
+                <TableCell className="table-cell">
+                  <TextField
+                    name="surcharge"
+                    type="number"
+                    value={formData.surcharge || ''}
+                    onChange={handleChange}
+                    fullWidth
+                    className="text-field"
+                  />
+                </TableCell>
+              </>
+            )}
+            {!isEditing && (
+              <>
+                <TableCell className="table-cell">
+                  {currentCreditCard}
+                </TableCell>
+                <TableCell className="table-cell">
+                  {formData.installments !== undefined ? formData.installments : 'N/A'}
+                </TableCell>
+                <TableCell className="table-cell">
+                  {formData.surcharge !== undefined ? formData.surcharge : 'N/A'}
+                </TableCell>
+              </>
+            )}
           </>
         )}
         {type === 'income' && (

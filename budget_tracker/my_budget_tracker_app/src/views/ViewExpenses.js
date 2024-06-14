@@ -129,7 +129,7 @@ const ViewExpenses = () => {
           )}
         </LocalizationProvider>
         <Container maxWidth="lg">
-          <Table>
+          <Table className="table">
             <TableHead>
               <TableRow className="table-header">
                 <TableCell>Category</TableCell>
@@ -137,6 +137,8 @@ const ViewExpenses = () => {
                 <TableCell>Amount</TableCell>
                 <TableCell>Description</TableCell>
                 <TableCell>Recurring</TableCell>
+                <TableCell>Paid with Credit Card</TableCell>
+                <TableCell>Credit Card</TableCell>
                 <TableCell>Installments</TableCell>
                 <TableCell>Surcharge</TableCell>
                 <TableCell>Actions</TableCell>

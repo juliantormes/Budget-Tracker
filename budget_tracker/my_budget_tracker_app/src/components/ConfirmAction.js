@@ -1,6 +1,5 @@
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material';
-import '../styles/ConfirmAction.css';
 
 const ConfirmAction = ({ open, onClose, onConfirm, title, message }) => {
   return (

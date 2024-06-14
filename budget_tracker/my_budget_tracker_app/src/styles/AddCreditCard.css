@@ -1,3 +1,5 @@
+/* add-credit-card.css */
+
 .add-credit-card {
   display: flex;
   flex-direction: row;
@@ -49,26 +51,4 @@
 
 .submit-button:hover {
   background-color: #1565c0 !important;
-}
-
-/* Additional styles for better visibility */
-.MuiOutlinedInput-root {
-  color: #ffffff !important; /* White text inside input fields */
-}
-
-.MuiInputBase-input {
-  color: #ffffff !important; /* White text inside input fields */
-}
-
-.MuiOutlinedInput-notchedOutline {
-  border-color: #ffffff !important; /* White border for input fields */
-}
-
-/* Specific styles for input labels */
-.MuiFormLabel-root.Mui-focused {
-  color: #1976d2 !important; /* Blue color for focused labels */
-}
-
-.MuiInputBase-root {
-  color: #ffffff !important; /* White color for input base */
 }

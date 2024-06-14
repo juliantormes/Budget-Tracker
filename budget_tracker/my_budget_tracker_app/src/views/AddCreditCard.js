@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
-import '../styles/AddCreditCard.css';
+import '../styles/FormStyles.css'; // Import the consolidated form styles
 
 const AddCreditCard = () => {
   const { logout } = useAuth();
@@ -44,9 +44,9 @@ const AddCreditCard = () => {
       </div>
       <div className="content">
         <Header logout={logout} />
-        <Container maxWidth="sm">
+        <Container maxWidth="sm" className="container-top">
           <Typography variant="h4" gutterBottom>Add Credit Card</Typography>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="form-container">
             <TextField
               label="Last Four Digits"
               name="last_four_digits"
@@ -55,6 +55,7 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
             />
             <TextField
               label="Brand"
@@ -64,6 +65,7 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
             />
             <TextField
               label="Expire Date"
@@ -74,6 +76,7 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
               InputLabelProps={{
                 shrink: true,
               }}
@@ -87,6 +90,7 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
             />
             <TextField
               label="Payment Day"
@@ -97,6 +101,7 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
             />
             <TextField
               label="Close Card Day"
@@ -107,8 +112,9 @@ const AddCreditCard = () => {
               fullWidth
               margin="normal"
               required
+              className="text-field"
             />
-            <Button type="submit" variant="contained" color="primary">
+            <Button type="submit" variant="contained" color="primary" className="submit-button">
               Add Credit Card
             </Button>
           </form>

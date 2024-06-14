@@ -4,7 +4,7 @@ import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
-import '../styles/AddExpenses.css';
+import '../styles/FormStyles.css'; // Import the consolidated form styles
 
 const AddExpenses = () => {
   const { logout } = useAuth();

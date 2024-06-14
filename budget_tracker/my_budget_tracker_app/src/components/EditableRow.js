@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { TableCell, TableRow, TextField, IconButton, MenuItem, Select, FormControl } from '@mui/material';
+import { TableCell, TableRow, TextField, IconButton, MenuItem, Select, FormControl, Checkbox } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
-import CreditCardIcon from '@mui/icons-material/CreditCard';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type, showType }) => {
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type }) => {
   const [formData, setFormData] = useState({ ...item });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
@@ -29,6 +27,10 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
     setFormData({ ...formData, category: event.target.value });
   };
 
+  const handleCheckboxChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.checked });
+  };
+
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
       onDelete(item.id);
@@ -44,12 +46,11 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
-  const expenseType = formData.credit_card ? <CreditCardIcon /> : <AttachMoneyIcon />;
 
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
-        <TableCell>
+        <TableCell className="table-cell">
           {isEditing ? (
             <FormControl fullWidth>
               <Select
@@ -69,7 +70,7 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
             currentCategory
           )}
         </TableCell>
-        <TableCell>
+        <TableCell className="table-cell">
           {isEditing ? (
             <TextField
               name="date"
@@ -77,12 +78,13 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               value={formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : ''}
               onChange={handleChange}
               fullWidth
+              className="text-field"
             />
           ) : (
             formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : 'N/A'
           )}
         </TableCell>
-        <TableCell>
+        <TableCell className="table-cell">
           {isEditing ? (
             <TextField
               name="amount"
@@ -90,17 +92,82 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               value={formData.amount || ''}
               onChange={handleChange}
               fullWidth
+              className="text-field"
             />
           ) : (
             formData.amount !== undefined ? formData.amount : 'N/A'
           )}
         </TableCell>
-        {showType && (
-          <TableCell>
-            {expenseType}
+        <TableCell className="table-cell">
+          {isEditing ? (
+            <TextField
+              name="description"
+              value={formData.description || ''}
+              onChange={handleChange}
+              fullWidth
+              className="text-field"
+            />
+          ) : (
+            formData.description || 'N/A'
+          )}
+        </TableCell>
+        {type === 'expense' && (
+          <>
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <Checkbox
+                  name="is_recurring"
+                  checked={formData.is_recurring || false}
+                  onChange={handleCheckboxChange}
+                />
+              ) : (
+                formData.is_recurring ? 'Yes' : 'No'
+              )}
+            </TableCell>
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <TextField
+                  name="installments"
+                  type="number"
+                  value={formData.installments || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  className="text-field"
+                />
+              ) : (
+                formData.installments !== undefined ? formData.installments : 'N/A'
+              )}
+            </TableCell>
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <TextField
+                  name="surcharge"
+                  type="number"
+                  value={formData.surcharge || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  className="text-field"
+                />
+              ) : (
+                formData.surcharge !== undefined ? formData.surcharge : 'N/A'
+              )}
+            </TableCell>
+          </>
+        )}
+        {type === 'income' && (
+          <TableCell className="table-cell">
+            {isEditing ? (
+              <Checkbox
+                name="is_recurring"
+                checked={formData.is_recurring || false}
+                onChange={handleCheckboxChange}
+              />
+            ) : (
+              formData.is_recurring ? 'Yes' : 'No'
+            )}
           </TableCell>
         )}
-        <TableCell>
+        <TableCell className="table-cell">
           {isEditing ? (
             <>
               <IconButton onClick={() => openConfirmDialog('edit')}>

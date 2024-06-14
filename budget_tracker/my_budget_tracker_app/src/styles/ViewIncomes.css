@@ -161,3 +161,45 @@
 .MuiTypography-root.MuiTypography-subtitle1 {
     color: #1976d2 !important; /* Blue color for the date picker subtitle */
 }
+
+.table-header {
+    background-color: #1f2a40;
+}
+
+.table-header th {
+    color: white;
+}
+
+.MuiTableCell-root {
+    color: white !important;
+    border-bottom: none !important;
+}
+
+.text-field input {
+    color: white !important;
+}
+
+.text-field .MuiOutlinedInput-root {
+    fieldset {
+        border-color: white !important;
+    }
+}
+
+.MuiSelect-root,
+.MuiInputBase-root {
+    color: white !important;
+}
+
+.MuiInputLabel-root {
+    color: white !important;
+}
+
+.MuiSelect-icon {
+    color: white !important;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

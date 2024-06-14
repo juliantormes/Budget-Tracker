@@ -1,6 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Container, Typography, IconButton, Button, TextField } from '@mui/material';
+import {
+  Container,
+  Typography,
+  IconButton,
+  Button,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import EditIcon from '@mui/icons-material/Edit';
@@ -20,6 +31,8 @@ const ViewExpenseCategory = () => {
   const [categories, setCategories] = useState([]);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
   const query = useQuery();
   const addMode = query.get('add');
 
@@ -73,17 +86,31 @@ const ViewExpenseCategory = () => {
     }
   };
 
-  const handleDeleteClick = async (categoryId) => {
+  const handleDeleteClick = (categoryId) => {
+    setCategoryToDelete(categoryId);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      const response = await axiosInstance.delete(`/api/expense_categories/${categoryId}/`);
+      const response = await axiosInstance.delete(`/api/expense_categories/${categoryToDelete}/`);
       if (response.status === 204) {
-        setCategories(categories.filter((cat) => cat.id !== categoryId));
+        setCategories(categories.filter((cat) => cat.id !== categoryToDelete));
+        setOpenDeleteDialog(false);
+        setCategoryToDelete(null);
       } else {
         throw new Error('Failed to delete category');
       }
     } catch (error) {
       console.error('Error deleting category:', error);
+      setOpenDeleteDialog(false);
+      setCategoryToDelete(null);
     }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setCategoryToDelete(null);
   };
 
   const handleNewCategorySave = async () => {
@@ -101,6 +128,13 @@ const ViewExpenseCategory = () => {
     }
   };
 
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
   return (
     <div className="view-expense-category">
       <div className="sidebar-container">
@@ -116,8 +150,11 @@ const ViewExpenseCategory = () => {
                 {editingCategoryId === category.id ? (
                   <>
                     <TextField
+                      name="name"
                       value={formData.name}
-                      onChange={(e) => setFormData({ name: e.target.value })}
+                      onChange={handleChange}
+                      fullWidth
+                      className="text-field"
                     />
                     <div className="actions">
                       <IconButton onClick={() => handleSaveClick(category.id)}>
@@ -146,8 +183,11 @@ const ViewExpenseCategory = () => {
             {editingCategoryId === 'new' && (
               <div className="category-item">
                 <TextField
+                  name="name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ name: e.target.value })}
+                  onChange={handleChange}
+                  fullWidth
+                  className="text-field"
                 />
                 <div className="actions">
                   <IconButton onClick={handleNewCategorySave}>
@@ -171,6 +211,27 @@ const ViewExpenseCategory = () => {
             </Button>
           </div>
         </Container>
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title" className="dialog-title">Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description" className="dialog-content-text">
+              Are you sure you want to delete this expense category?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog} className="button">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} className="button">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

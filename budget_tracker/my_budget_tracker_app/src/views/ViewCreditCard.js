@@ -1,5 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow, IconButton, TextField, Button } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  IconButton,
+  TextField,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Button
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
@@ -8,7 +24,6 @@ import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
-import '../styles/ViewCreditCard.css';
 
 const ViewCreditCard = () => {
   const { logout } = useAuth();
@@ -22,6 +37,8 @@ const ViewCreditCard = () => {
     payment_day: '',
     close_card_day: '',
   });
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState(null);
 
   useEffect(() => {
     const fetchCreditCards = async () => {
@@ -78,17 +95,31 @@ const ViewCreditCard = () => {
     }
   };
 
-  const handleDeleteClick = async (cardId) => {
+  const handleDeleteClick = (cardId) => {
+    setCardToDelete(cardId);
+    setOpenDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
     try {
-      const response = await axiosInstance.delete(`/api/credit_cards/${cardId}/`);
+      const response = await axiosInstance.delete(`/api/credit_cards/${cardToDelete}/`);
       if (response.status === 204) {
-        setCreditCards((prevCards) => prevCards.filter((card) => card.id !== cardId));
+        setCreditCards((prevCards) => prevCards.filter((card) => card.id !== cardToDelete));
+        setOpenDeleteDialog(false);
+        setCardToDelete(null);
       } else {
         throw new Error('Failed to delete credit card');
       }
     } catch (error) {
       console.error('Error deleting credit card:', error);
+      setOpenDeleteDialog(false);
+      setCardToDelete(null);
     }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setCardToDelete(null);
   };
 
   const handleChange = (e) => {
@@ -109,7 +140,7 @@ const ViewCreditCard = () => {
           <Typography variant="h4" gutterBottom>View Credit Cards</Typography>
           <Table>
             <TableHead>
-              <TableRow>
+              <TableRow className="table-header">
                 <TableCell>Last Four Digits</TableCell>
                 <TableCell>Brand</TableCell>
                 <TableCell>Expire Date</TableCell>
@@ -130,6 +161,7 @@ const ViewCreditCard = () => {
                           value={formData.last_four_digits}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                         />
                       </TableCell>
                       <TableCell>
@@ -138,6 +170,7 @@ const ViewCreditCard = () => {
                           value={formData.brand}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                         />
                       </TableCell>
                       <TableCell>
@@ -147,6 +180,7 @@ const ViewCreditCard = () => {
                           value={formData.expire_date}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                           InputLabelProps={{
                             shrink: true,
                           }}
@@ -159,6 +193,7 @@ const ViewCreditCard = () => {
                           value={formData.credit_limit}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                         />
                       </TableCell>
                       <TableCell>
@@ -168,6 +203,7 @@ const ViewCreditCard = () => {
                           value={formData.payment_day}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                         />
                       </TableCell>
                       <TableCell>
@@ -177,6 +213,7 @@ const ViewCreditCard = () => {
                           value={formData.close_card_day}
                           onChange={handleChange}
                           fullWidth
+                          className="text-field"
                         />
                       </TableCell>
                       <TableCell>
@@ -211,6 +248,27 @@ const ViewCreditCard = () => {
             </TableBody>
           </Table>
         </Container>
+        <Dialog
+          open={openDeleteDialog}
+          onClose={handleCloseDeleteDialog}
+          aria-labelledby="delete-dialog-title"
+          aria-describedby="delete-dialog-description"
+        >
+          <DialogTitle id="delete-dialog-title" className="dialog-title">Confirm Delete</DialogTitle>
+          <DialogContent>
+            <DialogContentText id="delete-dialog-description" className="dialog-content-text">
+              Are you sure you want to delete this credit card?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeleteDialog} className="button">
+              Cancel
+            </Button>
+            <Button onClick={handleConfirmDelete} className="button">
+              Confirm
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

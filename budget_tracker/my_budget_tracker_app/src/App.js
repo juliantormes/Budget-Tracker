@@ -14,6 +14,7 @@ import ViewCreditCard from './views/ViewCreditCard';
 import AddCreditCard from './views/AddCreditCard';
 import PieGraphics from './views/PieGraphics';
 import BarGraphics from './views/BarGraphics';
+import './styles/global.css'; // Import global styles
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
   const { user } = useAuth();

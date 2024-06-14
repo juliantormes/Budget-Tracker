@@ -35,7 +35,7 @@ class ExpenseCategorySerializer(serializers.ModelSerializer):
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = ['brand', 'last_four_digits', 'close_card_day']
+        fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseSerializer(serializers.ModelSerializer):

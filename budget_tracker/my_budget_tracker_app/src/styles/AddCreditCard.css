@@ -1,22 +1,74 @@
 .add-credit-card {
-    display: flex;
-  }
-  
-  .sidebar-container {
-    width: 250px;
-  }
-  
-  .content {
-    flex-grow: 1;
-    padding: 20px;
-  }
-  
-  form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  form > * {
-    margin-bottom: 20px;
-  }
-  
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  color: #ffffff; /* Use white or a lighter color for text */
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align the content */
+}
+
+.container-top {
+  width: 100%; /* Ensure the container takes full width */
+  max-width: 600px; /* Set a max width for better appearance */
+  margin-top: 50px;
+  text-align: center; /* Center align the text */
+}
+
+.form-container {
+  display: flex;
+  justify-content: flex-start;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%; /* Ensure form takes full width */
+  align-items: center; /* Center align the form elements */
+  margin-top: 20px; /* Add some space between the title and form */
+}
+
+.text-field .MuiOutlinedInput-input {
+  color: #ffffff !important; /* Ensure input text is white */
+}
+
+.text-field .MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff !important; /* Ensure border is white */
+}
+
+.text-field .MuiInputLabel-root {
+  color: #ffffff !important; /* Ensure label is white */
+}
+
+.submit-button {
+  color: #ffffff !important;
+  background-color: #1976d2 !important;
+}
+
+.submit-button:hover {
+  background-color: #1565c0 !important;
+}
+
+/* Additional styles for better visibility */
+.MuiOutlinedInput-root {
+  color: #ffffff !important; /* White text inside input fields */
+}
+
+.MuiInputBase-input {
+  color: #ffffff !important; /* White text inside input fields */
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #ffffff !important; /* White border for input fields */
+}
+
+/* Specific styles for input labels */
+.MuiFormLabel-root.Mui-focused {
+  color: #1976d2 !important; /* Blue color for focused labels */
+}
+
+.MuiInputBase-root {
+  color: #ffffff !important; /* White color for input base */
+}

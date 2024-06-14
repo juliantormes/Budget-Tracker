@@ -40,6 +40,9 @@ const ViewIncomeCategory = () => {
     if (addMode) {
       setEditingCategoryId('new');
       setFormData({ name: '' });
+    } else {
+      setEditingCategoryId(null);
+      setFormData({ name: '' });
     }
   }, [addMode]);
 

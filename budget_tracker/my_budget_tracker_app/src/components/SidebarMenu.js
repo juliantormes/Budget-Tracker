@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sidebar as ProSidebar, Menu, MenuItem, SubMenu } from 'react-pro-sidebar';
 import CreditCardIcon from '@mui/icons-material/CreditCard';
-import PieChartIcon from '@mui/icons-material/PieChart';
 import ExpenseIcon from '@mui/icons-material/Receipt';
 import IncomeIcon from '@mui/icons-material/AttachMoney';
 import { Link, useLocation } from 'react-router-dom';
@@ -12,7 +11,6 @@ const SidebarMenu = () => {
     incomes: false,
     expenses: false,
     creditCard: false,
-    graphics: false,
   });
 
   useEffect(() => {
@@ -23,8 +21,6 @@ const SidebarMenu = () => {
       setExpandedMenus((prevState) => ({ ...prevState, expenses: true }));
     } else if (path.includes('credit-card')) {
       setExpandedMenus((prevState) => ({ ...prevState, creditCard: true }));
-    } else if (path.includes('graphics')) {
-      setExpandedMenus((prevState) => ({ ...prevState, graphics: true }));
     }
   }, [location.pathname]);
 
@@ -84,15 +80,6 @@ const SidebarMenu = () => {
         >
           <MenuItem component={<Link to="/view-credit-card" />}>View Credit Card</MenuItem>
           <MenuItem component={<Link to="/add-credit-card" />}>Add Credit Card</MenuItem>
-        </SubMenu>
-        <SubMenu
-          label="Graphics"
-          icon={<PieChartIcon />}
-          open={expandedMenus.graphics}
-          onOpenChange={() => handleToggle('graphics')}
-        >
-          <MenuItem component={<Link to="/pie-graphics" />}>Pie Graphics</MenuItem>
-          <MenuItem component={<Link to="/bar-graphics" />}>Bar Graphics</MenuItem>
         </SubMenu>
       </Menu>
     </ProSidebar>

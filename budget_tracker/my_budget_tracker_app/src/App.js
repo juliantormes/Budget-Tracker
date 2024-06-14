@@ -12,8 +12,6 @@ import AddExpenses from './views/AddExpenses';
 import ViewExpenseCategory from './views/ViewExpenseCategory';
 import ViewCreditCard from './views/ViewCreditCard';
 import AddCreditCard from './views/AddCreditCard';
-import PieGraphics from './views/PieGraphics';
-import BarGraphics from './views/BarGraphics';
 import './styles/global.css'; // Import global styles
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
@@ -42,8 +40,6 @@ const App = () => {
           <Route path="/view-expense-category" element={<PrivateRoute element={ViewExpenseCategory} />} />
           <Route path="/view-credit-card" element={<PrivateRoute element={ViewCreditCard} />} />
           <Route path="/add-credit-card" element={<PrivateRoute element={AddCreditCard} />} />
-          <Route path="/pie-graphics" element={<PrivateRoute element={PieGraphics} />} />
-          <Route path="/bar-graphics" element={<PrivateRoute element={BarGraphics} />} />
         </Routes>
       </Router>
     </ProvideAuth>

@@ -1,0 +1,22 @@
+.add-credit-card {
+    display: flex;
+  }
+  
+  .sidebar-container {
+    width: 250px;
+  }
+  
+  .content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  form > * {
+    margin-bottom: 20px;
+  }
+  

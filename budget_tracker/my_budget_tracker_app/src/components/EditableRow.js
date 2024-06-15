@@ -53,21 +53,36 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const handleSave = async () => {
+    const apiEndpoint = type === 'expense' ? `/api/expenses/${item.id}/` : `/api/incomes/${item.id}/`;
     try {
-      const response = await axiosInstance.put(`/api/expenses/${item.id}/`, formData);
+      const response = await axiosInstance.put(apiEndpoint, formData);
       if (response.status === 200) {
         onSave(formData);
       } else {
-        throw new Error('Failed to update expense');
+        throw new Error(`Failed to update ${type}`);
       }
     } catch (error) {
-      console.error('Error updating expense:', error);
+      console.error(`Error updating ${type}:`, error);
+    }
+  };
+
+  const handleDelete = async () => {
+    const apiEndpoint = type === 'expense' ? `/api/expenses/${item.id}/` : `/api/incomes/${item.id}/`;
+    try {
+      const response = await axiosInstance.delete(apiEndpoint);
+      if (response.status === 204) {
+        onDelete(item.id);
+      } else {
+        throw new Error(`Failed to delete ${type}`);
+      }
+    } catch (error) {
+      console.error(`Error deleting ${type}:`, error);
     }
   };
 
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
-      onDelete(item.id);
+      handleDelete();
     } else if (actionType === 'edit') {
       handleSave();
     }

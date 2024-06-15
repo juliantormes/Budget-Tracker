@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 import axiosInstance from '../api/axiosApi';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type, creditCards }) => {
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories = [], type, creditCards = [] }) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');

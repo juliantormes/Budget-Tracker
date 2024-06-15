@@ -179,12 +179,13 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         } else {
             processedExpenses.push({
                 ...expense,
-                month: formattedMonth,
+                month: startMonth.getMonth() + 1 === month ? formattedMonth : '', // Ensure it only appears in the correct month
                 amount: totalAmountWithSurcharge,
             });
         }
     });
 
+    // Filter expenses to include only those for the current month
     const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
     const chartData = filteredExpenses.reduce((acc, expense) => {
         const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`.toLowerCase(); // Ensure consistent formatting

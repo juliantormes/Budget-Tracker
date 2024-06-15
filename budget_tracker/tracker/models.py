@@ -38,7 +38,7 @@ class CreditCard(models.Model):
     def available_credit(self):
         """Calculate available credit, factoring in surcharges and installments."""
         # This might need adjustment based on how you account for future installments
-        return round(self.credit_limit - self.current_balance(),2)
+        return round(self.credit_limit - self.current_balance(), 2)
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
@@ -57,24 +57,16 @@ class Expense(models.Model):
     date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     is_recurring = models.BooleanField(default=False)
-    pay_with_credit_card = models.BooleanField(default=False)  # New field
+    pay_with_credit_card = models.BooleanField(default=False)
     credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True, blank=True)
     installments = models.IntegerField(default=1)
-    surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
-
-    def update_amount(self, new_amount):
-        if self.is_recurring:
-            ExpenseChangeLog.objects.create(
-                expense=self,
-                previous_amount=self.amount,
-                new_amount=new_amount
-            )
-            self.amount = new_amount
-            self.save()
+    surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def save(self, *args, **kwargs):
-        if self.is_recurring and self.pay_with_credit_card and self.installments:
-            self.end_date = self.date + relativedelta(months=self.installments-1)
+        if not self.pay_with_credit_card:
+            self.credit_card = None
+            self.installments = 1
+            self.surcharge = Decimal('0.00')
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -53,6 +53,13 @@ class ExpenseSerializer(serializers.ModelSerializer):
         fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
 
+    def validate(self, data):
+        if not data.get('pay_with_credit_card', False):
+            data['credit_card'] = None
+            data['installments'] = 1
+            data['surcharge'] = 0.00
+        return data
+
     def create(self, validated_data):
         credit_card = validated_data.pop('credit_card', None)
         expense = Expense.objects.create(**validated_data)

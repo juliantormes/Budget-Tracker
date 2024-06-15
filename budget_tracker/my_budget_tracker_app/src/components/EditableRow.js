@@ -35,7 +35,21 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
 
   const handlePayWithCreditCardChange = (e) => {
     const isChecked = e.target.checked;
-    setFormData((prevFormData) => ({ ...prevFormData, pay_with_credit_card: isChecked }));
+    if (!isChecked) {
+      // Reset credit card-related fields when unchecked
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        pay_with_credit_card: false,
+        credit_card_id: '',
+        installments: 1,
+        surcharge: 0.00,
+      }));
+    } else {
+      setFormData((prevFormData) => ({
+        ...prevFormData,
+        pay_with_credit_card: true,
+      }));
+    }
   };
 
   const handleSave = async () => {

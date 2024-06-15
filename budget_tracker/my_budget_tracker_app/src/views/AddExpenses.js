@@ -175,7 +175,7 @@ const AddExpenses = () => {
                 >
                   {creditCards.map((card) => (
                     <MenuItem key={card.id} value={card.id}>
-                      {card.name}
+                      {`${card.brand} ${card.last_four_digits}`}
                     </MenuItem>
                   ))}
                 </TextField>

@@ -22,12 +22,12 @@ const ViewExpenses = () => {
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [creditCards, setCreditCards] = useState([]);
 
   const fetchExpenses = useCallback((start, end) => {
     const fetchedExpenses = data.expenses.filter(expense =>
       dayjs(expense.date).isBetween(start, end, null, '[]')
     );
-    console.log('Fetched expenses:', fetchedExpenses); // Log fetched expenses
     setSelectedExpenses(fetchedExpenses);
   }, [data]);
 
@@ -47,15 +47,25 @@ const ViewExpenses = () => {
     }
   };
 
+  const fetchCreditCards = async () => {
+    try {
+      const response = await axiosInstance.get('/api/credit_cards/');
+      setCreditCards(response.data);
+      console.log('Fetched credit cards:', response.data);
+    } catch (error) {
+      console.error('Error fetching credit cards:', error);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
+    fetchCreditCards();
   }, []);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
     const expensesForSelectedDate = data.expenses.filter(expense => dayjs(expense.date).isSame(date, 'day'));
     setSelectedExpenses(expensesForSelectedDate);
-    console.log('Expenses for selected date:', expensesForSelectedDate);
   };
 
   const handleDateRangeChange = (newValue) => {
@@ -67,7 +77,6 @@ const ViewExpenses = () => {
       fetchExpenses(newValue[0], newValue[1]);
       setSelectedDate(newValue[0]);
     }
-    console.log('Date range changed:', newValue);
   };
 
   const handleMonthChange = (date) => {
@@ -76,17 +85,14 @@ const ViewExpenses = () => {
     setDateRange([newStartDate, newEndDate]);
     setSelectedDate(newStartDate);
     fetchExpenses(newStartDate, newEndDate);
-    console.log('Month changed:', newStartDate, newEndDate);
   };
 
   const handleSave = async (formData) => {
-    console.log('Saving expense:', formData);
     try {
       const response = await axiosInstance.put(`/api/expenses/${editingExpenseId}/`, formData);
       if (response.status === 200) {
         refetch();
         setEditingExpenseId(null);
-        console.log('Save successful');
       } else {
         throw new Error('Failed to update expense');
       }
@@ -96,12 +102,10 @@ const ViewExpenses = () => {
   };
 
   const handleDelete = async (expenseId) => {
-    console.log('Deleting expense:', expenseId);
     try {
       const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
       if (response.status === 204) {
         refetch();
-        console.log('Delete successful');
       } else {
         throw new Error('Failed to delete expense');
       }
@@ -112,12 +116,10 @@ const ViewExpenses = () => {
 
   const handleEdit = (expense) => {
     setEditingExpenseId(expense.id);
-    console.log('Editing expense:', expense);
   };
 
   const handleCancel = () => {
     setEditingExpenseId(null);
-    console.log('Editing cancelled');
   };
 
   return (
@@ -167,6 +169,7 @@ const ViewExpenses = () => {
                   onDelete={handleDelete}
                   categories={categories}
                   type="expense"
+                  creditCards={creditCards}
                 />
               ))}
             </TableBody>

@@ -8,75 +8,52 @@ import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 import axiosInstance from '../api/axiosApi';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type }) => {
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories, type, creditCards }) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
-  const [creditCards, setCreditCards] = useState([]);
 
   useEffect(() => {
     if (isEditing) {
-      console.log('Editing started for item:', item);
       setFormData({ ...item, credit_card_id: item.credit_card?.id || '' });
-      fetchCreditCards();
     }
   }, [isEditing, item]);
-
-  const fetchCreditCards = async () => {
-    try {
-      const response = await axiosInstance.get('/api/credit_cards/');
-      setCreditCards(response.data);
-      console.log('Fetched credit cards:', response.data);
-    } catch (error) {
-      console.error('Error fetching credit cards:', error);
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-    console.log('Form data updated:', formData);
   };
 
   const handleCategoryChange = (event) => {
     setFormData({ ...formData, category: event.target.value });
-    console.log('Category changed:', event.target.value);
   };
 
   const handleCheckboxChange = (e) => {
     const { name, checked } = e.target;
     setFormData({ ...formData, [name]: checked });
-    console.log('Checkbox changed:', name, checked);
   };
 
   const handlePayWithCreditCardChange = (e) => {
     const isChecked = e.target.checked;
     setFormData((prevFormData) => ({ ...prevFormData, pay_with_credit_card: isChecked }));
-    console.log('Pay with credit card changed:', isChecked);
   };
 
   const handleSave = async () => {
-    console.log('Saving form data:', formData);
     try {
       const response = await axiosInstance.put(`/api/expenses/${item.id}/`, formData);
       if (response.status === 200) {
-        onSave(formData); // This will call the onSave function passed from the parent component
-        console.log('Save successful:', formData);
+        onSave(formData);
       } else {
         throw new Error('Failed to update expense');
       }
     } catch (error) {
       console.error('Error updating expense:', error);
-      if (error.response) {
-        console.error('Server response:', error.response.data);
-      }
     }
   };
 
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
       onDelete(item.id);
-      console.log('Delete confirmed for item:', item.id);
     } else if (actionType === 'edit') {
       handleSave();
     }
@@ -86,13 +63,10 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   const openConfirmDialog = (type) => {
     setActionType(type);
     setConfirmActionOpen(true);
-    console.log('Confirm dialog opened for:', type);
   };
 
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
-  const currentCreditCard = formData.credit_card 
-    ? `${formData.credit_card.brand} **** ${formData.credit_card.last_four_digits}` 
-    : 'N/A';
+  const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
 
   return (
     <>
@@ -225,7 +199,7 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
             {!isEditing && (
               <>
                 <TableCell className="table-cell">
-                  {currentCreditCard}
+                  {currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'}
                 </TableCell>
                 <TableCell className="table-cell">
                   {formData.installments !== undefined ? formData.installments : 'N/A'}

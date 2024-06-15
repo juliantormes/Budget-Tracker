@@ -259,10 +259,10 @@ def home(request):
     }
     return render(request, 'tracker/home.html', context)
 class ExpenseViewSet(viewsets.ModelViewSet):
-
     permission_classes = [IsAuthenticated]
     queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
+
     def get_queryset(self):
         queryset = super().get_queryset().filter(user=self.request.user)
         year = self.request.query_params.get('year')

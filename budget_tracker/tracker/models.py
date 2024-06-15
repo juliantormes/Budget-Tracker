@@ -57,7 +57,8 @@ class Expense(models.Model):
     date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     is_recurring = models.BooleanField(default=False)
-    credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True)
+    pay_with_credit_card = models.BooleanField(default=False)  # New field
+    credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True, blank=True)
     installments = models.IntegerField(default=1)
     surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)  # Percentage
 
@@ -72,7 +73,7 @@ class Expense(models.Model):
             self.save()
 
     def save(self, *args, **kwargs):
-        if self.is_recurring and self.credit_card and self.installments:
+        if self.is_recurring and self.pay_with_credit_card and self.installments:
             self.end_date = self.date + relativedelta(months=self.installments-1)
         super().save(*args, **kwargs)
 

@@ -36,16 +36,38 @@ class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
         fields = '__all__'
-        extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     credit_card = CreditCardSerializer(read_only=True)
+    credit_card_id = serializers.PrimaryKeyRelatedField(
+        queryset=CreditCard.objects.all(),
+        source='credit_card',
+        write_only=True,
+        required=False,
+        allow_null=True
+    )
 
     class Meta:
         model = Expense
-        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'credit_card', 'installments', 'surcharge', 'is_recurring']
+        fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
+
+    def create(self, validated_data):
+        credit_card = validated_data.pop('credit_card', None)
+        expense = Expense.objects.create(**validated_data)
+        if credit_card:
+            expense.credit_card = credit_card
+            expense.save()
+        return expense
+
+    def update(self, instance, validated_data):
+        credit_card = validated_data.pop('credit_card', None)
+        instance = super().update(instance, validated_data)
+        if credit_card:
+            instance.credit_card = credit_card
+            instance.save()
+        return instance
 
 class IncomeCategorySerializer(serializers.ModelSerializer):
     class Meta:

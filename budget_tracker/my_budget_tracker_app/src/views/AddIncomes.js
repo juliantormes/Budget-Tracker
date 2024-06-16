@@ -13,7 +13,7 @@ const AddIncomes = () => {
     category: '',
     date: '',
     amount: '',
-    description: '',
+    description: '',  // Ensure this matches the initial state
     is_recurring: false,
   });
   const [categories, setCategories] = useState([]);

@@ -98,7 +98,7 @@ class IncomeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Income
-        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring']
+        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring', 'description']
         extra_kwargs = {'user': {'read_only': True}}
 
 class ExpenseChangeLogSerializer(serializers.ModelSerializer):

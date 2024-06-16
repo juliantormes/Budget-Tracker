@@ -1,0 +1,81 @@
+/* AuthFormStyles.css */
+
+/* Auth Form Container */
+.auth-form-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #1f2a40;
+  }
+  
+  .form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 300px;
+    background-color: #2c3e50;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    align-items: center;
+  }
+  
+  .form-title {
+    color: #ffffff;
+    text-align: center;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+  
+  .input-field {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+  }
+  
+  .input-field::placeholder {
+    color: #999;
+  }
+  
+  .submit-button {
+    color: #ffffff !important;
+    background-color: #1976d2 !important;
+    border: none;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .submit-button:hover {
+    background-color: #1565c0 !important;
+  }
+  
+  .redirect-button {
+    background-color: transparent;
+    border: none;
+    color: #1976d2;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    text-decoration: underline;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  .redirect-button:hover {
+    color: #1565c0;
+    text-decoration: none;
+  }
+  
+  .error-message {
+    color: red;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+  

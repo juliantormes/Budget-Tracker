@@ -4,8 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import ErrorMessage from '../components/ErrorMessage';
 import SubmitButton from '../components/SubmitButton';
-import FormContainer from '../components/FormContainer';
-import '../styles/FormStyles.css';
+import AuthFormContainer from '../components/AuthFormContainer';
+import '../styles/AuthFormStyles.css';
 
 const RegisterForm = () => {
     const [username, setUsername] = useState('');
@@ -55,32 +55,35 @@ const RegisterForm = () => {
     };
 
     return (
-        <FormContainer>
+        <AuthFormContainer>
             <form onSubmit={handleSubmit} className="form">
-                <h2>Register</h2>
+                <h2 className="form-title">Register</h2>
                 <ErrorMessage error={error} />
                 <InputField
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Username"
+                    className="input-field"
                 />
                 <InputField
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Password"
+                    className="input-field"
                 />
                 <InputField
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Confirm Password"
+                    className="input-field"
                 />
-                <SubmitButton text="Register" />
+                <SubmitButton text="Register" className="submit-button" />
+                <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" type="button" className="redirect-button" />
             </form>
-            <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" type="button" />
-        </FormContainer>
+        </AuthFormContainer>
     );
 };
 

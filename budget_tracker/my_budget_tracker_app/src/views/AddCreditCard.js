@@ -5,7 +5,7 @@ import axiosInstance from '../api/axiosApi';
 import CreditCardForm from '../components/CreditCardForm';
 import AlertMessage from '../components/AlertMessage';
 import Layout from '../components/Layout';
-import '../styles/FormStyles.css'; // Import the consolidated form styles
+import '../styles/FormStyles.css';
 
 const AddCreditCard = () => {
   const { logout } = useAuth();

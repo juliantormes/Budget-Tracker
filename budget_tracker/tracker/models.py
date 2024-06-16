@@ -1,18 +1,37 @@
 from django.db import models
 from django.conf import settings
-from dateutil.relativedelta import relativedelta
 from decimal import Decimal
 from django.utils import timezone
 from .utils import calculate_total_payment_with_surcharge
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 
 class CreditCard(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    last_four_digits = models.CharField(max_length=4)
+    last_four_digits = models.CharField(
+        max_length=4,
+        validators=[
+            RegexValidator(
+                regex='^\d{4}$',
+                message='Last four digits must be exactly 4 digits'
+            )
+        ]
+    )
     brand = models.CharField(max_length=50)
     expire_date = models.DateField()
     credit_limit = models.DecimalField(max_digits=10, decimal_places=2)
-    payment_day = models.IntegerField()
-    close_card_day = models.IntegerField(default=21)
+    payment_day = models.IntegerField(
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(31)
+        ]
+    )
+    close_card_day = models.IntegerField(
+        default=21,
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(31)
+        ]
+    )
 
     def current_balance(self):
         """Calculate the current balance, including surcharges and installments."""

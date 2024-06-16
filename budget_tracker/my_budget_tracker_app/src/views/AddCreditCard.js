@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Container, TextField, Button, Typography } from '@mui/material';
+import { Container, TextField, Button, Typography, Alert } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -17,6 +17,9 @@ const AddCreditCard = () => {
     close_card_day: '',
   });
 
+  const [errors, setErrors] = useState({});
+  const [successMessage, setSuccessMessage] = useState('');
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -26,14 +29,30 @@ const AddCreditCard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({}); // Clear previous errors
+    setSuccessMessage(''); // Clear previous success message
+
     try {
       const response = await axiosInstance.post('/api/credit_cards/', formData);
       if (response.status === 201) {
         // Handle successful submission (e.g., redirect or show a message)
-        console.log('Credit card added successfully');
+        setSuccessMessage('Credit card added successfully');
+        setFormData({
+          last_four_digits: '',
+          brand: '',
+          expire_date: '',
+          credit_limit: '',
+          payment_day: '',
+          close_card_day: '',
+        });
       }
     } catch (error) {
-      console.error('Error adding credit card:', error);
+      if (error.response) {
+        // Handle validation errors from the backend
+        setErrors(error.response.data);
+      } else {
+        console.error('Error message:', error.message);
+      }
     }
   };
 
@@ -46,6 +65,7 @@ const AddCreditCard = () => {
         <Header logout={logout} />
         <Container maxWidth="sm" className="container-top">
           <Typography variant="h4" gutterBottom>Add Credit Card</Typography>
+          {successMessage && <Alert severity="success">{successMessage}</Alert>}
           <form onSubmit={handleSubmit} className="form-container">
             <TextField
               label="Last Four Digits"
@@ -56,6 +76,8 @@ const AddCreditCard = () => {
               margin="normal"
               required
               className="text-field"
+              error={Boolean(errors.last_four_digits)}
+              helperText={errors.last_four_digits}
             />
             <TextField
               label="Brand"
@@ -66,6 +88,8 @@ const AddCreditCard = () => {
               margin="normal"
               required
               className="text-field"
+              error={Boolean(errors.brand)}
+              helperText={errors.brand}
             />
             <TextField
               label="Expire Date"
@@ -80,6 +104,8 @@ const AddCreditCard = () => {
               InputLabelProps={{
                 shrink: true,
               }}
+              error={Boolean(errors.expire_date)}
+              helperText={errors.expire_date}
             />
             <TextField
               label="Credit Limit"
@@ -91,6 +117,8 @@ const AddCreditCard = () => {
               margin="normal"
               required
               className="text-field"
+              error={Boolean(errors.credit_limit)}
+              helperText={errors.credit_limit}
             />
             <TextField
               label="Payment Day"
@@ -102,6 +130,8 @@ const AddCreditCard = () => {
               margin="normal"
               required
               className="text-field"
+              error={Boolean(errors.payment_day)}
+              helperText={errors.payment_day}
             />
             <TextField
               label="Close Card Day"
@@ -113,6 +143,8 @@ const AddCreditCard = () => {
               margin="normal"
               required
               className="text-field"
+              error={Boolean(errors.close_card_day)}
+              helperText={errors.close_card_day}
             />
             <Button type="submit" variant="contained" color="primary" className="submit-button">
               Add Credit Card

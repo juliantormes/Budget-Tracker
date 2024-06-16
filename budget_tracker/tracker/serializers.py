@@ -35,7 +35,7 @@ class ExpenseCategorySerializer(serializers.ModelSerializer):
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = '__all__'
+        exclude = ['user']
 
 class ExpenseSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)

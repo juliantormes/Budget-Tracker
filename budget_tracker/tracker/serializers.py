@@ -1,7 +1,8 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
 from django.contrib.auth import authenticate
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
+from decimal import Decimal
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,7 +24,6 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField()
 
     def validate(self, data):
-        # Don't authenticate here, just return the validated data
         return data
 
 class ExpenseCategorySerializer(serializers.ModelSerializer):
@@ -54,23 +54,17 @@ class ExpenseSerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'read_only': True}}
 
     def validate(self, data):
-        print("Validate Method - Initial Data:", data)  # Debugging line
-
-        # Ensure credit_card is not set to None if pay_with_credit_card is true
-        if data.get('pay_with_credit_card', False) and 'credit_card' not in data:
+        if data.get('pay_with_credit_card', False) and not data.get('credit_card'):
             raise serializers.ValidationError("Credit card must be provided if paying with credit card.")
         
         if not data.get('pay_with_credit_card', False):
             data['credit_card'] = None
             data['installments'] = 1
-            data['surcharge'] = 0.00
+            data['surcharge'] = Decimal('0.00')
         
-        print("Validate Method - Final Data:", data)  # Debugging line
         return data
 
-
     def create(self, validated_data):
-        print("Validated Data:", validated_data)  # Debugging line
         credit_card = validated_data.pop('credit_card', None)
         expense = Expense.objects.create(**validated_data)
         if credit_card:
@@ -79,7 +73,6 @@ class ExpenseSerializer(serializers.ModelSerializer):
         return expense
 
     def update(self, instance, validated_data):
-        print("Updating Data:", validated_data)  # Debugging line
         credit_card = validated_data.pop('credit_card', None)
         instance = super().update(instance, validated_data)
         if credit_card:

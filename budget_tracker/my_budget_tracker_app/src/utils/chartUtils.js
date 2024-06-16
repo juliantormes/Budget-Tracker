@@ -156,7 +156,6 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         const closingDay = expense.credit_card.close_card_day;
         const surchargeRate = parseFloat(expense.surcharge || 0) / 100;
         const totalAmountWithSurcharge = parseFloat(expense.amount) * (1 + surchargeRate);
-        const amountPerInstallment = totalAmountWithSurcharge / expense.installments;
 
         let startMonth;
         if (expenseDate.getDate() <= closingDay) {
@@ -165,7 +164,17 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
             startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1);
         }
 
-        if (expense.installments > 1) {
+        if (expense.is_recurring) {
+            // Handle recurring expenses (installments = 1)
+            const formattedInstallmentMonth = `${startMonth.getFullYear()}-${String(startMonth.getMonth() + 1).padStart(2, '0')}`;
+            if (formattedInstallmentMonth <= formattedMonth) {
+                processedExpenses.push({
+                    ...expense,
+                    month: formattedMonth,
+                    amount: totalAmountWithSurcharge,
+                });
+            }
+        } else if (expense.installments > 1) {
             for (let i = 0; i < expense.installments; i++) {
                 const installmentMonth = new Date(startMonth);
                 installmentMonth.setMonth(startMonth.getMonth() + i);
@@ -173,7 +182,7 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
                 processedExpenses.push({
                     ...expense,
                     month: formattedInstallmentMonth,
-                    amount: amountPerInstallment,
+                    amount: totalAmountWithSurcharge / expense.installments,
                 });
             }
         } else {

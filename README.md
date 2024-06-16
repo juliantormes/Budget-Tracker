@@ -2,7 +2,7 @@
 
 ## Overview
 
-Welcome to the Budget Tracker Project! This application is designed to help individuals manage their finances efficiently and effectively. Built with Python, Django, and React, it uses SQLite for database management. The project aims for a clean architecture with Command Query Responsibility Segregation (CQRS) and comprehensive testing.
+Welcome to the Budget Tracker Project! This application is designed to help individuals manage their finances efficiently and effectively. Built with Python, Django, and React, it uses SQLite for database management. The project aims for a clean architecture and comprehensive testing.
 
 ## Features
 

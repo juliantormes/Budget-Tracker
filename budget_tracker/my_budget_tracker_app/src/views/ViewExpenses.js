@@ -1,5 +1,6 @@
+// ViewExpenses.js
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Typography, Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
+import { Container, Typography } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -11,7 +12,7 @@ import Calendar from '../components/Calendar';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewExpenses.css';
-import EditableRow from '../components/EditableRow';
+import ExpenseTable from '../components/ExpenseTable';
 
 const ViewExpenses = () => {
   const { logout } = useAuth();
@@ -142,38 +143,16 @@ const ViewExpenses = () => {
           )}
         </LocalizationProvider>
         <Container maxWidth="lg">
-          <Table className="table">
-            <TableHead>
-              <TableRow className="table-header">
-                <TableCell>Category</TableCell>
-                <TableCell>Date</TableCell>
-                <TableCell>Amount</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell>Recurring</TableCell>
-                <TableCell>Paid with Credit Card</TableCell>
-                <TableCell>Credit Card</TableCell>
-                <TableCell>Installments</TableCell>
-                <TableCell>Surcharge</TableCell>
-                <TableCell>Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {selectedExpenses.map((expense) => (
-                <EditableRow
-                  key={expense.id}
-                  item={expense}
-                  isEditing={editingExpenseId === expense.id}
-                  onEdit={handleEdit}
-                  onCancel={handleCancel}
-                  onSave={handleSave}
-                  onDelete={handleDelete}
-                  categories={categories}
-                  type="expense"
-                  creditCards={creditCards}
-                />
-              ))}
-            </TableBody>
-          </Table>
+          <ExpenseTable
+            expenses={selectedExpenses}
+            editingExpenseId={editingExpenseId}
+            onEdit={handleEdit}
+            onCancel={handleCancel}
+            onSave={handleSave}
+            onDelete={handleDelete}
+            categories={categories}
+            creditCards={creditCards}
+          />
         </Container>
       </div>
     </div>

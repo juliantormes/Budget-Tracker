@@ -1,3 +1,4 @@
+// ViewCreditCard.js
 import React, { useState, useEffect } from 'react';
 import {
   Container,
@@ -8,22 +9,15 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Button
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
+import EditCreditCardForm from '../components/EditCreditCardForm';
+import DeleteDialog from '../components/DeleteDialog';
 
 const ViewCreditCard = () => {
   const { logout } = useAuth();
@@ -154,77 +148,12 @@ const ViewCreditCard = () => {
               {creditCards.map((card) => (
                 <TableRow key={card.id}>
                   {editingCardId === card.id ? (
-                    <>
-                      <TableCell>
-                        <TextField
-                          name="last_four_digits"
-                          value={formData.last_four_digits}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="brand"
-                          value={formData.brand}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="expire_date"
-                          type="date"
-                          value={formData.expire_date}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                          InputLabelProps={{
-                            shrink: true,
-                          }}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="credit_limit"
-                          type="number"
-                          value={formData.credit_limit}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="payment_day"
-                          type="number"
-                          value={formData.payment_day}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <TextField
-                          name="close_card_day"
-                          type="number"
-                          value={formData.close_card_day}
-                          onChange={handleChange}
-                          fullWidth
-                          className="text-field"
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <IconButton onClick={handleSaveClick}>
-                          <SaveIcon />
-                        </IconButton>
-                        <IconButton onClick={handleCancelClick}>
-                          <CancelIcon />
-                        </IconButton>
-                      </TableCell>
-                    </>
+                    <EditCreditCardForm
+                      formData={formData}
+                      handleChange={handleChange}
+                      handleSaveClick={handleSaveClick}
+                      handleCancelClick={handleCancelClick}
+                    />
                   ) : (
                     <>
                       <TableCell>{card.last_four_digits}</TableCell>
@@ -248,27 +177,11 @@ const ViewCreditCard = () => {
             </TableBody>
           </Table>
         </Container>
-        <Dialog
+        <DeleteDialog
           open={openDeleteDialog}
-          onClose={handleCloseDeleteDialog}
-          aria-labelledby="delete-dialog-title"
-          aria-describedby="delete-dialog-description"
-        >
-          <DialogTitle id="delete-dialog-title" className="dialog-title">Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="delete-dialog-description" className="dialog-content-text">
-              Are you sure you want to delete this credit card?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDeleteDialog} className="button">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} className="button">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+          handleClose={handleCloseDeleteDialog}
+          handleConfirm={handleConfirmDelete}
+        />
       </div>
     </div>
   );

@@ -1,10 +1,11 @@
+// LoginForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import InputField from '../components/InputField';
 import ErrorMessage from '../components/ErrorMessage';
 import SubmitButton from '../components/SubmitButton';
-import '../styles/FormStyles.css';
+import FormContainer from '../components/FormContainer';
 
 const LoginForm = () => {
     const [username, setUsername] = useState('');
@@ -37,7 +38,7 @@ const LoginForm = () => {
     };
 
     return (
-        <div className="form-container">
+        <FormContainer>
             <form onSubmit={handleSubmit} className="form">
                 <h2>Login</h2>
                 <ErrorMessage error={error} />
@@ -56,7 +57,7 @@ const LoginForm = () => {
                 <SubmitButton text="Log In" />
             </form>
             <SubmitButton onClick={() => navigate('/register')} text="Don't have an account? Register" type="button" />
-        </div>
+        </FormContainer>
     );
 };
 

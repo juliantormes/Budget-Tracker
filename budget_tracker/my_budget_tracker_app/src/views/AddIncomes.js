@@ -1,9 +1,11 @@
+// AddIncomes.js
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, TextField, Button, MenuItem, FormControlLabel, Checkbox } from '@mui/material';
-import Header from '../components/Header';
-import SidebarMenu from '../components/SidebarMenu';
+import { Container, Typography } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
+import IncomeForm from '../components/IncomeForm';
+import AlertMessage from '../components/AlertMessage';
+import Layout from '../components/Layout';
 import '../styles/FormStyles.css'; // Import the consolidated form styles
 
 const AddIncomes = () => {
@@ -53,85 +55,18 @@ const AddIncomes = () => {
   };
 
   return (
-    <div className="add-incomes">
-      <div className="sidebar-container">
-        <SidebarMenu />
-      </div>
-      <div className="content">
-        <Header logout={logout} />
-        <Container className="container-top">
-          <Typography variant="h4" gutterBottom>Add Incomes</Typography>
-          <form onSubmit={handleSubmit} className="form-container">
-            <TextField
-              select
-              label="Category"
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              required
-              fullWidth
-              variant="outlined"
-              className="text-field"
-            >
-              {categories.map((category) => (
-                <MenuItem key={category.id} value={category.id}>
-                  {category.name}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField
-              label="Date"
-              name="date"
-              type="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-              fullWidth
-              variant="outlined"
-              className="text-field"
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-            <TextField
-              label="Amount"
-              name="amount"
-              type="number"
-              value={formData.amount}
-              onChange={handleChange}
-              required
-              fullWidth
-              variant="outlined"
-              className="text-field"
-            />
-            <TextField
-              label="Description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              fullWidth
-              variant="outlined"
-              className="text-field"
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={formData.is_recurring}
-                  onChange={handleChange}
-                  name="is_recurring"
-                  color="primary"
-                />
-              }
-              label="Recurring Income"
-            />
-            <Button type="submit" variant="contained" color="primary" className="submit-button">
-              Add Income
-            </Button>
-          </form>
-          {message && <Typography variant="body2" color="textSecondary">{message}</Typography>}
-        </Container>
-      </div>
-    </div>
+    <Layout logout={logout}>
+      <Container className="container-top">
+        <Typography variant="h4" gutterBottom>Add Incomes</Typography>
+        <AlertMessage message={message} severity={message === 'Income added successfully!' ? 'success' : 'error'} />
+        <IncomeForm
+          formData={formData}
+          categories={categories}
+          handleChange={handleChange}
+          handleSubmit={handleSubmit}
+        />
+      </Container>
+    </Layout>
   );
 };
 

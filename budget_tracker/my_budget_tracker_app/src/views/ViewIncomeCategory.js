@@ -3,24 +3,18 @@ import { useLocation } from 'react-router-dom';
 import {
   Container,
   Typography,
-  IconButton,
   Button,
-  TextField,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle
+  IconButton,
 } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import SaveIcon from '@mui/icons-material/Save';
-import CancelIcon from '@mui/icons-material/Cancel';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
 import '../styles/ViewIncomeCategory.css';
+import EditCategoryForm from '../components/EditCategoryForm';
+import DeleteDialog from '../components/DeleteDialog';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const useQuery = () => {
   return new URLSearchParams(useLocation().search);
@@ -148,23 +142,12 @@ const ViewIncomeCategory = () => {
             {categories.map((category) => (
               <div key={category.id} className="category-item">
                 {editingCategoryId === category.id ? (
-                  <>
-                    <TextField
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      fullWidth
-                      className="text-field"
-                    />
-                    <div className="actions">
-                      <IconButton onClick={() => handleSaveClick(category.id)}>
-                        <SaveIcon />
-                      </IconButton>
-                      <IconButton onClick={handleCancelClick}>
-                        <CancelIcon />
-                      </IconButton>
-                    </div>
-                  </>
+                  <EditCategoryForm
+                    formData={formData}
+                    handleChange={handleChange}
+                    handleSave={() => handleSaveClick(category.id)}
+                    handleCancel={handleCancelClick}
+                  />
                 ) : (
                   <>
                     <span>{category.name}</span>
@@ -181,23 +164,12 @@ const ViewIncomeCategory = () => {
               </div>
             ))}
             {editingCategoryId === 'new' && (
-              <div className="category-item">
-                <TextField
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  fullWidth
-                  className="text-field"
-                />
-                <div className="actions">
-                  <IconButton onClick={handleNewCategorySave}>
-                    <SaveIcon />
-                  </IconButton>
-                  <IconButton onClick={handleCancelClick}>
-                    <CancelIcon />
-                  </IconButton>
-                </div>
-              </div>
+              <EditCategoryForm
+                formData={formData}
+                handleChange={handleChange}
+                handleSave={handleNewCategorySave}
+                handleCancel={handleCancelClick}
+              />
             )}
           </div>
           <div className="add-button-container">
@@ -211,27 +183,11 @@ const ViewIncomeCategory = () => {
             </Button>
           </div>
         </Container>
-        <Dialog
+        <DeleteDialog
           open={openDeleteDialog}
-          onClose={handleCloseDeleteDialog}
-          aria-labelledby="delete-dialog-title"
-          aria-describedby="delete-dialog-description"
-        >
-          <DialogTitle id="delete-dialog-title" className="dialog-title">Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText id="delete-dialog-description" className="dialog-content-text">
-              Are you sure you want to delete this income category?
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseDeleteDialog} className="button">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} className="button">
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+          handleClose={handleCloseDeleteDialog}
+          handleConfirm={handleConfirmDelete}
+        />
       </div>
     </div>
   );

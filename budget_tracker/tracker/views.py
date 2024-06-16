@@ -283,7 +283,9 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 raise ValidationError('Invalid year or month format.')
 
         return queryset
-
+    
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 class IncomeViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     queryset = Income.objects.all()

@@ -16,8 +16,8 @@ const AddExpenses = () => {
     is_recurring: false,
     paid_with_credit_card: false,
     credit_card: '',
-    installments: '',
-    surcharge: '',
+    installments: 1,
+    surcharge: 0,
   });
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
@@ -48,13 +48,22 @@ const AddExpenses = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const submissionData = {
+      ...formData,
+      installments: formData.paid_with_credit_card ? formData.installments : 1,
+      surcharge: formData.paid_with_credit_card ? formData.surcharge : 0,
+    };
+    console.log('Form Data:', submissionData); // Log the form data being sent
     try {
-      const response = await axiosInstance.post('/api/expenses/', formData);
+      const response = await axiosInstance.post('/api/expenses/', submissionData);
       if (response.status === 201) {
         setMessage('Expense added successfully!');
         setFormData({
@@ -65,14 +74,14 @@ const AddExpenses = () => {
           is_recurring: false,
           paid_with_credit_card: false,
           credit_card: '',
-          installments: '',
-          surcharge: '',
+          installments: 1,
+          surcharge: 0,
         });
       } else {
         throw new Error('Failed to add expense');
       }
     } catch (error) {
-      console.error(error);
+      console.error('Error:', error.response ? error.response.data : error.message);
       setMessage('Error adding expense');
     }
   };

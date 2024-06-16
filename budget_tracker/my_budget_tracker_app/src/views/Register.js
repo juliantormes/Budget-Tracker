@@ -1,4 +1,3 @@
-// RegisterForm.js
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -18,13 +17,12 @@ const RegisterForm = () => {
     const handleSubmit = async (event) => {
         event.preventDefault();
 
-        // Check if passwords match
         if (password !== confirmPassword) {
             setError('Passwords do not match. Please try again.');
             return;
         }
 
-        setError('');  // Reset error message
+        setError('');
 
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}signup/`, {
@@ -33,7 +31,7 @@ const RegisterForm = () => {
             });
             const token = response.data.token;
             localStorage.setItem('token', token);
-            navigate('/home');  // Navigate to home after successful registration
+            navigate('/home');
         } catch (error) {
             console.error('Registration failed:', error);
             if (error.response) {
@@ -41,10 +39,10 @@ const RegisterForm = () => {
                     case 400:
                         setError('Please ensure all fields are filled correctly.');
                         break;
-                    case 409: // Conflict status, could be used for duplicate username
+                    case 409:
                         setError('Username already in use. Please choose another.');
                         break;
-                    case 422: // Unprocessable entity, might be used for validation errors
+                    case 422:
                         setError('Invalid data entered. Please check and try again.');
                         break;
                     default:

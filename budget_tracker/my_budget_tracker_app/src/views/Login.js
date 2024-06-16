@@ -1,4 +1,3 @@
-// LoginForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -16,16 +15,16 @@ const LoginForm = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        setError('');  // Reset error message
+        setError('');
 
         try {
             await login(username, password);
-            navigate('/home');  // Navigate to home after successful login
+            navigate('/home');
         } catch (error) {
             console.error('Login failed:', error);
             if (error.response) {
                 switch (error.response.status) {
-                    case 401:  // Handle both non-existent user and wrong password under the same case
+                    case 401:
                         setError('Invalid username or password. Please try again.');
                         break;
                     default:

@@ -1,4 +1,3 @@
-// AddIncomes.js
 import React, { useState, useEffect } from 'react';
 import { Container, Typography } from '@mui/material';
 import { useAuth } from '../hooks/useAuth';
@@ -6,7 +5,7 @@ import axiosInstance from '../api/axiosApi';
 import IncomeForm from '../components/IncomeForm';
 import AlertMessage from '../components/AlertMessage';
 import Layout from '../components/Layout';
-import '../styles/FormStyles.css'; // Import the consolidated form styles
+import '../styles/FormStyles.css';
 
 const AddIncomes = () => {
   const { logout } = useAuth();

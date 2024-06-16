@@ -1,4 +1,3 @@
-// HomePage.js
 import React, { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';

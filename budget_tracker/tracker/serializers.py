@@ -54,13 +54,23 @@ class ExpenseSerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'read_only': True}}
 
     def validate(self, data):
+        print("Validate Method - Initial Data:", data)  # Debugging line
+
+        # Ensure credit_card is not set to None if pay_with_credit_card is true
+        if data.get('pay_with_credit_card', False) and 'credit_card' not in data:
+            raise serializers.ValidationError("Credit card must be provided if paying with credit card.")
+        
         if not data.get('pay_with_credit_card', False):
             data['credit_card'] = None
             data['installments'] = 1
             data['surcharge'] = 0.00
+        
+        print("Validate Method - Final Data:", data)  # Debugging line
         return data
 
+
     def create(self, validated_data):
+        print("Validated Data:", validated_data)  # Debugging line
         credit_card = validated_data.pop('credit_card', None)
         expense = Expense.objects.create(**validated_data)
         if credit_card:
@@ -69,6 +79,7 @@ class ExpenseSerializer(serializers.ModelSerializer):
         return expense
 
     def update(self, instance, validated_data):
+        print("Updating Data:", validated_data)  # Debugging line
         credit_card = validated_data.pop('credit_card', None)
         instance = super().update(instance, validated_data)
         if credit_card:

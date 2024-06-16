@@ -14,8 +14,8 @@ const AddExpenses = () => {
     amount: '',
     description: '',
     is_recurring: false,
-    paid_with_credit_card: false,
-    credit_card: '',
+    pay_with_credit_card: false,
+    credit_card_id: '',
     installments: 1,
     surcharge: 0,
   });
@@ -58,8 +58,8 @@ const AddExpenses = () => {
     e.preventDefault();
     const submissionData = {
       ...formData,
-      installments: formData.paid_with_credit_card ? formData.installments : 1,
-      surcharge: formData.paid_with_credit_card ? formData.surcharge : 0,
+      installments: formData.pay_with_credit_card ? formData.installments : 1,
+      surcharge: formData.pay_with_credit_card ? formData.surcharge : 0,
     };
     console.log('Form Data:', submissionData); // Log the form data being sent
     try {
@@ -72,8 +72,8 @@ const AddExpenses = () => {
           amount: '',
           description: '',
           is_recurring: false,
-          paid_with_credit_card: false,
-          credit_card: '',
+          pay_with_credit_card: false,
+          credit_card_id: '',
           installments: 1,
           surcharge: 0,
         });
@@ -161,21 +161,21 @@ const AddExpenses = () => {
             <FormControlLabel
               control={
                 <Checkbox
-                  checked={formData.paid_with_credit_card}
+                  checked={formData.pay_with_credit_card}
                   onChange={handleChange}
-                  name="paid_with_credit_card"
+                  name="pay_with_credit_card"
                   color="primary"
                 />
               }
               label="Paid with Credit Card"
             />
-            {formData.paid_with_credit_card && (
+            {formData.pay_with_credit_card && (
               <>
                 <TextField
                   select
                   label="Credit Card"
-                  name="credit_card"
-                  value={formData.credit_card}
+                  name="credit_card_id"
+                  value={formData.credit_card_id}
                   onChange={handleChange}
                   required
                   fullWidth

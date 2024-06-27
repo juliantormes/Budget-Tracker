@@ -4,6 +4,14 @@ from decimal import Decimal
 from django.utils import timezone
 from .utils import calculate_total_payment_with_surcharge
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.core.exceptions import ValidationError
+class ExpenseCategory(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class CreditCard(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     last_four_digits = models.CharField(
@@ -37,14 +45,14 @@ class CreditCard(models.Model):
         now_date = timezone.now().date()
         total_balance = Decimal('0')
 
-        non_recurring_expenses = self.expense_set.filter(is_recurring=False)
+        non_recurring_expenses = self.expenses.filter(is_recurring=False)
         for expense in non_recurring_expenses:
-            total_balance += calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+            total_balance += expense.amount + (expense.amount * expense.surcharge / 100)
 
-        recurring_expenses = self.expense_set.filter(is_recurring=True)
+        recurring_expenses = self.expenses.filter(is_recurring=True)
         for expense in recurring_expenses:
             if expense.date <= now_date:
-                total_payment = calculate_total_payment_with_surcharge(expense.amount, expense.surcharge)
+                total_payment = expense.amount + (expense.amount * expense.surcharge / 100)
                 total_balance += total_payment / expense.installments if expense.installments else total_payment
 
         return total_balance
@@ -55,12 +63,6 @@ class CreditCard(models.Model):
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
-class ExpenseCategory(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    name = models.CharField(max_length=100)
-
-    def __str__(self):
-        return self.name
 
 class Expense(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
@@ -80,6 +82,16 @@ class Expense(models.Model):
             self.credit_card = None
             self.installments = 1
             self.surcharge = Decimal('0.00')
+        else:
+            if self.credit_card:
+                current_balance = self.credit_card.current_balance()
+                total_new_expense = self.amount + (self.amount * self.surcharge / 100)
+                if current_balance + total_new_expense > self.credit_card.credit_limit:
+                    raise ValidationError(
+                        f"Credit limit exceeded. Current balance: {current_balance}, "
+                        f"New expense total: {total_new_expense}, Credit limit: {self.credit_card.credit_limit}. "
+                        f"Available credit: {self.credit_card.available_credit()}."
+                    )
         super().save(*args, **kwargs)
 
     def __str__(self):

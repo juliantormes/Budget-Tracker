@@ -56,12 +56,22 @@ class ExpenseSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data.get('pay_with_credit_card', False) and not data.get('credit_card'):
             raise serializers.ValidationError("Credit card must be provided if paying with credit card.")
-        
+
+        if data.get('pay_with_credit_card', False):
+            credit_card = data.get('credit_card')
+            current_balance = credit_card.current_balance()
+            total_new_expense = data['amount'] + (data['amount'] * data['surcharge'] / 100)
+            if current_balance + total_new_expense > credit_card.credit_limit:
+                raise serializers.ValidationError(
+                    f"Credit limit exceeded. Current balance: {current_balance}, "
+                    f"New expense total: {total_new_expense}, Credit limit: {credit_card.credit_limit}"
+                )
+
         if not data.get('pay_with_credit_card', False):
             data['credit_card'] = None
             data['installments'] = 1
             data['surcharge'] = Decimal('0.00')
-        
+
         return data
 
     def create(self, validated_data):
@@ -79,7 +89,6 @@ class ExpenseSerializer(serializers.ModelSerializer):
             instance.credit_card = credit_card
             instance.save()
         return instance
-
 class IncomeCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = IncomeCategory

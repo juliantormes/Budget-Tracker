@@ -23,6 +23,7 @@ const AddExpenses = () => {
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
   const [message, setMessage] = useState('');
+  const [severity, setSeverity] = useState('');
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -67,6 +68,7 @@ const AddExpenses = () => {
       const response = await axiosInstance.post('/api/expenses/', submissionData);
       if (response.status === 201) {
         setMessage('Expense added successfully!');
+        setSeverity('success');
         setFormData({
           category: '',
           date: '',
@@ -83,7 +85,8 @@ const AddExpenses = () => {
       }
     } catch (error) {
       console.error('Error:', error.response ? error.response.data : error.message);
-      setMessage('Error adding expense');
+      setMessage(error.response ? error.response.data.detail || 'Error adding expense' : 'Error adding expense');
+      setSeverity('error');
     }
   };
 
@@ -91,7 +94,7 @@ const AddExpenses = () => {
     <Layout logout={logout}>
       <Container className="container-top">
         <Typography variant="h4" gutterBottom>Add Expenses</Typography>
-        <AlertMessage message={message} severity={message === 'Expense added successfully!' ? 'success' : 'error'} />
+        <AlertMessage message={message} severity={severity} duration={3000} />
         <ExpenseForm
           formData={formData}
           categories={categories}

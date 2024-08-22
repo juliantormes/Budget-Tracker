@@ -12,6 +12,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewExpenses.css';
 import ExpenseTable from '../components/ExpenseTable';
+import DeleteDialog from '../components/DeleteDialog';
 
 const ViewExpenses = () => {
   const { logout } = useAuth();
@@ -23,6 +24,9 @@ const ViewExpenses = () => {
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [expenseToDelete, setExpenseToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false); // New state to prevent multiple deletions
 
   const fetchExpenses = useCallback((start, end) => {
     const fetchedExpenses = data.expenses.filter(expense =>
@@ -101,17 +105,42 @@ const ViewExpenses = () => {
     }
   };
 
-  const handleDelete = async (expenseId) => {
+  const handleDeleteClick = useCallback((expenseId) => {
+    if (!isDeleting && !openDeleteDialog) {  // Prevent opening dialog if already deleting
+      console.log('Delete clicked for expense ID:', expenseId);
+      setExpenseToDelete(expenseId);
+      setOpenDeleteDialog(true);
+    }
+  }, [isDeleting, openDeleteDialog]);
+
+  const handleConfirmDelete = async () => {
+    if (!expenseToDelete || isDeleting) return;
+  
+    setIsDeleting(true); // Set isDeleting true to prevent further clicks
+  
     try {
-      const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
+      console.log('Delete confirmed for expense ID:', expenseToDelete);
+      const response = await axiosInstance.delete(`/api/expenses/${expenseToDelete}/`);
       if (response.status === 204) {
-        refetch();
+        console.log('Expense deleted:', expenseToDelete);
+        setOpenDeleteDialog(false);  // Close the dialog
+        setExpenseToDelete(null);    // Reset the expense to delete
+        refetch();                   // Refetch data only on successful delete
       } else {
         throw new Error('Failed to delete expense');
       }
     } catch (error) {
       console.error('Error deleting expense:', error);
+      setOpenDeleteDialog(false);  // Ensure the dialog is closed on error
+    } finally {
+      setIsDeleting(false);  // Reset deleting state after operation
     }
+  };
+  
+  const handleCloseDeleteDialog = () => {
+    setOpenDeleteDialog(false);
+    setExpenseToDelete(null);
+    setIsDeleting(false);  // Reset deleting state to prevent re-triggering delete
   };
 
   const handleEdit = (expense) => {
@@ -148,11 +177,16 @@ const ViewExpenses = () => {
             onEdit={handleEdit}
             onCancel={handleCancel}
             onSave={handleSave}
-            onDelete={handleDelete}
+            onDelete={handleDeleteClick}  // Updated to ensure correct delete handling
             categories={categories}
             creditCards={creditCards}
           />
         </Container>
+        <DeleteDialog
+          open={openDeleteDialog}
+          handleClose={handleCloseDeleteDialog}
+          handleConfirm={handleConfirmDelete}
+        />
       </div>
     </div>
   );

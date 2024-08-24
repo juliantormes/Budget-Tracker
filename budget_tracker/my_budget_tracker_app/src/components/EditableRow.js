@@ -108,6 +108,11 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
                 value={formData.category || ''}
                 onChange={handleCategoryChange}
                 displayEmpty
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                }}
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -129,6 +134,14 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               onChange={handleChange}
               fullWidth
               className="text-field"
+              InputProps={{
+                style: {
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  padding: 0,
+                },
+              }}
             />
           ) : (
             formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : 'N/A'
@@ -143,6 +156,14 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               onChange={handleChange}
               fullWidth
               className="text-field"
+              InputProps={{
+                style: {
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  padding: 0,
+                },
+              }}
             />
           ) : (
             formData.amount !== undefined ? formData.amount : 'N/A'
@@ -156,6 +177,14 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               onChange={handleChange}
               fullWidth
               className="text-field"
+              InputProps={{
+                style: {
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  padding: 0,
+                },
+              }}
             />
           ) : (
             formData.description || 'N/A'
@@ -169,6 +198,12 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
                   name="is_recurring"
                   checked={formData.is_recurring || false}
                   onChange={handleCheckboxChange}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    boxShadow: 'none',
+                    padding: 0,
+                  }}
                 />
               ) : (
                 formData.is_recurring ? 'Yes' : 'No'
@@ -180,64 +215,90 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
                   name="pay_with_credit_card"
                   checked={formData.pay_with_credit_card || false}
                   onChange={handlePayWithCreditCardChange}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    boxShadow: 'none',
+                    padding: 0,
+                  }}
                 />
               ) : (
                 formData.pay_with_credit_card ? 'Yes' : 'No'
               )}
             </TableCell>
-            {isEditing && formData.pay_with_credit_card && (
-              <>
-                <TableCell className="table-cell">
-                  <FormControl fullWidth>
-                    <Select
-                      name="credit_card_id"
-                      value={formData.credit_card_id || ''}
-                      onChange={handleChange}
-                      displayEmpty
-                    >
-                      {creditCards.map((card) => (
-                        <MenuItem key={card.id} value={card.id}>
-                          {`${card.brand} **** ${card.last_four_digits}`}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </TableCell>
-                <TableCell className="table-cell">
-                  <TextField
-                    name="installments"
-                    type="number"
-                    value={formData.installments || ''}
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <FormControl fullWidth>
+                  <Select
+                    name="credit_card_id"
+                    value={formData.credit_card_id || ''}
                     onChange={handleChange}
-                    fullWidth
-                    className="text-field"
-                  />
-                </TableCell>
-                <TableCell className="table-cell">
-                  <TextField
-                    name="surcharge"
-                    type="number"
-                    value={formData.surcharge || ''}
-                    onChange={handleChange}
-                    fullWidth
-                    className="text-field"
-                  />
-                </TableCell>
-              </>
-            )}
-            {!isEditing && (
-              <>
-                <TableCell className="table-cell">
-                  {currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'}
-                </TableCell>
-                <TableCell className="table-cell">
-                  {formData.installments !== undefined ? formData.installments : 'N/A'}
-                </TableCell>
-                <TableCell className="table-cell">
-                  {formData.surcharge !== undefined ? formData.surcharge : 'N/A'}
-                </TableCell>
-              </>
-            )}
+                    displayEmpty
+                    disabled={!formData.pay_with_credit_card}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      boxShadow: 'none',
+                      width: '150px' // Set a fixed width for the dropdown
+                    }}
+                  >
+                    {creditCards.map((card) => (
+                      <MenuItem key={card.id} value={card.id}>
+                        {`${card.brand} **** ${card.last_four_digits}`}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : (
+                currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'
+              )}
+            </TableCell>
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <TextField
+                  name="installments"
+                  type="number"
+                  value={formData.installments || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  className="text-field"
+                  InputProps={{
+                    style: {
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      boxShadow: 'none',
+                      padding: 0,
+                    },
+                  }}
+                  disabled={!formData.pay_with_credit_card}
+                />
+              ) : (
+                formData.installments !== undefined ? formData.installments : 'N/A'
+              )}
+            </TableCell>
+            <TableCell className="table-cell">
+              {isEditing ? (
+                <TextField
+                  name="surcharge"
+                  type="number"
+                  value={formData.surcharge || ''}
+                  onChange={handleChange}
+                  fullWidth
+                  className="text-field"
+                  InputProps={{
+                    style: {
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      boxShadow: 'none',
+                      padding: 0,
+                    },
+                  }}
+                  disabled={!formData.pay_with_credit_card}
+                />
+              ) : (
+                formData.surcharge !== undefined ? formData.surcharge : 'N/A'
+              )}
+            </TableCell>
           </>
         )}
         {type === 'income' && (
@@ -247,13 +308,19 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
                 name="is_recurring"
                 checked={formData.is_recurring || false}
                 onChange={handleCheckboxChange}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  boxShadow: 'none',
+                  padding: 0,
+                }}
               />
             ) : (
               formData.is_recurring ? 'Yes' : 'No'
             )}
           </TableCell>
         )}
-        <TableCell className="table-cell">
+        <TableCell className="table-cell" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           {isEditing ? (
             <>
               <IconButton onClick={() => openConfirmDialog('edit')}>

@@ -235,3 +235,11 @@
     justify-content: center;
     align-items: center;
 }
+.MuiTableCell-root {
+    color: white !important;
+    border-bottom: none !important;
+    padding-left: 0 !important; /* Ensure no extra padding at the start */
+    font-size: 0.9rem; /* Adjust font size */
+    text-align: left; /* Ensure text starts at the beginning */
+}
+

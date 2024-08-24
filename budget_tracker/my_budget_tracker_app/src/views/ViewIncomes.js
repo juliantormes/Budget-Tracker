@@ -22,6 +22,7 @@ const ViewIncomes = () => {
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingIncomeId, setEditingIncomeId] = useState(null);
   const [categories, setCategories] = useState([]);
+  const [isDeleting, setIsDeleting] = useState(false); // To prevent multiple deletions
 
   const fetchIncomes = useCallback((start, end) => {
     const fetchedIncomes = data.incomes.filter(income =>
@@ -89,15 +90,26 @@ const ViewIncomes = () => {
   };
 
   const handleDelete = async (incomeId) => {
+    if (isDeleting) return; // Prevent multiple deletions
+  
+    setIsDeleting(true); // Set deleting state to true
+  
     try {
       const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
       if (response.status === 204) {
-        refetch();
+        refetch(); // Refetch data only on successful delete
       } else {
         throw new Error('Failed to delete income');
       }
     } catch (error) {
-      console.error('Error deleting income:', error);
+      if (error.response && error.response.status === 404) {
+        console.log('Income not found, possibly already deleted.');
+        refetch(); // Refetch data if income is already deleted
+      } else {
+        console.error('Error deleting income:', error);
+      }
+    } finally {
+      setIsDeleting(false); // Reset deleting state
     }
   };
 
@@ -137,6 +149,7 @@ const ViewIncomes = () => {
             onSave={handleSave}
             onDelete={handleDelete}
             categories={categories}
+            isDeleting={isDeleting} // Pass isDeleting state to disable the delete button
           />
         </Container>
       </div>

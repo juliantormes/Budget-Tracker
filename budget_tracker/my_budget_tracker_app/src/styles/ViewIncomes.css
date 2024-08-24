@@ -7,16 +7,85 @@
 
 .content {
     flex-grow: 1;
-    padding: 20px;
+    padding: 10px; /* Reduced padding */
 }
 
 .date-picker-container,
 .calendar-container {
-    margin: 20px 0;
+    margin: 10px 0; /* Reduced margin */
     display: flex;
     justify-content: center;
 }
 
+.container-max-width-lg {
+    max-width: 100%; /* Utilize full width */
+    padding: 0 10px; /* Reduced padding */
+}
+
+.table-container {
+    overflow-x: auto; /* Allow horizontal scrolling */
+}
+
+.table-header {
+    background-color: #1f2a40;
+}
+
+.table-header th {
+    color: white;
+    padding: 8px; /* Reduce padding to fit more content */
+    font-size: 0.9rem; /* Slightly smaller font size */
+}
+
+.MuiTableCell-root {
+    color: white !important;
+    border-bottom: none !important;
+    padding: 6px; /* Reduce padding */
+    font-size: 0.9rem; /* Adjust font size */
+}
+
+/* Make Sidebar collapsible */
+.sidebar-container {
+    width: 250px; /* Collapsible sidebar width */
+    transition: width 0.3s ease;
+}
+
+.sidebar-container.collapsed {
+    width: 70px; /* Width when collapsed */
+}
+
+/* Styles for collapsible sidebar toggle */
+.sidebar-toggle {
+    position: absolute;
+    top: 20px;
+    left: 230px;
+    cursor: pointer;
+    transition: left 0.3s ease;
+}
+
+.sidebar-container.collapsed + .sidebar-toggle {
+    left: 50px; /* Adjust toggle position when sidebar is collapsed */
+}
+
+/* Responsive styles for smaller screens */
+@media (max-width: 768px) {
+    .content {
+        padding: 5px; /* Further reduce padding */
+    }
+
+    .MuiTableCell-root {
+        font-size: 0.8rem; /* Smaller font size */
+    }
+
+    .table-header th {
+        font-size: 0.8rem;
+    }
+
+    .table-header th.hide-on-mobile {
+        display: none; /* Hide less important columns */
+    }
+}
+
+/* Original styles with minor adjustments */
 .date-picker-input {
     border-radius: 4px;
     color: #ffffff; /* White text color */
@@ -42,7 +111,6 @@
 .income-list .MuiIconButton-root {
     color: #ffffff; /* White icons */
 }
-
 
 .MuiIconButton-root {
     color: #ffffff !important; /* White icons */
@@ -173,6 +241,8 @@
 .MuiTableCell-root {
     color: white !important;
     border-bottom: none !important;
+    padding: 6px; /* Reduce padding */
+    font-size: 0.9rem; /* Adjust font size */
 }
 
 .text-field input {

@@ -42,7 +42,6 @@ const ViewExpenses = () => {
     try {
       const response = await axiosInstance.get('/api/expense_categories/');
       setCategories(response.data);
-      console.log('Fetched categories:', response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
     }
@@ -52,7 +51,6 @@ const ViewExpenses = () => {
     try {
       const response = await axiosInstance.get('/api/credit_cards/');
       setCreditCards(response.data);
-      console.log('Fetched credit cards:', response.data);
     } catch (error) {
       console.error('Error fetching credit cards:', error);
     }

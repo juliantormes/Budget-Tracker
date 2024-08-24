@@ -11,7 +11,8 @@ const ExpenseTable = ({
   onSave,
   onDelete,
   categories,
-  creditCards
+  creditCards,
+  isDeleting
 }) => (
   <Table className="table">
     <TableHead>
@@ -41,6 +42,7 @@ const ExpenseTable = ({
           categories={categories}
           type="expense"
           creditCards={creditCards}
+          isDeleting={isDeleting}
         />
       ))}
     </TableBody>

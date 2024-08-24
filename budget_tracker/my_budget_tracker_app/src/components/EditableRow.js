@@ -8,10 +8,11 @@ import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 import axiosInstance from '../api/axiosApi';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories = [], type, creditCards = [] }) => {
+const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories = [], type, creditCards = [], isDeleting }) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
+
 
   useEffect(() => {
     if (isEditing) {
@@ -67,11 +68,12 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const handleDelete = async () => {
+    if (isDeleting) return; // Prevent multiple deletions
     const apiEndpoint = type === 'expense' ? `/api/expenses/${item.id}/` : `/api/incomes/${item.id}/`;
     try {
       const response = await axiosInstance.delete(apiEndpoint);
       if (response.status === 204) {
-        onDelete(item.id);
+        onDelete(item.id); // Call the onDelete prop passed from the parent component
       } else {
         throw new Error(`Failed to delete ${type}`);
       }
@@ -82,11 +84,11 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
 
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
-      handleDelete();
+      handleDelete(); // Trigger deletion
     } else if (actionType === 'edit') {
-      handleSave();
+      handleSave(); // Trigger save
     }
-    setConfirmActionOpen(false);
+    setConfirmActionOpen(false); // Close the confirmation dialog
   };
 
   const openConfirmDialog = (type) => {
@@ -335,7 +337,7 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
               <IconButton onClick={() => onEdit(item)}>
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => openConfirmDialog('delete')}>
+              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting}>
                 <DeleteIcon />
               </IconButton>
             </>

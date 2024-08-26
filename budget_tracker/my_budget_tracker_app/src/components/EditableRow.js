@@ -82,6 +82,14 @@ const EditableRow = ({
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
   const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
 
+  // Common styles for consistent height across all elements
+  const commonHeightStyle = {
+    height: '40px', // Consistent height for all elements
+    lineHeight: '40px',
+    display: 'flex',
+    alignItems: 'center',
+  };
+
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
@@ -95,10 +103,7 @@ const EditableRow = ({
                 displayEmpty
                 variant="outlined"
                 size="small"
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                }}
+                style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -121,14 +126,9 @@ const EditableRow = ({
               variant="outlined"
               size="small"
               fullWidth
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-              }}
+              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
               InputProps={{
-                style: {
-                  padding: '8px',
-                },
+                style: { ...commonHeightStyle },
               }}
             />
           ) : (
@@ -145,14 +145,9 @@ const EditableRow = ({
               variant="outlined"
               size="small"
               fullWidth
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-              }}
+              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
               InputProps={{
-                style: {
-                  padding: '8px',
-                },
+                style: { ...commonHeightStyle },
               }}
             />
           ) : (
@@ -168,14 +163,9 @@ const EditableRow = ({
               variant="outlined"
               size="small"
               fullWidth
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-              }}
+              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
               InputProps={{
-                style: {
-                  padding: '8px',
-                },
+                style: { ...commonHeightStyle },
               }}
             />
           ) : (
@@ -190,10 +180,7 @@ const EditableRow = ({
                   name="is_recurring"
                   checked={formData.is_recurring || false}
                   onChange={handleCheckboxChange}
-                  style={{
-                    backgroundColor: 'transparent',
-                    padding: '0',
-                  }}
+                  style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
                 />
               ) : (
                 formData.is_recurring ? 'Yes' : 'No'
@@ -205,10 +192,7 @@ const EditableRow = ({
                   name="pay_with_credit_card"
                   checked={formData.pay_with_credit_card || false}
                   onChange={handlePayWithCreditCardChange}
-                  style={{
-                    backgroundColor: 'transparent',
-                    padding: '0',
-                  }}
+                  style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
                 />
               ) : (
                 formData.pay_with_credit_card ? 'Yes' : 'No'
@@ -225,10 +209,7 @@ const EditableRow = ({
                     disabled={!formData.pay_with_credit_card}
                     variant="outlined"
                     size="small"
-                    style={{
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                    }}
+                    style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
                   >
                     {creditCards.map((card) => (
                       <MenuItem key={card.id} value={card.id}>
@@ -251,14 +232,9 @@ const EditableRow = ({
                   variant="outlined"
                   size="small"
                   fullWidth
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                  }}
+                  style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
                   InputProps={{
-                    style: {
-                      padding: '8px',
-                    },
+                    style: { ...commonHeightStyle },
                   }}
                   disabled={!formData.pay_with_credit_card}
                 />
@@ -276,14 +252,9 @@ const EditableRow = ({
                   variant="outlined"
                   size="small"
                   fullWidth
-                  style={{
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                  }}
+                  style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
                   InputProps={{
-                    style: {
-                      padding: '8px',
-                    },
+                    style: { ...commonHeightStyle },
                   }}
                   disabled={!formData.pay_with_credit_card}
                 />
@@ -294,8 +265,8 @@ const EditableRow = ({
           </>
         )}
         <TableCell
-          className="table-cell actions-cell"
-          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '8%' }}
+          className="table-cell"
+          style={{ ...commonHeightStyle, display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '8%' }}
         >
           {isEditing ? (
             <>

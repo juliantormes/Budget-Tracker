@@ -295,23 +295,23 @@ const EditableRow = ({
         )}
         <TableCell
           className="table-cell actions-cell"
-          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', padding: '0 16px', width: '10%' }}
+          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '8%' }}
         >
           {isEditing ? (
             <>
-              <IconButton onClick={() => openConfirmDialog('edit')}>
+              <IconButton onClick={() => openConfirmDialog('edit')} style={{ padding: '8px' }}>
                 <SaveIcon />
               </IconButton>
-              <IconButton onClick={onCancel}>
+              <IconButton onClick={onCancel} style={{ padding: '8px' }}>
                 <CancelIcon />
               </IconButton>
             </>
           ) : (
             <>
-              <IconButton onClick={() => onEdit(item)}>
+              <IconButton onClick={() => onEdit(item)} style={{ padding: '8px' }}>
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting}>
+              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting} style={{ padding: '8px' }}>
                 <DeleteIcon />
               </IconButton>
             </>

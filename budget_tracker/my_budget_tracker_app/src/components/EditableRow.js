@@ -7,17 +7,17 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
-const EditableRow = ({ 
-  item = {}, 
-  isEditing, 
-  onEdit, 
-  onCancel, 
-  onSave, 
-  onDelete, 
-  categories = [], 
-  type, 
-  creditCards = [], 
-  isDeleting 
+const EditableRow = ({
+  item = {},
+  isEditing,
+  onEdit,
+  onCancel,
+  onSave,
+  onDelete,
+  categories = [],
+  type,
+  creditCards = [],
+  isDeleting,
 }) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
@@ -85,7 +85,7 @@ const EditableRow = ({
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
-        <TableCell className="table-cell">
+        <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
           {isEditing ? (
             <FormControl fullWidth>
               <Select
@@ -93,10 +93,11 @@ const EditableRow = ({
                 value={formData.category || ''}
                 onChange={handleCategoryChange}
                 displayEmpty
+                variant="outlined"
+                size="small"
                 style={{
                   backgroundColor: 'transparent',
                   border: 'none',
-                  boxShadow: 'none',
                 }}
               >
                 {categories.map((category) => (
@@ -110,43 +111,47 @@ const EditableRow = ({
             currentCategory
           )}
         </TableCell>
-        <TableCell className="table-cell">
+        <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
           {isEditing ? (
             <TextField
               name="date"
               type="date"
               value={formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : ''}
               onChange={handleChange}
+              variant="outlined"
+              size="small"
               fullWidth
-              className="text-field"
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+              }}
               InputProps={{
                 style: {
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none',
-                  padding: 0,
+                  padding: '8px',
                 },
               }}
             />
           ) : (
-            formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : 'N/A'
+            dayjs(formData.date).format('YYYY-MM-DD')
           )}
         </TableCell>
-        <TableCell className="table-cell">
+        <TableCell className="table-cell" style={{ padding: '0 16px', width: '10%' }}>
           {isEditing ? (
             <TextField
               name="amount"
               type="number"
               value={formData.amount || ''}
               onChange={handleChange}
+              variant="outlined"
+              size="small"
               fullWidth
-              className="text-field"
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+              }}
               InputProps={{
                 style: {
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none',
-                  padding: 0,
+                  padding: '8px',
                 },
               }}
             />
@@ -154,20 +159,22 @@ const EditableRow = ({
             formData.amount !== undefined ? formData.amount : 'N/A'
           )}
         </TableCell>
-        <TableCell className="table-cell">
+        <TableCell className="table-cell" style={{ padding: '0 16px', width: '14%' }}>
           {isEditing ? (
             <TextField
               name="description"
               value={formData.description || ''}
               onChange={handleChange}
+              variant="outlined"
+              size="small"
               fullWidth
-              className="text-field"
+              style={{
+                backgroundColor: 'transparent',
+                border: 'none',
+              }}
               InputProps={{
                 style: {
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none',
-                  padding: 0,
+                  padding: '8px',
                 },
               }}
             />
@@ -177,7 +184,7 @@ const EditableRow = ({
         </TableCell>
         {type === 'expense' && (
           <>
-            <TableCell className="table-cell">
+            <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
               {isEditing ? (
                 <Checkbox
                   name="is_recurring"
@@ -185,16 +192,14 @@ const EditableRow = ({
                   onChange={handleCheckboxChange}
                   style={{
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    boxShadow: 'none',
-                    padding: 0,
+                    padding: '0',
                   }}
                 />
               ) : (
                 formData.is_recurring ? 'Yes' : 'No'
               )}
             </TableCell>
-            <TableCell className="table-cell">
+            <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
               {isEditing ? (
                 <Checkbox
                   name="pay_with_credit_card"
@@ -202,16 +207,14 @@ const EditableRow = ({
                   onChange={handlePayWithCreditCardChange}
                   style={{
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    boxShadow: 'none',
-                    padding: 0,
+                    padding: '0',
                   }}
                 />
               ) : (
                 formData.pay_with_credit_card ? 'Yes' : 'No'
               )}
             </TableCell>
-            <TableCell className="table-cell">
+            <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
               {isEditing ? (
                 <FormControl fullWidth>
                   <Select
@@ -220,11 +223,11 @@ const EditableRow = ({
                     onChange={handleChange}
                     displayEmpty
                     disabled={!formData.pay_with_credit_card}
+                    variant="outlined"
+                    size="small"
                     style={{
                       backgroundColor: 'transparent',
                       border: 'none',
-                      boxShadow: 'none',
-                      width: '150px' // Set a fixed width for the dropdown
                     }}
                   >
                     {creditCards.map((card) => (
@@ -238,21 +241,23 @@ const EditableRow = ({
                 currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'
               )}
             </TableCell>
-            <TableCell className="table-cell">
+            <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
               {isEditing ? (
                 <TextField
                   name="installments"
                   type="number"
                   value={formData.installments || ''}
                   onChange={handleChange}
+                  variant="outlined"
+                  size="small"
                   fullWidth
-                  className="text-field"
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                  }}
                   InputProps={{
                     style: {
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      boxShadow: 'none',
-                      padding: 0,
+                      padding: '8px',
                     },
                   }}
                   disabled={!formData.pay_with_credit_card}
@@ -261,21 +266,23 @@ const EditableRow = ({
                 formData.installments !== undefined ? formData.installments : 'N/A'
               )}
             </TableCell>
-            <TableCell className="table-cell">
+            <TableCell className="table-cell" style={{ padding: '0 16px', width: '10%' }}>
               {isEditing ? (
                 <TextField
                   name="surcharge"
                   type="number"
                   value={formData.surcharge || ''}
                   onChange={handleChange}
+                  variant="outlined"
+                  size="small"
                   fullWidth
-                  className="text-field"
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                  }}
                   InputProps={{
                     style: {
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      boxShadow: 'none',
-                      padding: 0,
+                      padding: '8px',
                     },
                   }}
                   disabled={!formData.pay_with_credit_card}
@@ -286,26 +293,10 @@ const EditableRow = ({
             </TableCell>
           </>
         )}
-        {type === 'income' && (
-          <TableCell className="table-cell">
-            {isEditing ? (
-              <Checkbox
-                name="is_recurring"
-                checked={formData.is_recurring || false}
-                onChange={handleCheckboxChange}
-                style={{
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  boxShadow: 'none',
-                  padding: 0,
-                }}
-              />
-            ) : (
-              formData.is_recurring ? 'Yes' : 'No'
-            )}
-          </TableCell>
-        )}
-        <TableCell className="table-cell" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <TableCell
+          className="table-cell actions-cell"
+          style={{ display: 'flex', flexDirection: 'row', justifyContent: 'center', padding: '0 16px', width: '10%' }}
+        >
           {isEditing ? (
             <>
               <IconButton onClick={() => openConfirmDialog('edit')}>

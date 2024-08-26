@@ -82,6 +82,14 @@ const EditableRow = ({
   const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
   const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
 
+  // Function to strip .00 decimals
+  const stripDecimals = (value) => {
+    if (parseFloat(value) === parseInt(value, 10)) {
+      return parseInt(value, 10);
+    }
+    return value;
+  };
+
   // Common styles for consistent height across all elements
   const commonHeightStyle = {
     height: '40px', // Consistent height for all elements
@@ -151,7 +159,7 @@ const EditableRow = ({
               }}
             />
           ) : (
-            formData.amount !== undefined ? formData.amount : 'N/A'
+            stripDecimals(formData.amount)  // Use the stripDecimals function
           )}
         </TableCell>
         <TableCell className="table-cell" style={{ padding: '0 16px', width: '14%' }}>
@@ -239,7 +247,7 @@ const EditableRow = ({
                   disabled={!formData.pay_with_credit_card}
                 />
               ) : (
-                formData.installments !== undefined ? formData.installments : 'N/A'
+                stripDecimals(formData.installments)  // Use the stripDecimals function
               )}
             </TableCell>
             <TableCell className="table-cell" style={{ padding: '0 16px', width: '10%' }}>
@@ -259,7 +267,7 @@ const EditableRow = ({
                   disabled={!formData.pay_with_credit_card}
                 />
               ) : (
-                formData.surcharge !== undefined ? formData.surcharge : 'N/A'
+                stripDecimals(formData.surcharge)  // Use the stripDecimals function
               )}
             </TableCell>
           </>

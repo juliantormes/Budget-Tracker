@@ -109,6 +109,7 @@ const ViewExpenses = () => {
       const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
       if (response.status === 204) {
         refetch(); // Refetch data only on successful delete
+        console.log('Expense deleted successfully');
       } else {
         throw new Error('Failed to delete expense');
       }

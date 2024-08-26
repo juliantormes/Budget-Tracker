@@ -1,4 +1,3 @@
-// IncomeTable.js
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableRow } from '@mui/material';
 import EditableRow from './EditableRow';
@@ -15,13 +14,13 @@ const IncomeTable = ({
 }) => (
   <Table className="table">
     <TableHead>
-      <TableRow className="table-header">
-        <TableCell>Category</TableCell>
-        <TableCell>Date</TableCell>
-        <TableCell>Amount</TableCell>
-        <TableCell>Description</TableCell>
-        <TableCell>Recurring</TableCell>
-        <TableCell>Actions</TableCell>
+      <TableRow className="table-header" >
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '20%' }}>Category</TableCell>
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '15%' }}>Date</TableCell>
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '10%' }}>Amount</TableCell>
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '35%' }}>Description</TableCell>
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '10%' }}>Recurring</TableCell>
+        <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '10%' }}>Actions</TableCell>
       </TableRow>
     </TableHead>
     <TableBody>

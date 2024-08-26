@@ -17,7 +17,7 @@ const ViewExpenses = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
-  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
+  const { data, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedExpenses, setSelectedExpenses] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingExpenseId, setEditingExpenseId] = useState(null);

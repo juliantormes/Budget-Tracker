@@ -56,11 +56,6 @@ form {
 .table-cell {
     color: #ffffff; /* White text color */
 }
-
-.table-header {
-    color: #ffffff; /* White text color */
-}
-
 .MuiTableCell-root {
     color: #ffffff; /* White text color */
     border-bottom: 1px solid #e0e0e0; /* Light border */
@@ -266,4 +261,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: 100% !important;
     box-sizing: border-box;
   }
-  
+.table-header .MuiTableCell-root {
+    color: #ffffff; /* White text color */
+    font-weight: bold; /* Bold text */
+}

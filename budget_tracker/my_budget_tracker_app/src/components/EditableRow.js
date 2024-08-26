@@ -172,20 +172,20 @@ const EditableRow = ({
             formData.description || 'N/A'
           )}
         </TableCell>
+        <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
+          {isEditing ? (
+            <Checkbox
+              name="is_recurring"
+              checked={formData.is_recurring || false}
+              onChange={handleCheckboxChange}
+              style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
+            />
+          ) : (
+            formData.is_recurring ? 'Yes' : 'No'
+          )}
+        </TableCell>
         {type === 'expense' && (
           <>
-            <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
-              {isEditing ? (
-                <Checkbox
-                  name="is_recurring"
-                  checked={formData.is_recurring || false}
-                  onChange={handleCheckboxChange}
-                  style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
-                />
-              ) : (
-                formData.is_recurring ? 'Yes' : 'No'
-              )}
-            </TableCell>
             <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
               {isEditing ? (
                 <Checkbox

@@ -17,7 +17,7 @@ const ViewIncomes = () => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
-  const { data, loading, error, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
+  const { data, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingIncomeId, setEditingIncomeId] = useState(null);

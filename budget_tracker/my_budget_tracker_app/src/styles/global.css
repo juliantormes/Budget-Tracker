@@ -228,3 +228,7 @@ form {
 .MuiButton-containedSecondary:hover {
     background-color: #0d47a1 !important; /* Darker blue on hover */
 }
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(100%) brightness(100%); /* This makes the icon white */
+    cursor: pointer;
+  }

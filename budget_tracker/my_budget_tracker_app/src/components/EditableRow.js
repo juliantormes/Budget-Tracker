@@ -6,13 +6,22 @@ import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
-import axiosInstance from '../api/axiosApi';
 
-const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete, categories = [], type, creditCards = [], isDeleting }) => {
+const EditableRow = ({ 
+  item = {}, 
+  isEditing, 
+  onEdit, 
+  onCancel, 
+  onSave, 
+  onDelete, 
+  categories = [], 
+  type, 
+  creditCards = [], 
+  isDeleting 
+}) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
-
 
   useEffect(() => {
     if (isEditing) {
@@ -37,7 +46,6 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   const handlePayWithCreditCardChange = (e) => {
     const isChecked = e.target.checked;
     if (!isChecked) {
-      // Reset credit card-related fields when unchecked
       setFormData((prevFormData) => ({
         ...prevFormData,
         pay_with_credit_card: false,
@@ -54,37 +62,12 @@ const EditableRow = ({ item = {}, isEditing, onEdit, onCancel, onSave, onDelete,
   };
 
   const handleSave = async () => {
-    const apiEndpoint = type === 'expense' ? `/api/expenses/${item.id}/` : `/api/incomes/${item.id}/`;
-    try {
-      const response = await axiosInstance.put(apiEndpoint, formData);
-      if (response.status === 200) {
-        onSave(formData);
-      } else {
-        throw new Error(`Failed to update ${type}`);
-      }
-    } catch (error) {
-      console.error(`Error updating ${type}:`, error);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (isDeleting) return; // Prevent multiple deletions
-    const apiEndpoint = type === 'expense' ? `/api/expenses/${item.id}/` : `/api/incomes/${item.id}/`;
-    try {
-      const response = await axiosInstance.delete(apiEndpoint);
-      if (response.status === 204) {
-        onDelete(item.id); // Call the onDelete prop passed from the parent component
-      } else {
-        throw new Error(`Failed to delete ${type}`);
-      }
-    } catch (error) {
-      console.error(`Error deleting ${type}:`, error);
-    }
+    onSave(formData); // Trigger save using the onSave prop
   };
 
   const handleActionConfirm = () => {
     if (actionType === 'delete') {
-      handleDelete(); // Trigger deletion
+      onDelete(item.id); // Trigger deletion using the onDelete prop
     } else if (actionType === 'edit') {
       handleSave(); // Trigger save
     }

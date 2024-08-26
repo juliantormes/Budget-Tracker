@@ -23,7 +23,7 @@ const ViewExpenses = () => {
   const [editingExpenseId, setEditingExpenseId] = useState(null);
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
-  const [isDeleting, setIsDeleting] = useState(false); // To prevent multiple deletions
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const fetchExpenses = useCallback((start, end) => {
     const fetchedExpenses = data.expenses.filter(expense =>
@@ -99,7 +99,7 @@ const ViewExpenses = () => {
       console.error('Error updating expense:', error);
     }
   };
-//revisar handleDelete por que trata de borrarlo 2 veces
+
   const handleDelete = async (expenseId) => {
     if (isDeleting) return;
   
@@ -111,12 +111,6 @@ const ViewExpenses = () => {
         refetch(); // Refetch data only on successful delete
       } else {
         throw new Error('Failed to delete expense');
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        refetch(); // Refetch data if expense is already deleted
-      } else {
-        console.error('Error deleting expense:', error);
       }
     } finally {
       setIsDeleting(false); // Reset deleting state

@@ -101,14 +101,7 @@ const ViewIncomes = () => {
       } else {
         throw new Error('Failed to delete income');
       }
-    } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.log('Income not found, possibly already deleted.');
-        refetch(); // Refetch data if income is already deleted
-      } else {
-        console.error('Error deleting income:', error);
-      }
-    } finally {
+    }  finally {
       setIsDeleting(false); // Reset deleting state
     }
   };

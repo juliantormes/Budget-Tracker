@@ -282,3 +282,11 @@ input:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0px 1000px #1f2a40 inset !important; /* Match your background color */
     -webkit-text-fill-color: white !important; /* Match your text color */
 }
+.MuiInputLabel-root {
+    color: #ffffff !important; /* Force label color to white */
+  }
+  
+  .MuiInputBase-input {
+    color: #ffffff !important; /* Force input text color to white */
+  }
+  

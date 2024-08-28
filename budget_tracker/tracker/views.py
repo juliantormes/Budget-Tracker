@@ -52,45 +52,66 @@ def logout(request):
     request.auth.delete()  # Deletes the token, logging the user out
     return Response({'message': 'Logged out successfully'})
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_recurring_expense(request, expense_id):
     try:
         # Retrieve the expense or return a 404 error if not found
         expense = get_object_or_404(Expense, id=expense_id, user=request.user)
         
-        # Create the serializer with the incoming data and context
-        serializer = ExpenseRecurringChangeLogSerializer(data=request.data, context={'expense': expense})
-        
+        # Check if a recurring change log already exists for the given effective date
+        effective_date = request.data.get('effective_date')
+        if effective_date:
+            existing_log = expense.change_logs.filter(effective_date=effective_date).first()
+        else:
+            existing_log = None
+
+        # If there's an existing log and it's a PUT request, update it
+        if request.method == 'PUT' and existing_log:
+            serializer = ExpenseRecurringChangeLogSerializer(existing_log, data=request.data, partial=True)
+        else:
+            # Create a new record if it's a POST request or no existing log was found
+            serializer = ExpenseRecurringChangeLogSerializer(data=request.data, context={'expense': expense})
+
         if serializer.is_valid():
-            # Save the serializer with the expense object
             serializer.save(expense=expense)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK if existing_log else status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['POST'])
+@api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
 def update_recurring_income(request, income_id):
     try:
         # Retrieve the income or return a 404 error if not found
         income = get_object_or_404(Income, id=income_id, user=request.user)
         
-        # Create the serializer with the incoming data and context
-        serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})
-        
+        # Check if a recurring change log already exists for the given effective date
+        effective_date = request.data.get('effective_date')
+        if effective_date:
+            existing_log = income.change_logs.filter(effective_date=effective_date).first()
+        else:
+            existing_log = None
+
+        # If there's an existing log and it's a PUT request, update it
+        if request.method == 'PUT' and existing_log:
+            serializer = IncomeRecurringChangeLogSerializer(existing_log, data=request.data, partial=True)
+        else:
+            # Create a new record if it's a POST request or no existing log was found
+            serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})
+
         if serializer.is_valid():
-            # Save the serializer with the income object
             serializer.save(income=income)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK if existing_log else status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback} from 'react';
-import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Alert } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -28,10 +28,11 @@ const ViewIncomes = () => {
   const [currentIncome, setCurrentIncome] = useState(null);
   const [newAmount, setNewAmount] = useState('');
   const [effectiveDate, setEffectiveDate] = useState(dayjs());
+  const [errorMessage, setErrorMessage] = useState(''); // For error notifications
 
   useEffect(() => {
     if (currentIncome) {
-      setNewAmount(currentIncome.amount);  // Set the default value to the current amount
+      setNewAmount(currentIncome.effective_amount || currentIncome.amount);  // Set the default value to the current amount
     }
   }, [currentIncome]);
 
@@ -86,68 +87,66 @@ const ViewIncomes = () => {
     fetchIncomes(newStartDate, newEndDate);
   };
 
-  const handleSave = async (formData) => {
-    try {
-      const response = await axiosInstance.put(`/api/incomes/${editingIncomeId}/`, formData);
-      if (response.status === 200) {
-        refetch();
-        setEditingIncomeId(null);
-      } else {
-        throw new Error('Failed to update income');
-      }
-    } catch (error) {
-      console.error('Error updating income:', error);
+  const handleSave = async () => {
+    if (!currentIncome || !currentIncome.id) {
+      setErrorMessage('Error: Cannot update income because the necessary data is missing.');
+      return;
     }
-  };
-
-  const handleDelete = async (incomeId) => {
-    if (isDeleting) return;
-
-    setIsDeleting(true);
-
+  
+    const formData = {
+      new_amount: parseFloat(newAmount),
+      effective_date: effectiveDate.format('YYYY-MM-DD'),
+    };
+  
     try {
-      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
-      if (response.status === 204) {
-        refetch();
+      // Check if there's already a change log for this month
+      const existingLog = currentIncome.change_logs.find(log =>
+        dayjs(log.effective_date).isSame(effectiveDate, 'month')
+      );
+  
+      let response;
+      if (existingLog) {
+        // If a log exists for the current month, update it
+        response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       } else {
-        throw new Error('Failed to delete income');
+        // Otherwise, create a new log
+        response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       }
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleEdit = (income) => {
-    setEditingIncomeId(income.id);
-  };
-
-  const handleCancel = () => {
-    setEditingIncomeId(null);
-  };
-
-  const handleUpdateRecurring = (incomeId) => {
-    const income = selectedIncomes.find((inc) => inc.id === incomeId);
-    setCurrentIncome(income);
-    setOpenDialog(true);
-  };
-
-  const handleDialogSave = async () => {
-    try {
-      const response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, {
-        new_amount: newAmount,
-        effective_date: effectiveDate.format('YYYY-MM-DD'),
-      });
-      if (response.status === 200) {
+  
+      if (response.status === 200 || response.status === 201) {
         refetch();
         setOpenDialog(false);
         setCurrentIncome(null);
         setNewAmount('');
         setEffectiveDate(dayjs());
+        setErrorMessage('');
       } else {
-        throw new Error('Failed to update recurring amount');
+        throw new Error('Failed to save the recurring amount');
       }
     } catch (error) {
-      console.error('Error updating recurring amount:', error);
+      console.error('Error saving income:', error);
+      setErrorMessage(error.response?.data?.effective_date?.[0] || 'Failed to save the recurring amount. Please check your input and try again.');
+    }
+  };
+  
+
+  const handleEdit = (income) => {
+    setEditingIncomeId(income.id);
+    setCurrentIncome(income);
+    setNewAmount(income.effective_amount || income.amount);
+    setEffectiveDate(dayjs());
+    setOpenDialog(true);
+  };
+
+  const handleUpdateRecurring = (incomeId) => {
+    const income = selectedIncomes.find((inc) => inc.id === incomeId);
+    if (income) {
+      setCurrentIncome(income);  // Set the current income with the correct ID
+      setNewAmount(income.effective_amount || income.amount);
+      setEffectiveDate(dayjs());
+      setOpenDialog(true);  // Open the dialog
+    } else {
+      console.error('Income not found for the given ID:', incomeId);
     }
   };
 
@@ -175,18 +174,19 @@ const ViewIncomes = () => {
             incomes={selectedIncomes}
             editingIncomeId={editingIncomeId}
             onEdit={handleEdit}
-            onCancel={handleCancel}
+            onCancel={() => setEditingIncomeId(null)}
             onSave={handleSave}
-            onDelete={handleDelete}
-            onUpdateRecurring={handleUpdateRecurring} // Pass the handler to EditableRow
+            onDelete={() => setEditingIncomeId(null)}
+            onUpdateRecurring={handleUpdateRecurring} // Pass the handleUpdateRecurring to the IncomeTable
             categories={categories}
             isDeleting={isDeleting}
           />
         </Container>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Update Recurring Amount</DialogTitle>
+        <DialogTitle>{editingIncomeId ? "Edit Existing Recurring Amount" : "Create New Recurring Amount"}</DialogTitle>
         <DialogContent>
+          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           <TextField
             label="New Amount"
             type="number"
@@ -214,7 +214,7 @@ const ViewIncomes = () => {
           <Button onClick={() => setOpenDialog(false)} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleDialogSave} color="primary">
+          <Button onClick={handleSave} color="primary">
             Save
           </Button>
         </DialogActions>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
+import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Alert } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -29,10 +29,11 @@ const ViewExpenses = () => {
   const [currentExpense, setCurrentExpense] = useState(null);
   const [newAmount, setNewAmount] = useState('');
   const [effectiveDate, setEffectiveDate] = useState(dayjs());
+  const [errorMessage, setErrorMessage] = useState(''); // For error notifications
 
   useEffect(() => {
     if (currentExpense) {
-      setNewAmount(currentExpense.amount);  // Set the default value to the current amount
+      setNewAmount(currentExpense.effective_amount || currentExpense.amount);  // Set the default value to the current amount
     }
   }, [currentExpense]);
 
@@ -97,69 +98,66 @@ const ViewExpenses = () => {
     fetchExpenses(newStartDate, newEndDate);
   };
 
-  const handleSave = async (formData) => {
-    try {
-      const response = await axiosInstance.put(`/api/expenses/${editingExpenseId}/`, formData);
-      if (response.status === 200) {
-        refetch();
-        setEditingExpenseId(null);
-      } else {
-        throw new Error('Failed to update expense');
-      }
-    } catch (error) {
-      console.error('Error updating expense:', error);
+  const handleSave = async () => {
+    if (!currentExpense || !currentExpense.id) {
+      setErrorMessage('Error: Cannot update expense because the necessary data is missing.');
+      return;
     }
-  };
-
-  const handleDelete = async (expenseId) => {
-    if (isDeleting) return;
-
-    setIsDeleting(true);
-
+  
+    const formData = {
+      new_amount: parseFloat(newAmount),
+      effective_date: effectiveDate.format('YYYY-MM-DD'),
+    };
+  
     try {
-      const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
-      if (response.status === 204) {
-        refetch();
-        console.log('Expense deleted successfully');
+      // Check if there's already a change log for this month
+      const existingLog = currentExpense.change_logs.find(log =>
+        dayjs(log.effective_date).isSame(effectiveDate, 'month')
+      );
+  
+      let response;
+      if (existingLog) {
+        // If a log exists for the current month, update it
+        response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
       } else {
-        throw new Error('Failed to delete expense');
+        // Otherwise, create a new log
+        response = await axiosInstance.post(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
       }
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const handleEdit = (expense) => {
-    setEditingExpenseId(expense.id);
-  };
-
-  const handleCancel = () => {
-    setEditingExpenseId(null);
-  };
-
-  const handleUpdateRecurring = (expenseId) => {
-    const expense = selectedExpenses.find((exp) => exp.id === expenseId);
-    setCurrentExpense(expense);
-    setOpenDialog(true);
-  };
-
-  const handleDialogSave = async () => {
-    try {
-      const response = await axiosInstance.post(`/api/expenses/${currentExpense.id}/update_recurring/`, {
-        new_amount: newAmount,
-        effective_date: effectiveDate.format('YYYY-MM-DD'),
-      });
-      if (response.status === 200) {
+  
+      if (response.status === 200 || response.status === 201) {
         refetch();
         setOpenDialog(false);
         setCurrentExpense(null);
         setNewAmount('');
         setEffectiveDate(dayjs());
+        setErrorMessage('');
       } else {
-        throw new Error('Failed to update recurring amount');
+        throw new Error('Failed to save the recurring amount');
       }
     } catch (error) {
-      console.error('Error updating recurring amount:', error);
+      console.error('Error saving expense:', error);
+      setErrorMessage(error.response?.data?.effective_date?.[0] || 'Failed to save the recurring amount. Please check your input and try again.');
+    }
+  };
+  
+
+  const handleEdit = (expense) => {
+    setEditingExpenseId(expense.id);
+    setCurrentExpense(expense);
+    setNewAmount(expense.effective_amount || expense.amount);
+    setEffectiveDate(dayjs());
+    setOpenDialog(true);
+  };
+
+  const handleUpdateRecurring = (expenseId) => {
+    const expense = selectedExpenses.find((exp) => exp.id === expenseId);
+    if (expense) {
+      setCurrentExpense(expense);  // Set the current expense with the correct ID
+      setNewAmount(expense.effective_amount || expense.amount);
+      setEffectiveDate(dayjs());
+      setOpenDialog(true);  // Open the dialog
+    } else {
+      console.error('Expense not found for the given ID:', expenseId);
     }
   };
 
@@ -187,10 +185,10 @@ const ViewExpenses = () => {
             expenses={selectedExpenses}
             editingExpenseId={editingExpenseId}
             onEdit={handleEdit}
-            onCancel={handleCancel}
+            onCancel={() => setEditingExpenseId(null)}
             onSave={handleSave}
-            onDelete={handleDelete}
-            onUpdateRecurring={handleUpdateRecurring} // Pass the handler to EditableRow
+            onDelete={() => setEditingExpenseId(null)}
+            onUpdateRecurring={handleUpdateRecurring} // Pass the handleUpdateRecurring to the ExpenseTable
             categories={categories}
             creditCards={creditCards}
             isDeleting={isDeleting}
@@ -198,8 +196,9 @@ const ViewExpenses = () => {
         </Container>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Update Recurring Amount</DialogTitle>
+        <DialogTitle>{editingExpenseId ? "Edit Existing Recurring Amount" : "Create New Recurring Amount"}</DialogTitle>
         <DialogContent>
+          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           <TextField
             label="New Amount"
             type="number"
@@ -227,7 +226,7 @@ const ViewExpenses = () => {
           <Button onClick={() => setOpenDialog(false)} color="secondary">
             Cancel
           </Button>
-          <Button onClick={handleDialogSave} color="primary">
+          <Button onClick={handleSave} color="primary">
             Save
           </Button>
         </DialogActions>

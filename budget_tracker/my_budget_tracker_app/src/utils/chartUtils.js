@@ -71,6 +71,7 @@ export const prepareBarChartData = (percentages) => {
 
 export const prepareIncomeChartData = (incomes, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
+    
     const nonRecurringIncomes = incomes.filter(income => {
         const incomeDate = new Date(income.date);
         const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
@@ -83,7 +84,7 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         return income.is_recurring && incomeMonth <= formattedMonth;
     }).map(income => ({
         ...income,
-        amount: parseFloat(income.amount)
+        amount: parseFloat(income.effective_amount || income.amount) // Use effective amount if available
     }));
 
     const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
@@ -103,13 +104,16 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
             label: 'Incomes',
             data,
             backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
-            borderColor: ['#4b4b4b']
+            borderColor: ['#4b4b4b'],
+            borderWidth: 1,
         }]
     };
 };
 
+
 export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
+    
     const nonRecurringExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
@@ -122,7 +126,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         return expense.is_recurring && expenseMonth <= formattedMonth;
     }).map(expense => ({
         ...expense,
-        amount: parseFloat(expense.amount)
+        amount: parseFloat(expense.effective_amount || expense.amount) // Use effective amount if available
     }));
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
@@ -142,7 +146,8 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
             label: 'Expenses',
             data,
             backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
-            borderColor: ['#4b4b4b']
+            borderColor: ['#4b4b4b'],
+            borderWidth: 1,
         }]
     };
 };

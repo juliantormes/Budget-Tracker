@@ -4,6 +4,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
 import CancelIcon from '@mui/icons-material/Cancel';
+import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
 
@@ -14,6 +15,7 @@ const EditableRow = ({
   onCancel,
   onSave,
   onDelete,
+  onUpdateRecurring, // Add a prop to handle the update recurring action
   categories = [],
   type,
   creditCards = [],
@@ -159,7 +161,7 @@ const EditableRow = ({
               }}
             />
           ) : (
-            stripDecimals(formData.amount)  // Use the stripDecimals function
+            stripDecimals(item.effective_amount || formData.amount)  // Use effective_amount if available
           )}
         </TableCell>
         <TableCell className="table-cell" style={{ padding: '0 16px', width: '14%' }}>
@@ -274,7 +276,7 @@ const EditableRow = ({
         )}
         <TableCell
           className="table-cell"
-          style={{ ...commonHeightStyle, display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '8%' }}
+          style={{ ...commonHeightStyle, display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '16%' }}
         >
           {isEditing ? (
             <>
@@ -293,6 +295,14 @@ const EditableRow = ({
               <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting} style={{ padding: '8px' }}>
                 <DeleteIcon />
               </IconButton>
+              {formData.is_recurring && (
+                <IconButton
+                  onClick={() => onUpdateRecurring(item.id)} // Trigger the update recurring action
+                  style={{ padding: '8px', marginLeft: '8px' }}
+                >
+                  <MonetizationOnIcon />
+                </IconButton>
+              )}
             </>
           )}
         </TableCell>

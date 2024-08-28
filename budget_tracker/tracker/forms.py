@@ -4,7 +4,6 @@ from .models import Expense, Income, ExpenseCategory, IncomeCategory, CreditCard
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 from decimal import Decimal
-
 class ExpenseCategoryForm(forms.ModelForm):
     class Meta:
         model = ExpenseCategory

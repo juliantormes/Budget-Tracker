@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Typography } from '@mui/material';
+import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -24,6 +24,17 @@ const ViewExpenses = () => {
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentExpense, setCurrentExpense] = useState(null);
+  const [newAmount, setNewAmount] = useState('');
+  const [effectiveDate, setEffectiveDate] = useState(dayjs());
+
+  useEffect(() => {
+    if (currentExpense) {
+      setNewAmount(currentExpense.amount);  // Set the default value to the current amount
+    }
+  }, [currentExpense]);
 
   const fetchExpenses = useCallback((start, end) => {
     const fetchedExpenses = data.expenses.filter(expense =>
@@ -102,19 +113,19 @@ const ViewExpenses = () => {
 
   const handleDelete = async (expenseId) => {
     if (isDeleting) return;
-  
+
     setIsDeleting(true);
-  
+
     try {
       const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
       if (response.status === 204) {
-        refetch(); // Refetch data only on successful delete
+        refetch();
         console.log('Expense deleted successfully');
       } else {
         throw new Error('Failed to delete expense');
       }
     } finally {
-      setIsDeleting(false); // Reset deleting state
+      setIsDeleting(false);
     }
   };
 
@@ -124,6 +135,32 @@ const ViewExpenses = () => {
 
   const handleCancel = () => {
     setEditingExpenseId(null);
+  };
+
+  const handleUpdateRecurring = (expenseId) => {
+    const expense = selectedExpenses.find((exp) => exp.id === expenseId);
+    setCurrentExpense(expense);
+    setOpenDialog(true);
+  };
+
+  const handleDialogSave = async () => {
+    try {
+      const response = await axiosInstance.post(`/api/expenses/${currentExpense.id}/update_recurring/`, {
+        new_amount: newAmount,
+        effective_date: effectiveDate.format('YYYY-MM-DD'),
+      });
+      if (response.status === 200) {
+        refetch();
+        setOpenDialog(false);
+        setCurrentExpense(null);
+        setNewAmount('');
+        setEffectiveDate(dayjs());
+      } else {
+        throw new Error('Failed to update recurring amount');
+      }
+    } catch (error) {
+      console.error('Error updating recurring amount:', error);
+    }
   };
 
   return (
@@ -152,13 +189,49 @@ const ViewExpenses = () => {
             onEdit={handleEdit}
             onCancel={handleCancel}
             onSave={handleSave}
-            onDelete={handleDelete}  // Directly handle deletion here
+            onDelete={handleDelete}
+            onUpdateRecurring={handleUpdateRecurring} // Pass the handler to EditableRow
             categories={categories}
             creditCards={creditCards}
-            isDeleting={isDeleting} // Pass isDeleting state to disable the delete button
+            isDeleting={isDeleting}
           />
         </Container>
       </div>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Update Recurring Amount</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="New Amount"
+            type="number"
+            fullWidth
+            margin="dense"
+            value={newAmount}
+            onChange={(e) => setNewAmount(e.target.value)}
+            InputLabelProps={{
+              style: { color: '#ffffff' }  // Set label color to white
+            }}
+          />
+          <TextField
+            label="Effective Date"
+            type="date"
+            fullWidth
+            margin="dense"
+            value={effectiveDate.format('YYYY-MM-DD')}
+            onChange={(e) => setEffectiveDate(dayjs(e.target.value))}
+            InputLabelProps={{
+              style: { color: '#ffffff' }  // Set label color to white
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleDialogSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

@@ -5,6 +5,7 @@ from django.utils import timezone
 from .utils import calculate_total_payment_with_surcharge
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.core.exceptions import ValidationError
+from datetime import date
 class ExpenseCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
@@ -93,6 +94,18 @@ class Expense(models.Model):
                         f"Available credit: {self.credit_card.available_credit()}."
                     )
         super().save(*args, **kwargs)
+    def get_effective_amount(expense, check_date=None):
+        if check_date is None:
+            check_date = date.today()
+        
+        # Fetch the latest change log before or on the check_date
+        change_log = ExpenseRecurringChangeLog.objects.filter(
+            expense=expense, effective_date__lte=check_date
+        ).order_by('-effective_date').first()
+        
+        if change_log:
+            return change_log.new_amount
+        return expense.amount
 
     def __str__(self):
         return f"{self.category.name}: {self.amount} on {self.date}"
@@ -111,34 +124,60 @@ class Income(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     is_recurring = models.BooleanField(default=False)
-
-    def update_amount(self, new_amount):
-        if self.is_recurring:
-            IncomeChangeLog.objects.create(
-                income=self,
-                previous_amount=self.amount,
-                new_amount=new_amount
-            )
-            self.amount = new_amount
-            self.save()
+    def get_effective_amount(self, check_date=None):
+        if check_date is None:
+            check_date = date.today()
+        
+        # Use the correct related name for the reverse relationship
+        change_log = self.change_logs.filter(
+            effective_date__lte=check_date
+        ).order_by('-effective_date').first()
+        
+        if change_log:
+            return change_log.new_amount
+        return self.amount
+    
 
     def __str__(self):
         return f"{self.category.name}: {self.amount} on {self.date}"
 
-class ExpenseChangeLog(models.Model):
-    expense = models.ForeignKey(Expense, on_delete=models.CASCADE, related_name='change_logs')
-    previous_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    new_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    change_date = models.DateField(auto_now_add=True)
+class IncomeRecurringChangeLog(models.Model):
+    income = models.ForeignKey(
+        Income,
+        on_delete=models.CASCADE,
+        related_name='change_logs'
+    )
+    new_amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
+    effective_date = models.DateField()
+
+    class Meta:
+        unique_together = ('income', 'effective_date')
+        ordering = ['effective_date']
 
     def __str__(self):
-        return f"Change for {self.expense.category.name} on {self.change_date}: {self.previous_amount} to {self.new_amount}"
+        return f"Change {self.income.description} to {self.new_amount} effective {self.effective_date}"
 
-class IncomeChangeLog(models.Model):
-    income = models.ForeignKey(Income, on_delete=models.CASCADE, related_name='change_logs')
-    previous_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    new_amount = models.DecimalField(max_digits=10, decimal_places=2)
-    change_date = models.DateField(auto_now_add=True)
+    def clean(self):
+        if self.effective_date < self.income.date:
+            raise ValidationError("Effective date cannot be earlier than the start date of the income.")
+
+
+class ExpenseRecurringChangeLog(models.Model):
+    expense = models.ForeignKey(
+        Expense,
+        on_delete=models.CASCADE,
+        related_name='change_logs'
+    )
+    new_amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
+    effective_date = models.DateField()
+
+    class Meta:
+        unique_together = ('expense', 'effective_date')
+        ordering = ['effective_date']
 
     def __str__(self):
-        return f"Change for {self.income.category.name} on {self.change_date}: {self.previous_amount} to {self.new_amount}"
+        return f"Change {self.expense.description} to {self.new_amount} effective {self.effective_date}"
+
+    def clean(self):
+        if self.effective_date < self.expense.date:
+            raise ValidationError("Effective date cannot be earlier than the start date of the expense.")

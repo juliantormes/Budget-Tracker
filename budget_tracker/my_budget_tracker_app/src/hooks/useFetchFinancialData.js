@@ -14,12 +14,25 @@ import {
     calculateNet,
     calculatePercentages
 } from '../utils/chartUtils';
+import dayjs from 'dayjs';
 
 export function useFetchFinancialData(year, month) {
     const [data, setData] = useState({ incomes: [], expenses: [], creditCardExpenses: [] });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const fetchYearData = useFetchYearData();
+
+    const getEffectiveAmount = (items, checkDate) => {
+        return items.map(item => {
+            const effectiveLog = item.change_logs
+                ? item.change_logs.filter(log => dayjs(log.effective_date).isBefore(checkDate, 'day')).sort((a, b) => dayjs(b.effective_date).diff(dayjs(a.effective_date)))[0]
+                : null;
+            return {
+                ...item,
+                amount: effectiveLog ? effectiveLog.new_amount : item.amount
+            };
+        });
+    };
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -50,10 +63,12 @@ export function useFetchFinancialData(year, month) {
             const allExpenses = mergeData(currentYearData.expenses, pastDataResults.flatMap(res => res.expenses || []));
             const allCreditCardExpenses = mergeData(currentYearData.creditCardExpenses, pastDataResults.flatMap(res => res.creditCardExpenses || []));
 
+            const checkDate = dayjs(new Date(year, month - 1, 1));  // Define check date based on year and month
+
             setData({
-                incomes: allIncomes,
-                expenses: allExpenses,
-                creditCardExpenses: allCreditCardExpenses,
+                incomes: getEffectiveAmount(allIncomes, checkDate),
+                expenses: getEffectiveAmount(allExpenses, checkDate),
+                creditCardExpenses: allCreditCardExpenses,  // Assuming credit card expenses don't need the same treatment
             });
 
         } catch (error) {
@@ -62,7 +77,7 @@ export function useFetchFinancialData(year, month) {
         } finally {
             setLoading(false);
         }
-    }, [year, fetchYearData]);
+    }, [year, month, fetchYearData]);
 
     useEffect(() => {
         fetchData();
@@ -85,7 +100,7 @@ export function useFetchFinancialData(year, month) {
         data, 
         loading, 
         error, 
-        refetch,  // Ensure refetch is included here
+        refetch, 
         incomeChartData, 
         expenseChartData, 
         creditCardChartData, 

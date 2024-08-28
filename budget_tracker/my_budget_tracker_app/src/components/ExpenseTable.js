@@ -10,6 +10,7 @@ const ExpenseTable = ({
   onCancel,
   onSave,
   onDelete,
+  onUpdateRecurring,  // New prop
   categories,
   creditCards,
   isDeleting
@@ -39,6 +40,7 @@ const ExpenseTable = ({
           onCancel={onCancel}
           onSave={onSave}
           onDelete={onDelete}
+          onUpdateRecurring={onUpdateRecurring} // Pass the new prop
           categories={categories}
           type="expense"
           creditCards={creditCards}
@@ -56,8 +58,10 @@ ExpenseTable.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onUpdateRecurring: PropTypes.func.isRequired,  // Add prop type
   categories: PropTypes.array.isRequired,
   creditCards: PropTypes.array.isRequired,
+  isDeleting: PropTypes.bool.isRequired,
 };
 
 export default ExpenseTable;

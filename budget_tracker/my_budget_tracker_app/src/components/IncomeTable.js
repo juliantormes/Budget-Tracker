@@ -10,11 +10,12 @@ const IncomeTable = ({
   onCancel,
   onSave,
   onDelete,
+  onUpdateRecurring,  // New prop
   categories
 }) => (
   <Table className="table">
     <TableHead>
-      <TableRow className="table-header" >
+      <TableRow className="table-header">
         <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '20%' }}>Category</TableCell>
         <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '15%' }}>Date</TableCell>
         <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '10%' }}>Amount</TableCell>
@@ -33,6 +34,7 @@ const IncomeTable = ({
           onCancel={onCancel}
           onSave={onSave}
           onDelete={onDelete}
+          onUpdateRecurring={onUpdateRecurring} // Pass the new prop
           categories={categories}
           type="income"
           showType={false}
@@ -49,6 +51,7 @@ IncomeTable.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
+  onUpdateRecurring: PropTypes.func.isRequired,  // Add prop type
   categories: PropTypes.array.isRequired,
 };
 

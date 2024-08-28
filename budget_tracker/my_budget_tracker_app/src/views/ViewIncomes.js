@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Container, Typography } from '@mui/material';
+import React, { useState, useEffect, useCallback} from 'react';
+import { Container, Typography, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
@@ -22,7 +22,18 @@ const ViewIncomes = () => {
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingIncomeId, setEditingIncomeId] = useState(null);
   const [categories, setCategories] = useState([]);
-  const [isDeleting, setIsDeleting] = useState(false); // To prevent multiple deletions
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const [openDialog, setOpenDialog] = useState(false);
+  const [currentIncome, setCurrentIncome] = useState(null);
+  const [newAmount, setNewAmount] = useState('');
+  const [effectiveDate, setEffectiveDate] = useState(dayjs());
+
+  useEffect(() => {
+    if (currentIncome) {
+      setNewAmount(currentIncome.amount);  // Set the default value to the current amount
+    }
+  }, [currentIncome]);
 
   const fetchIncomes = useCallback((start, end) => {
     const fetchedIncomes = data.incomes.filter(income =>
@@ -90,19 +101,19 @@ const ViewIncomes = () => {
   };
 
   const handleDelete = async (incomeId) => {
-    if (isDeleting) return; // Prevent multiple deletions
-  
-    setIsDeleting(true); // Set deleting state to true
-  
+    if (isDeleting) return;
+
+    setIsDeleting(true);
+
     try {
       const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
       if (response.status === 204) {
-        refetch(); // Refetch data only on successful delete
+        refetch();
       } else {
         throw new Error('Failed to delete income');
       }
-    }  finally {
-      setIsDeleting(false); // Reset deleting state
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -112,6 +123,32 @@ const ViewIncomes = () => {
 
   const handleCancel = () => {
     setEditingIncomeId(null);
+  };
+
+  const handleUpdateRecurring = (incomeId) => {
+    const income = selectedIncomes.find((inc) => inc.id === incomeId);
+    setCurrentIncome(income);
+    setOpenDialog(true);
+  };
+
+  const handleDialogSave = async () => {
+    try {
+      const response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, {
+        new_amount: newAmount,
+        effective_date: effectiveDate.format('YYYY-MM-DD'),
+      });
+      if (response.status === 200) {
+        refetch();
+        setOpenDialog(false);
+        setCurrentIncome(null);
+        setNewAmount('');
+        setEffectiveDate(dayjs());
+      } else {
+        throw new Error('Failed to update recurring amount');
+      }
+    } catch (error) {
+      console.error('Error updating recurring amount:', error);
+    }
   };
 
   return (
@@ -141,11 +178,47 @@ const ViewIncomes = () => {
             onCancel={handleCancel}
             onSave={handleSave}
             onDelete={handleDelete}
+            onUpdateRecurring={handleUpdateRecurring} // Pass the handler to EditableRow
             categories={categories}
-            isDeleting={isDeleting} // Pass isDeleting state to disable the delete button
+            isDeleting={isDeleting}
           />
         </Container>
       </div>
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle>Update Recurring Amount</DialogTitle>
+        <DialogContent>
+          <TextField
+            label="New Amount"
+            type="number"
+            fullWidth
+            margin="dense"
+            value={newAmount}
+            onChange={(e) => setNewAmount(e.target.value)}
+            InputLabelProps={{
+              style: { color: '#ffffff' }  // Set label color to white
+            }}
+          />
+          <TextField
+            label="Effective Date"
+            type="date"
+            fullWidth
+            margin="dense"
+            value={effectiveDate.format('YYYY-MM-DD')}
+            onChange={(e) => setEffectiveDate(dayjs(e.target.value))}
+            InputLabelProps={{
+              style: { color: '#ffffff' }  // Set label color to white
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
+            Cancel
+          </Button>
+          <Button onClick={handleDialogSave} color="primary">
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };

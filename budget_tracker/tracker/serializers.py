@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate
-from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from decimal import Decimal
 
 class UserSerializer(serializers.ModelSerializer):
@@ -37,6 +36,47 @@ class CreditCardSerializer(serializers.ModelSerializer):
         model = CreditCard
         exclude = ['user']
 
+class IncomeRecurringChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomeRecurringChangeLog
+        fields = ['id', 'income', 'new_amount', 'effective_date']
+        extra_kwargs = {
+            'income': {'read_only': True},
+        }
+
+    def validate_effective_date(self, value):
+        income = getattr(self.instance, 'income', None) or self.context.get('income')
+        if not income:
+            income = self.context['request'].data.get('income')
+        
+        if value < income.date:
+            raise serializers.ValidationError("Effective date cannot be earlier than the start date of the income.")
+        return value
+
+class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExpenseRecurringChangeLog
+        fields = ['id', 'expense', 'new_amount', 'effective_date']
+        extra_kwargs = {
+            'expense': {'read_only': True},
+        }
+
+    def validate_effective_date(self, value):
+        expense = getattr(self.instance, 'expense', None) or self.context.get('expense')
+        if not expense:
+            expense = self.context['request'].data.get('expense')
+        
+        if value < expense.date:
+            raise serializers.ValidationError("Effective date cannot be earlier than the start date of the expense.")
+        return value
+    
+class IncomeCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomeCategory
+        fields = '__all__'
+        extra_kwargs = {'user': {'read_only': True}}
+
+
 class ExpenseSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     credit_card = CreditCardSerializer(read_only=True)
@@ -47,6 +87,8 @@ class ExpenseSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True
     )
+    change_logs = ExpenseRecurringChangeLogSerializer(many=True, read_only=True)
+    effective_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Expense
@@ -89,26 +131,19 @@ class ExpenseSerializer(serializers.ModelSerializer):
             instance.credit_card = credit_card
             instance.save()
         return instance
-class IncomeCategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IncomeCategory
-        fields = '__all__'
-        extra_kwargs = {'user': {'read_only': True}}
+
+    def get_effective_amount(self, obj):
+        return obj.get_effective_amount()
 
 class IncomeSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
+    change_logs = IncomeRecurringChangeLogSerializer(many=True, read_only=True)
+    effective_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Income
-        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring', 'description']
+        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring', 'description', 'change_logs', 'effective_amount']
         extra_kwargs = {'user': {'read_only': True}}
 
-class ExpenseChangeLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ExpenseChangeLog
-        fields = '__all__'
-
-class IncomeChangeLogSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = IncomeChangeLog
-        fields = '__all__'
+    def get_effective_amount(self, obj):
+        return obj.get_effective_amount()

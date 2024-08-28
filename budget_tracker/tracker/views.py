@@ -1,12 +1,12 @@
 from django.db.models import Q
-from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, ExpenseChangeLog, IncomeChangeLog
+from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets, status
-from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, ExpenseChangeLogSerializer, IncomeChangeLogSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer
+from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer, IncomeCategorySerializer, CreditCardSerializer, ExpenseRecurringChangeLogSerializer, IncomeRecurringChangeLogSerializer
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import ValidationError
@@ -50,6 +50,46 @@ def signup(request):
 def logout(request):
     request.auth.delete()  # Deletes the token, logging the user out
     return Response({'message': 'Logged out successfully'})
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_recurring_expense(request, expense_id):
+    try:
+        # Retrieve the expense or return a 404 error if not found
+        expense = get_object_or_404(Expense, id=expense_id, user=request.user)
+        
+        # Create the serializer with the incoming data and context
+        serializer = ExpenseRecurringChangeLogSerializer(data=request.data, context={'expense': expense})
+        
+        if serializer.is_valid():
+            # Save the serializer with the expense object
+            serializer.save(expense=expense)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def update_recurring_income(request, income_id):
+    try:
+        # Retrieve the income or return a 404 error if not found
+        income = get_object_or_404(Income, id=income_id, user=request.user)
+        
+        # Create the serializer with the incoming data and context
+        serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})
+        
+        if serializer.is_valid():
+            # Save the serializer with the income object
+            serializer.save(income=income)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 class ExpenseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
@@ -139,23 +179,6 @@ class IncomeCategoryViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
-
-class ExpenseChangeLogViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = ExpenseChangeLog.objects.all()
-    serializer_class = ExpenseChangeLogSerializer
-    
-    def get_queryset(self):
-        return ExpenseChangeLog.objects.filter(expense__user=self.request.user)
-
-class IncomeChangeLogViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
-    queryset = IncomeChangeLog.objects.all()
-    serializer_class = IncomeChangeLogSerializer
-    
-    def get_queryset(self):
-        return IncomeChangeLog.objects.filter(income__user=self.request.user)
-
 class CreditCardExpenseViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = ExpenseSerializer
@@ -178,3 +201,25 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+class IncomeRecurringChangeLogViewSet(viewsets.ModelViewSet):
+    queryset = IncomeRecurringChangeLog.objects.all()
+    serializer_class = IncomeRecurringChangeLogSerializer
+
+    def create(self, request, *args, **kwargs):
+        income = Income.objects.get(pk=kwargs['income_id'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(income=income)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class ExpenseRecurringChangeLogViewSet(viewsets.ModelViewSet):
+    queryset = ExpenseRecurringChangeLog.objects.all()
+    serializer_class = ExpenseRecurringChangeLogSerializer
+
+    def create(self, request, *args, **kwargs):
+        expense = Expense.objects.get(pk=kwargs['expense_id'])
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(expense=expense)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)

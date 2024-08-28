@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os
+import logging
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,6 +35,20 @@ LOGIN_REDIRECT_URL = '/home/' # Redirect to the home page after login
 LOGOUT_REDIRECT_URL = '/login/' # Redirect to the login page after logout
 
 MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage' # Store messages in cookies
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',
+    },
+}
 
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'tracker/static'),

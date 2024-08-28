@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from decimal import Decimal
+from datetime import date
+from datetime import datetime
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,6 +30,11 @@ class LoginSerializer(serializers.Serializer):
 class ExpenseCategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = ExpenseCategory
+        fields = '__all__'
+        extra_kwargs = {'user': {'read_only': True}}
+class IncomeCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = IncomeCategory
         fields = '__all__'
         extra_kwargs = {'user': {'read_only': True}}
 
@@ -70,11 +77,32 @@ class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Effective date cannot be earlier than the start date of the expense.")
         return value
     
-class IncomeCategorySerializer(serializers.ModelSerializer):
+
+
+
+class IncomeSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    change_logs = IncomeRecurringChangeLogSerializer(many=True, read_only=True)
+    effective_amount = serializers.SerializerMethodField()
+
     class Meta:
-        model = IncomeCategory
-        fields = '__all__'
+        model = Income
+        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring', 'description', 'change_logs', 'effective_amount']
         extra_kwargs = {'user': {'read_only': True}}
+
+    def get_effective_amount(self, obj):
+        request = self.context.get('request')
+        check_date_str = request.query_params.get('date')
+        
+        if check_date_str:
+            try:
+                check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                raise serializers.ValidationError("Invalid date format. Use 'YYYY-MM-DD'.")
+        else:
+            check_date = date.today()
+        
+        return obj.get_effective_amount(check_date)
 
 
 class ExpenseSerializer(serializers.ModelSerializer):
@@ -133,17 +161,15 @@ class ExpenseSerializer(serializers.ModelSerializer):
         return instance
 
     def get_effective_amount(self, obj):
-        return obj.get_effective_amount()
-
-class IncomeSerializer(serializers.ModelSerializer):
-    category_name = serializers.CharField(source='category.name', read_only=True)
-    change_logs = IncomeRecurringChangeLogSerializer(many=True, read_only=True)
-    effective_amount = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Income
-        fields = ['id', 'amount', 'date', 'user', 'category', 'category_name', 'is_recurring', 'description', 'change_logs', 'effective_amount']
-        extra_kwargs = {'user': {'read_only': True}}
-
-    def get_effective_amount(self, obj):
-        return obj.get_effective_amount()
+        request = self.context.get('request')
+        check_date_str = request.query_params.get('date')
+        
+        if check_date_str:
+            try:
+                check_date = datetime.strptime(check_date_str, '%Y-%m-%d').date()
+            except ValueError:
+                raise serializers.ValidationError("Invalid date format. Use 'YYYY-MM-DD'.")
+        else:
+            check_date = date.today()
+        
+        return obj.get_effective_amount(check_date)

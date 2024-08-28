@@ -94,18 +94,28 @@ class Expense(models.Model):
                         f"Available credit: {self.credit_card.available_credit()}."
                     )
         super().save(*args, **kwargs)
-    def get_effective_amount(expense, check_date=None):
+    def get_effective_amount(self, check_date=None):
         if check_date is None:
             check_date = date.today()
+        # Convert check_date to first day of the month for comparison
+        start_of_check_month = check_date.replace(day=1)
         
-        # Fetch the latest change log before or on the check_date
-        change_log = ExpenseRecurringChangeLog.objects.filter(
-            expense=expense, effective_date__lte=check_date
+        # Check for an exact match in the same month
+        exact_match_log = self.change_logs.filter(
+            effective_date__year=check_date.year,
+            effective_date__month=check_date.month
+        ).first()
+        
+        if exact_match_log:
+            return exact_match_log.new_amount
+
+        # If no exact match, find the closest log with an effective date before the check month
+        closest_log = self.change_logs.filter(
+            effective_date__lt=start_of_check_month
         ).order_by('-effective_date').first()
         
-        if change_log:
-            return change_log.new_amount
-        return expense.amount
+        # Return the closest log's amount or the original amount
+        return closest_log.new_amount if closest_log else self.amount
 
     def __str__(self):
         return f"{self.category.name}: {self.amount} on {self.date}"
@@ -124,20 +134,32 @@ class Income(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField()
     is_recurring = models.BooleanField(default=False)
+    
     def get_effective_amount(self, check_date=None):
         if check_date is None:
             check_date = date.today()
+        # Convert check_date to first day of the month for comparison
+        start_of_check_month = check_date.replace(day=1)
         
-        # Use the correct related name for the reverse relationship
-        change_log = self.change_logs.filter(
-            effective_date__lte=check_date
+        # Check for an exact match in the same month
+        exact_match_log = self.change_logs.filter(
+            effective_date__year=check_date.year,
+            effective_date__month=check_date.month
+        ).first()
+        
+        if exact_match_log:
+            return exact_match_log.new_amount
+
+        # If no exact match, find the closest log with an effective date before the check month
+        closest_log = self.change_logs.filter(
+            effective_date__lt=start_of_check_month
         ).order_by('-effective_date').first()
         
-        if change_log:
-            return change_log.new_amount
+        if closest_log:
+            return closest_log.new_amount
+
         return self.amount
     
-
     def __str__(self):
         return f"{self.category.name}: {self.amount} on {self.date}"
 

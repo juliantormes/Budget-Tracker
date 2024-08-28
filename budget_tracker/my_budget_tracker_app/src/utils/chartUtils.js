@@ -82,10 +82,14 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         const incomeDate = new Date(income.date);
         const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
         return income.is_recurring && incomeMonth <= formattedMonth;
-    }).map(income => ({
-        ...income,
-        amount: parseFloat(income.effective_amount || income.amount) // Use effective amount if available
-    }));
+    }).map(income => {
+        // Determine the correct amount to use based on the effective amount and the original amount
+        const amountToUse = parseFloat(income.effective_amount || income.amount);
+        return {
+            ...income,
+            amount: amountToUse < income.amount ? amountToUse : income.amount // Use the smaller, correct amount
+        };
+    });
 
     const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
     const sumsByCategory = processedIncomes.reduce((acc, income) => {
@@ -111,6 +115,7 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
 };
 
 
+
 export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     
@@ -124,10 +129,14 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
         return expense.is_recurring && expenseMonth <= formattedMonth;
-    }).map(expense => ({
-        ...expense,
-        amount: parseFloat(expense.effective_amount || expense.amount) // Use effective amount if available
-    }));
+    }).map(expense => {
+        // Determine the correct amount to use based on the effective amount and the original amount
+        const amountToUse = parseFloat(expense.effective_amount || expense.amount);
+        return {
+            ...expense,
+            amount: amountToUse < expense.amount ? amountToUse : expense.amount // Use the smaller, correct amount
+        };
+    });
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
     const sumsByCategory = processedExpenses.reduce((acc, expense) => {
@@ -151,6 +160,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         }]
     };
 };
+
 
 export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;

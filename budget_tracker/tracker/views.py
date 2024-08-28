@@ -12,6 +12,7 @@ from django.contrib.auth import authenticate
 from rest_framework.exceptions import ValidationError
 from django.utils.timezone import make_aware
 from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import get_object_or_404
 
 @api_view(['POST'])
 @csrf_exempt
@@ -143,9 +144,6 @@ class IncomeViewSet(viewsets.ModelViewSet):
                 raise ValidationError('Invalid year or month format.')
 
         return queryset
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
 
 class CreditCardViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

@@ -20,7 +20,7 @@ const DeleteDialog = ({ open, handleClose, handleConfirm }) => (
     <DialogTitle id="delete-dialog-title" className="dialog-title">Confirm Delete</DialogTitle>
     <DialogContent>
       <DialogContentText id="delete-dialog-description" className="dialog-content-text">
-        Are you sure you want to delete this expense category?
+        Are you sure you want to delete this category?
       </DialogContentText>
     </DialogContent>
     <DialogActions>

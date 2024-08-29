@@ -8,6 +8,12 @@ import {
   TableHead,
   TableRow,
   IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Button,
+  Alert,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -16,7 +22,6 @@ import SidebarMenu from '../components/SidebarMenu';
 import { useAuth } from '../hooks/useAuth';
 import axiosInstance from '../api/axiosApi';
 import EditCreditCardForm from '../components/EditCreditCardForm';
-import DeleteDialog from '../components/DeleteDialog';
 
 const ViewCreditCard = () => {
   const { logout } = useAuth();
@@ -32,6 +37,7 @@ const ViewCreditCard = () => {
   });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
+  const [deleteError, setDeleteError] = useState('');
 
   useEffect(() => {
     const fetchCreditCards = async () => {
@@ -100,19 +106,20 @@ const ViewCreditCard = () => {
         setCreditCards((prevCards) => prevCards.filter((card) => card.id !== cardToDelete));
         setOpenDeleteDialog(false);
         setCardToDelete(null);
+        setDeleteError('');
       } else {
         throw new Error('Failed to delete credit card');
       }
     } catch (error) {
       console.error('Error deleting credit card:', error);
-      setOpenDeleteDialog(false);
-      setCardToDelete(null);
+      setDeleteError('Failed to delete credit card. Please try again.');
     }
   };
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
     setCardToDelete(null);
+    setDeleteError('');
   };
 
   const handleChange = (e) => {
@@ -176,11 +183,26 @@ const ViewCreditCard = () => {
             </TableBody>
           </Table>
         </Container>
-        <DeleteDialog
+
+        {/* Delete Dialog */}
+        <Dialog
           open={openDeleteDialog}
-          handleClose={handleCloseDeleteDialog}
-          handleConfirm={handleConfirmDelete}
-        />
+          onClose={handleCloseDeleteDialog}
+        >
+          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogContent>
+            {deleteError && <Alert severity="error">{deleteError}</Alert>}
+            <Typography>Are you sure you want to delete this credit card?</Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleConfirmDelete} color="primary">
+              Delete
+            </Button>
+            <Button onClick={handleCloseDeleteDialog} color="secondary">
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     </div>
   );

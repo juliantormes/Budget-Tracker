@@ -135,7 +135,6 @@ const ViewIncomes = () => {
     setCurrentIncome(income);
     setNewAmount(income.effective_amount || income.amount);
     setEffectiveDate(dayjs());
-    setOpenDialog(true);
   };
 
   const handleUpdateRecurring = (incomeId) => {

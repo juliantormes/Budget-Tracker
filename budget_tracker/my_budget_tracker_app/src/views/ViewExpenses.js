@@ -146,7 +146,6 @@ const ViewExpenses = () => {
     setCurrentExpense(expense);
     setNewAmount(expense.effective_amount || expense.amount);
     setEffectiveDate(dayjs());
-    setOpenDialog(true);
   };
 
   const handleUpdateRecurring = (expenseId) => {

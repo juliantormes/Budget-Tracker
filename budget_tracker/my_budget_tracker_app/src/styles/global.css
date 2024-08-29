@@ -62,7 +62,6 @@ form {
 
 .MuiTableCell-root {
     color: #ffffff; /* White text color */
-    border-bottom: 1px solid #e0e0e0; /* Light border */
 }
 
 .MuiTableCell-root input {
@@ -156,7 +155,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .editing .select-field {
     background-color: #1E1E2F;
     color: white;
-    border: 1px solid white;
     box-shadow: none;
     padding: 8px;
     box-sizing: border-box;

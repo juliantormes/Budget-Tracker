@@ -161,7 +161,7 @@ const EditableRow = ({
               }}
             />
           ) : (
-            stripDecimals(item.effective_amount || formData.amount)  // Use effective_amount if available
+            stripDecimals(formData.amount) 
           )}
         </TableCell>
         <TableCell className="table-cell" style={{ padding: '0 16px', width: '14%' }}>

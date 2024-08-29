@@ -52,8 +52,8 @@ const EditIncomeDialog = ({ open, onClose, income, onSave }) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">Cancel</Button>
         <Button onClick={handleSave} color="primary">Save</Button>
+        <Button onClick={onClose} color="secondary">Cancel</Button>
       </DialogActions>
     </Dialog>
   );

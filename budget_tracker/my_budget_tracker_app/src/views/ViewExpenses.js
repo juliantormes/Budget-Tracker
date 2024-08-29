@@ -223,11 +223,11 @@ const ViewExpenses = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} color="secondary">
-            Cancel
-          </Button>
           <Button onClick={handleSave} color="primary">
             Save
+          </Button>
+          <Button onClick={() => setOpenDialog(false)} color="secondary">
+            Cancel
           </Button>
         </DialogActions>
       </Dialog>

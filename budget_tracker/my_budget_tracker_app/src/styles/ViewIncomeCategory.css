@@ -1,58 +1,45 @@
 .view-income-category {
-    display: flex;
-    flex-direction: row;
-    height: 100vh;
-    color: #ffffff;
-  }
-  
-  .content {
-    flex-grow: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  
-  .container-top {
-    margin-top: 50px;
-    text-align: center;
-  }
-  
-  .category-list {
-    margin-top: 20px;
-    width: 100%; /* Make sure it takes the full width */
-    max-width: 600px; /* Set a max width for better appearance */
-  }
-  
-  .category-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    width: 100%; /* Ensure it takes full width */
-  }
-  
-  .category-item span {
-    flex: 1; /* Take up remaining space */
-    text-align: left;
-  }
-  
-  .category-item .actions {
-    display: flex;
-    align-items: center;
-    justify-content: flex-end; /* Align to the end */
-    gap: 10px; /* Add some space between the buttons */
-  }
-  
-  .add-button-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-    width: 100%;
-  }
-  
-  .add-button {
-    margin-top: 20px;
-  }
-  
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  color: #ffffff;
+}
+
+.content {
+  flex-grow: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.container-top {
+  margin-top: 50px;
+  text-align: center;
+}
+
+.category-list {
+  margin-top: 20px;
+  width: 90%; /* Adjusted to take 90% of the screen width */
+}
+
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.category-item span {
+  flex-grow: 1;
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+}

@@ -9,6 +9,7 @@
 .MuiDialogTitle-root {
   color: #ffffff !important; /* White text for dialog title */
   font-weight: bold; /* Emphasize the title */
+  padding-top: 0px;
 }
 
 .MuiDialogContentText-root {

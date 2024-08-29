@@ -80,16 +80,13 @@ form {
     color: #ffffff !important; /* White text for dialog title */
 }
 
-.MuiDialogContentText-root {
-    color: #ffffff !important; /* White text for dialog content */
-}
-
 .MuiDialogActions-root .MuiButton-root {
     color: #ffffff !important; /* Blue color for dialog buttons */
     background: linear-gradient(135deg, #1976d2, #1565c0);
     border-radius: 8px;
     padding: 8px 16px;
     transition: background 0.4s ease, transform 0.3s ease;
+    ;
 }
 
 .MuiDialogActions-root .MuiButton-root:hover {
@@ -144,11 +141,6 @@ form {
 
 .MuiPickersArrowSwitcher-button {
     color: #1976d2 !important; /* Blue color for the arrow buttons */
-}
-
-.MuiDialog-paper {
-    background-color: #1976d2 !important; /* Blue background for dialogs */
-    color: #ffffff !important; /* White text for dialogs */
 }
 
 .MuiDialogActions-root .MuiButton-root:hover {
@@ -216,3 +208,48 @@ input:-webkit-autofill:focus {
 .MuiInputBase-input {
     color: #ffffff !important; /* Force input text color to white */
 }
+.MuiFormControl-root {
+    margin-bottom: 24px; /* Add space between each form control */
+  }
+  .MuiFormLabel-root.Mui-focused,
+  .MuiFormLabel-root.MuiFormLabel-filled {
+    transform: translate(0, -24px) scale(1); /* Move label slightly more up when focused or filled */
+    color: #ffffff !important;
+  }
+  .MuiOutlinedInput-root {
+    background-color: transparent !important;
+    border-radius: 8px !important;
+  }
+
+.MuiDialog-paper {
+    min-height: 250px; /* Increase the minimum height of the dialog */
+    min-width: 400px; /* Increase the minimum width of the dialog */
+    padding: 20px; /* Add padding to the dialog */
+    border-radius: 8px; /* Rounded corners for modern look */
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    background-color: #1976d2 !important; /* Blue background for dialogs */
+    color: #ffffff !important; /* White text for dialogs */
+  }
+
+  /* Adjust the dialog content to ensure proper spacing */
+.MuiDialogContent-root {
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+    gap: 20px;
+    padding-top: 10px !important; /* Remove top padding */
+    padding-bottom: 0 !important; /* Remove bottom padding */
+    padding-left: 0 !important; /* Remove left padding */
+    padding-right: 0 !important; /* Remove right padding */
+    margin-top: 0 !important; /* Remove top margin */
+    margin-bottom: 0 !important; /* Remove bottom margin */
+    margin-left: 0 !important; /* Remove left margin */
+    margin-right: 0 !important; /* Remove right margin */
+  } 
+  .MuiFormLabel-root.Mui-focused,
+  .MuiFormLabel-root.MuiFormLabel-filled {
+      transform: translateY(-20px) scale(0.9); /* Move the label further up */
+      color: #ffffff !important;
+  }

@@ -104,6 +104,63 @@ const ViewExpenses = () => {
       return;
     }
   
+    try {
+      const response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/`, currentExpense);
+  
+      if (response.status === 200 || response.status === 201) {
+        refetch();
+        setEditingExpenseId(null);
+        setCurrentExpense(null);
+        setErrorMessage('');
+      } else {
+        throw new Error('Failed to save the expense');
+      }
+    } catch (error) {
+      console.error('Error saving expense:', error);
+      setErrorMessage('Failed to save the expense. Please try again.');
+    }
+  };
+
+  const handleEdit = (expense) => {
+    setEditingExpenseId(expense.id);
+    setCurrentExpense(expense);
+  };
+
+  const handleUpdateRecurring = (expenseId) => {
+    const expense = selectedExpenses.find((exp) => exp.id === expenseId);
+    if (expense) {
+      setCurrentExpense(expense);  // Set the current expense with the correct ID
+      setNewAmount(expense.effective_amount || expense.amount);
+      setEffectiveDate(dayjs());
+      setOpenDialog(true);  // Open the dialog for updating recurring expense
+    } else {
+      console.error('Expense not found for the given ID:', expenseId);
+    }
+  };
+
+  const handleDelete = async (expenseId) => {
+    setIsDeleting(true);
+    try {
+      const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
+      if (response.status === 204) {  // 204 No Content is typically returned on a successful DELETE
+        refetch();  // Refetch the expenses to update the list
+      } else {
+        throw new Error('Failed to delete the expense');
+      }
+    } catch (error) {
+      console.error('Error deleting expense:', error);
+      setErrorMessage('Failed to delete the expense. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSaveRecurringUpdate = async () => {
+    if (!currentExpense || !currentExpense.id) {
+      setErrorMessage('Error: Cannot update recurring expense because the necessary data is missing.');
+      return;
+    }
+  
     const formData = {
       new_amount: parseFloat(newAmount),
       effective_date: effectiveDate.format('YYYY-MM-DD'),
@@ -135,28 +192,8 @@ const ViewExpenses = () => {
         throw new Error('Failed to save the recurring amount');
       }
     } catch (error) {
-      console.error('Error saving expense:', error);
-      setErrorMessage(error.response?.data?.effective_date?.[0] || 'Failed to save the recurring amount. Please check your input and try again.');
-    }
-  };
-  
-
-  const handleEdit = (expense) => {
-    setEditingExpenseId(expense.id);
-    setCurrentExpense(expense);
-    setNewAmount(expense.effective_amount || expense.amount);
-    setEffectiveDate(dayjs());
-  };
-
-  const handleUpdateRecurring = (expenseId) => {
-    const expense = selectedExpenses.find((exp) => exp.id === expenseId);
-    if (expense) {
-      setCurrentExpense(expense);  // Set the current expense with the correct ID
-      setNewAmount(expense.effective_amount || expense.amount);
-      setEffectiveDate(dayjs());
-      setOpenDialog(true);  // Open the dialog
-    } else {
-      console.error('Expense not found for the given ID:', expenseId);
+      console.error('Error saving recurring update:', error);
+      setErrorMessage('Failed to save the recurring amount. Please try again.');
     }
   };
 
@@ -186,8 +223,8 @@ const ViewExpenses = () => {
             onEdit={handleEdit}
             onCancel={() => setEditingExpenseId(null)}
             onSave={handleSave}
-            onDelete={() => setEditingExpenseId(null)}
-            onUpdateRecurring={handleUpdateRecurring} // Pass the handleUpdateRecurring to the ExpenseTable
+            onDelete={handleDelete}  // Pass the handleDelete function
+            onUpdateRecurring={handleUpdateRecurring}
             categories={categories}
             creditCards={creditCards}
             isDeleting={isDeleting}
@@ -195,7 +232,7 @@ const ViewExpenses = () => {
         </Container>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>{editingExpenseId ? "Edit Existing Recurring Amount" : "Create New Recurring Amount"}</DialogTitle>
+        <DialogTitle>Update Recurring Expense</DialogTitle>
         <DialogContent>
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           <TextField
@@ -222,7 +259,7 @@ const ViewExpenses = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleSave} color="primary">
+          <Button onClick={handleSaveRecurringUpdate} color="primary">
             Save
           </Button>
           <Button onClick={() => setOpenDialog(false)} color="secondary">

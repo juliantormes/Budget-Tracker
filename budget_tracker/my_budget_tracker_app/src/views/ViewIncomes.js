@@ -93,6 +93,63 @@ const ViewIncomes = () => {
       return;
     }
   
+    try {
+      const response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/`, currentIncome);
+  
+      if (response.status === 200 || response.status === 201) {
+        refetch();
+        setEditingIncomeId(null);
+        setCurrentIncome(null);
+        setErrorMessage('');
+      } else {
+        throw new Error('Failed to save the income');
+      }
+    } catch (error) {
+      console.error('Error saving income:', error);
+      setErrorMessage('Failed to save the income. Please try again.');
+    }
+  };
+
+  const handleEdit = (income) => {
+    setEditingIncomeId(income.id);
+    setCurrentIncome(income);
+  };
+
+  const handleUpdateRecurring = (incomeId) => {
+    const income = selectedIncomes.find((inc) => inc.id === incomeId);
+    if (income) {
+      setCurrentIncome(income);  // Set the current income with the correct ID
+      setNewAmount(income.effective_amount || income.amount);
+      setEffectiveDate(dayjs());
+      setOpenDialog(true);  // Open the dialog for updating recurring income
+    } else {
+      console.error('Income not found for the given ID:', incomeId);
+    }
+  };
+
+  const handleDelete = async (incomeId) => {
+    setIsDeleting(true);
+    try {
+      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
+      if (response.status === 204) {  // 204 No Content is typically returned on a successful DELETE
+        refetch();  // Refetch the incomes to update the list
+      } else {
+        throw new Error('Failed to delete the income');
+      }
+    } catch (error) {
+      console.error('Error deleting income:', error);
+      setErrorMessage('Failed to delete the income. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleSaveRecurringUpdate = async () => {
+    if (!currentIncome || !currentIncome.id) {
+      setErrorMessage('Error: Cannot update recurring income because the necessary data is missing.');
+      return;
+    }
+  
     const formData = {
       new_amount: parseFloat(newAmount),
       effective_date: effectiveDate.format('YYYY-MM-DD'),
@@ -124,28 +181,8 @@ const ViewIncomes = () => {
         throw new Error('Failed to save the recurring amount');
       }
     } catch (error) {
-      console.error('Error saving income:', error);
-      setErrorMessage(error.response?.data?.effective_date?.[0] || 'Failed to save the recurring amount. Please check your input and try again.');
-    }
-  };
-  
-
-  const handleEdit = (income) => {
-    setEditingIncomeId(income.id);
-    setCurrentIncome(income);
-    setNewAmount(income.effective_amount || income.amount);
-    setEffectiveDate(dayjs());
-  };
-
-  const handleUpdateRecurring = (incomeId) => {
-    const income = selectedIncomes.find((inc) => inc.id === incomeId);
-    if (income) {
-      setCurrentIncome(income);  // Set the current income with the correct ID
-      setNewAmount(income.effective_amount || income.amount);
-      setEffectiveDate(dayjs());
-      setOpenDialog(true);  // Open the dialog
-    } else {
-      console.error('Income not found for the given ID:', incomeId);
+      console.error('Error saving recurring update:', error);
+      setErrorMessage('Failed to save the recurring amount. Please try again.');
     }
   };
 
@@ -175,15 +212,15 @@ const ViewIncomes = () => {
             onEdit={handleEdit}
             onCancel={() => setEditingIncomeId(null)}
             onSave={handleSave}
-            onDelete={() => setEditingIncomeId(null)}
-            onUpdateRecurring={handleUpdateRecurring} // Pass the handleUpdateRecurring to the IncomeTable
+            onDelete={handleDelete}  // Pass the handleDelete function
+            onUpdateRecurring={handleUpdateRecurring}
             categories={categories}
             isDeleting={isDeleting}
           />
         </Container>
       </div>
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>{editingIncomeId ? "Edit Existing Recurring Amount" : "Create New Recurring Amount"}</DialogTitle>
+        <DialogTitle>Update Recurring Income</DialogTitle>
         <DialogContent>
           {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
           <TextField
@@ -210,7 +247,7 @@ const ViewIncomes = () => {
           />
         </DialogContent>
         <DialogActions>
-        <Button onClick={handleSave} color="primary">
+          <Button onClick={handleSaveRecurringUpdate} color="primary">
             Save
           </Button>
           <Button onClick={() => setOpenDialog(false)} color="secondary">

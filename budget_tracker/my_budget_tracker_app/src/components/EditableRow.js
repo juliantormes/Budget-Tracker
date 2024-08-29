@@ -68,14 +68,16 @@ const EditableRow = ({
   };
 
   const handleActionConfirm = () => {
+    console.log('Action confirmed:', actionType); // Log the action type
     if (actionType === 'delete') {
-      onDelete(item.id); // Trigger deletion using the onDelete prop
+        console.log('Deleting item:', item.id);
+        onDelete(item.id); // Trigger deletion using the onDelete prop
     } else if (actionType === 'edit') {
-      handleSave(); // Trigger save
+        console.log('Saving item:', formData);
+        handleSave(); // Trigger save
     }
     setConfirmActionOpen(false); // Close the confirmation dialog
-  };
-
+};
   const openConfirmDialog = (type) => {
     setActionType(type);
     setConfirmActionOpen(true);

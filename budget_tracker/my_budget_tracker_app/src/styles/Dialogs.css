@@ -1,33 +1,43 @@
-/* Dialogs.css */
-
 /* Dialogs */
 .MuiDialog-paper {
-    background-color: #1976d2 !important; /* Blue background for dialogs */
-    color: #ffffff !important; /* White text for dialogs */
-  }
-  
-  .MuiDialogTitle-root {
-    color: #ffffff !important; /* White text for dialog title */
-  }
-  
-  .MuiDialogContentText-root {
-    color: #ffffff !important; /* White text for dialog content */
-  }
-  
-  .MuiDialogActions-root .MuiButton-root {
-    color: #ffffff !important; /* White color for dialog buttons */
-  }
-  
-  .MuiDialogActions-root .MuiButton-root:hover {
-    background-color: rgba(25, 118, 210, 0.15) !important; /* Light blue hover background */
-  }
-  
-  .MuiButton-containedSecondary {
-    color: #ffffff !important; /* White text for secondary button */
-    background-color: #1565c0 !important; /* Blue background for secondary button */
-  }
-  
-  .MuiButton-containedSecondary:hover {
-    background-color: #0d47a1 !important; /* Darker blue on hover */
-  }
-  
+  background: linear-gradient(135deg, #1976d2, #1565c0) !important; /* Gradient background for dialogs */
+  color: #ffffff !important; /* White text for dialogs */
+  border-radius: 8px; /* Slight rounding for a modern look */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3); /* Enhanced shadow for depth */
+}
+
+.MuiDialogTitle-root {
+  color: #ffffff !important; /* White text for dialog title */
+  font-weight: bold; /* Emphasize the title */
+}
+
+.MuiDialogContentText-root {
+  color: #e0e0e0 !important; /* Slightly lighter white for dialog content */
+  line-height: 1.6; /* Improve readability */
+}
+
+.MuiDialogActions-root .MuiButton-root {
+  color: #ffffff !important; /* White color for dialog buttons */
+  background: linear-gradient(135deg, #0074D9, #001f3f) !important; /* Gradient for buttons */
+  padding: 8px 16px; /* Consistent padding */
+  border-radius: 6px; /* Rounded corners for buttons */
+  transition: background 0.3s ease, transform 0.2s ease; /* Smooth hover transition */
+}
+
+.MuiDialogActions-root .MuiButton-root:hover {
+  background: linear-gradient(135deg, #001f3f, #0074D9) !important; /* Reverse gradient on hover */
+  transform: translateY(-2px) scale(1.05); /* Lifted effect on hover */
+}
+
+.MuiButton-containedSecondary {
+  color: #ffffff !important; /* White text for secondary button */
+  background: linear-gradient(135deg, #1565c0, #0d47a1) !important; /* Gradient background for secondary button */
+  border-radius: 6px; /* Rounded corners */
+  padding: 8px 16px; /* Consistent padding */
+  transition: background 0.3s ease, transform 0.2s ease; /* Smooth hover transition */
+}
+
+.MuiButton-containedSecondary:hover {
+  background: linear-gradient(135deg, #0d47a1, #1565c0) !important; /* Reverse gradient on hover */
+  transform: translateY(-2px) scale(1.05); /* Lifted effect on hover */
+}

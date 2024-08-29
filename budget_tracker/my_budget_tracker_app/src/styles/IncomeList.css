@@ -17,71 +17,119 @@
 .income-list .MuiTableCell-root .MuiSelect-root {
     color: #ffffff !important; /* Ensure input text is white */
     background-color: transparent !important; /* Transparent background for input */
+    border-radius: 4px; /* Add subtle rounding */
+    padding: 10px; /* Ensure consistent padding */
 }
 
 .income-list .MuiIconButton-root {
     color: #ffffff; /* White icons */
+    transition: color 0.3s ease; /* Smooth color transition */
+}
+
+.income-list .MuiIconButton-root:hover {
+    color: #7FDBFF !important; /* Apply a soft blue on hover */
 }
 
 /* Dropdown menu styles */
 .MuiSelect-root {
     color: #ffffff !important; /* White text */
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Subtle background for the dropdown */
+    border-radius: 4px; /* Rounded corners */
+    padding: 8px; /* Add padding for better spacing */
 }
 
 .MuiSelect-icon {
     color: #ffffff !important; /* White dropdown icon */
+    transition: color 0.3s ease; /* Smooth transition for icon color */
 }
-.Mui
+
+.MuiSelect-icon:hover {
+    color: #7FDBFF !important; /* Soft blue on hover */
+}
+
 .MuiInputLabel-root {
     color: #ffffff !important; /* White label text */
+    transition: color 0.3s ease, transform 0.3s ease; /* Smooth transitions for label */
 }
+
 /* Other styles remain unchanged */
 
 /* Targeting the calendar icon in the TextField for type="date" */
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(1);
+    cursor: pointer; /* Add pointer cursor for calendar icon */
 }
 
+/* Focused state for form control labels */
 .MuiFormControl-root .MuiInputLabel-root.Mui-focused {
     color: #ffffff !important; /* White label text when focused */
 }
 
+/* Adjusting label position */
 .MuiFormControl-root .MuiInputLabel-root {
     top: -6px; /* Adjust label position */
 }
 
+/* Dropdown option styles */
 .MuiPaper-root {
-    color: #1976d2 !important; /* White text for dropdown options */
+    color: #1976d2 !important; /* Blue text for dropdown options */
+    background-color: #ffffff !important; /* White background for dropdown */
+    border-radius: 4px; /* Add subtle rounding */
 }
 
 .MuiMenuItem-root {
-    color: #1976d2 !important; /* White text for dropdown options */
+    color: #1976d2 !important; /* Blue text for dropdown options */
+    transition: background-color 0.3s ease; /* Smooth transition for hover */
+}
+
+.MuiMenuItem-root:hover {
+    background-color: #f0f0f0 !important; /* Light gray background on hover */
 }
 
 /* Confirm action dialog styles */
 .confirm-dialog .MuiPaper-root {
-    background-color: #1976d2; /* Light blue background */
-    color: #ffffff; /* White text */
+    background-color: #1976d2 !important; /* Blue background */
+    color: #ffffff !important; /* White text */
+    border-radius: 8px; /* Add rounding to dialog */
+    padding: 20px; /* Add padding inside the dialog */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Subtle shadow for dialog */
 }
 
 .confirm-dialog .MuiDialogTitle-root {
-    color: #ffffff; /* White text for the dialog title */
+    color: #ffffff !important; /* White text for the dialog title */
+    font-weight: 600; /* Bold title text */
 }
 
 .confirm-dialog .MuiDialogContent-root {
-    color: #ffffff; /* White text for the dialog content */
+    color: #ffffff !important; /* White text for the dialog content */
+    padding: 20px; /* Add padding to dialog content */
 }
 
 .confirm-dialog .MuiTypography-root {
-    color: #ffffff; /* White text for the confirmation message */
+    color: #ffffff !important; /* White text for the confirmation message */
 }
 
 .confirm-dialog .MuiButton-root {
-    color: #ffffff; /* White text for buttons */
-    border-color: #ffffff; /* White border for buttons */
+    color: #ffffff !important; /* White text for buttons */
+    border-color: #ffffff !important; /* White border for buttons */
+    border-radius: 4px; /* Rounded corners for buttons */
+    padding: 10px 16px; /* Ensure consistent padding */
+    font-weight: 600; /* Bold button text */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions */
+}
+
+.confirm-dialog .MuiButton-root:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Light white background on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
 }
 
 .confirm-dialog .MuiButton-containedPrimary {
-    background-color: #ffffff; /* White background for contained primary button */
-    color: #1976d2; /* Text color for contained primary button */
+    background-color: #ffffff !important; /* White background for contained primary button */
+    color: #1976d2 !important; /* Blue text color for contained primary button */
+    transition: background-color 0.4s ease, transform 0.3s ease; /* Smooth transitions */
+}
+
+.confirm-dialog .MuiButton-containedPrimary:hover {
+    background-color: #f0f0f0 !important; /* Light gray background on hover */
+    transform: translateY(-2px); /* Slight lift on hover */
 }

@@ -3,39 +3,62 @@
   justify-content: flex-start;
   flex-direction: column;
   gap: 20px;
-  width: 100%; /* Ensure form takes full width */
-  align-items: center; /* Center align the form elements */
-  margin-top: 20px; /* Add some space between the title and form */
-}
-
-.text-field .MuiOutlinedInput-input {
-  color: #ffffff !important; /* Ensure input text is white */
-}
-
-.text-field .MuiOutlinedInput-notchedOutline {
-  border-color: #ffffff !important; /* Ensure border is white */
-}
-
-.text-field .MuiInputLabel-root {
-  color: #ffffff !important; /* Ensure label is white */
+  width: 100%;
+  align-items: center;
+  margin-top: 20px;
 }
 
 .text-field .MuiOutlinedInput-root {
-  background-color: transparent !important; /* Remove background change when filling fields */
+  background-color: transparent !important;
+  border-radius: 8px !important; /* Outer radius for the entire input */
+  padding: 10px;
+}
+
+.text-field .MuiOutlinedInput-notchedOutline {
+  border-color: #7FDBFF !important;
+  transition: border-color 0.3s ease;
+  border-radius: 8px !important; /* Ensure outer border remains rounded */
+}
+
+.text-field .MuiOutlinedInput-input {
+  color: #ffffff !important;
+  border-radius: 0 !important; /* Remove inner radius */
+  background-color: transparent !important;
+}
+
+.text-field .MuiInputLabel-root {
+  color: #7FDBFF !important;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.text-field .MuiInputLabel-root.Mui-focused {
+  color: #ffffff !important;
 }
 
 .submit-button {
   color: #ffffff !important;
-  background-color: #1976d2 !important;
+  background: linear-gradient(135deg, #7FDBFF, #0074D9) !important;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.4s ease, transform 0.3s ease;
 }
 
 .submit-button:hover {
-  background-color: #1565c0 !important;
+  background: linear-gradient(135deg, #0074D9, #001f3f) !important;
+  transform: translateY(-2px) scale(1.03);
 }
 
-/* Checkbox styles */
 .MuiCheckbox-root .MuiSvgIcon-root {
-  fill: #ffffff !important; /* Ensure checkbox square is white */
+  fill: #ffffff !important;
+  transition: fill 0.3s ease;
+}
+
+.MuiCheckbox-root .MuiSvgIcon-root:hover {
+  fill: #7FDBFF !important;
 }
 
 .MuiFormControlLabel-root {
@@ -44,18 +67,23 @@
 }
 
 .MuiFormControlLabel-label {
-  color: #ffffff !important; /* Ensure checkbox labels are white */
-  margin-left: 8px; /* Adjust margin for better alignment */
+  color: #ffffff !important;
+  margin-left: 8px;
+  transition: color 0.3s ease;
 }
 
-/* Dropdown content alignment */
 .MuiSelect-select {
-  text-align: left !important; /* Align dropdown content to the start */
+  text-align: left !important;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  padding: 8px;
+  border-radius: 8px; /* Retain the outer radius */
 }
 
-/* Calendar button styles */
 .MuiIconButton-root {
-  color: #ffffff !important; /* Ensure calendar button is white */
+  color: #7FDBFF !important;
+  transition: color 0.3s ease;
 }
 
-
+.MuiIconButton-root:hover {
+  color: #ffffff !important;
+}

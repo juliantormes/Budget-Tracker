@@ -7,28 +7,36 @@
 .navigation-bar h3 {
     margin-bottom: 5px;
     font-size: 1.2em;
-    color: #4a90e2;
+    color: #7FDBFF;
+    font-weight: bold;
+    text-transform: uppercase; /* Make the text uppercase for emphasis */
 }
 
 .navigation-buttons {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 5px;
+    gap: 10px; /* Increase the gap for better spacing */
 }
 
 .navigation-buttons button {
-    padding: 4px 8px;
-    border: 2px solid #4a90e2;
+    padding: 6px 12px;
+    border: 2px solid #7FDBFF;
     border-radius: 15px;
     background: transparent;
-    color: #4a90e2;
-    font-size: 0.9em;
+    color: #7FDBFF;
+    font-size: 1em;
+    font-weight: 600;
     cursor: pointer;
-    transition: background-color 0.3s, color 0.3s;
+    transition: background-color 0.4s ease, color 0.3s ease, transform 0.3s ease; /* Smooth transitions for hover effects */
 }
 
 .navigation-buttons button:hover {
-    background-color: #4a90e2;
+    background-color: #0074D9;
     color: white;
+    transform: translateY(-2px) scale(1.05); /* Add slight lift and scale on hover */
+}
+
+.navigation-buttons button:active {
+    transform: scale(0.98); /* Slight reduction in size on click */
 }

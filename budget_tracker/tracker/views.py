@@ -231,8 +231,12 @@ class IncomeViewSet(viewsets.ModelViewSet):
 
             except ValueError:
                 raise ValidationError('Invalid year or month format.')
+        
 
         return queryset
+    def perform_create(self, serializer):
+        # Set the user automatically when creating a new income
+        serializer.save(user=self.request.user)
 
 class CreditCardViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]

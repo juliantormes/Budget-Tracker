@@ -9,8 +9,8 @@ const ConfirmAction = ({ open, onClose, onConfirm, title, message }) => {
         <Typography>{message}</Typography>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color="secondary">Cancel</Button>
         <Button onClick={onConfirm} color="primary">Confirm</Button>
+        <Button onClick={onClose} color="secondary">Cancel</Button>
       </DialogActions>
     </Dialog>
   );

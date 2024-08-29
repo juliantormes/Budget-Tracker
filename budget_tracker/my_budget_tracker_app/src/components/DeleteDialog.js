@@ -24,11 +24,11 @@ const DeleteDialog = ({ open, handleClose, handleConfirm }) => (
       </DialogContentText>
     </DialogContent>
     <DialogActions>
+    <Button onClick={handleConfirm} className="button">
+        Confirm
+      </Button>
       <Button onClick={handleClose} className="button">
         Cancel
-      </Button>
-      <Button onClick={handleConfirm} className="button">
-        Confirm
       </Button>
     </DialogActions>
   </Dialog>

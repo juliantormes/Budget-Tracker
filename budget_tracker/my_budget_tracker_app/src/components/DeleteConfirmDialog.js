@@ -1,6 +1,6 @@
 import React from 'react';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, Typography } from '@mui/material';
-import '../styles/Dialogs.css';
+
 
 const DeleteConfirmDialog = ({ open, onClose, onConfirm, incomeId }) => {
   return (

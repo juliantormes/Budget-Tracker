@@ -1,31 +1,44 @@
+/* Form Container */
 .form-container {
   display: flex;
   justify-content: flex-start;
   flex-direction: column;
-  gap: 20px;
+  gap: 30px;
   width: 100%;
   align-items: center;
   margin-top: 20px;
 }
 
+
+/* Uniform Field Height */
+.text-field .MuiOutlinedInput-root,
+.submit-button,
+.MuiSelect-select,
+.MuiFormControl-root .MuiInputBase-root,
+.MuiCheckbox-root .MuiSvgIcon-root {
+  height: 48px; /* Set a consistent height */
+  line-height: 48px; /* Align the text vertically */
+}
+
+/* Text Fields */
 .text-field .MuiOutlinedInput-root {
   background-color: transparent !important;
-  border-radius: 8px !important; /* Outer radius for the entire input */
-  padding: 10px;
+  border-radius: 8px !important;
+  padding: 0 12px; /* Adjust padding to maintain consistent height */
 }
 
 .text-field .MuiOutlinedInput-notchedOutline {
-  border-color: #7FDBFF !important;
   transition: border-color 0.3s ease;
-  border-radius: 8px !important; /* Ensure outer border remains rounded */
+  border-radius: 8px !important;
 }
 
 .text-field .MuiOutlinedInput-input {
   color: #ffffff !important;
-  border-radius: 0 !important; /* Remove inner radius */
+  border-radius: 0 !important;
   background-color: transparent !important;
 }
 
+/* Labels */
 .text-field .MuiInputLabel-root {
   color: #7FDBFF !important;
   font-weight: bold;
@@ -36,25 +49,30 @@
   color: #ffffff !important;
 }
 
+/* Submit Button */
 .submit-button {
   color: #ffffff !important;
   background: linear-gradient(135deg, #7FDBFF, #0074D9) !important;
   border-radius: 8px;
-  padding: 12px;
+  padding: 0 20px; /* Adjust padding to maintain consistent height */
   font-size: 16px;
   font-weight: bold;
   cursor: pointer;
-  transition: background 0.4s ease, transform 0.3s ease;
+  transition: background 0.4s ease, transform 0.3s ease, box-shadow 0.4s ease;
 }
 
 .submit-button:hover {
   background: linear-gradient(135deg, #0074D9, #001f3f) !important;
   transform: translateY(-2px) scale(1.03);
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3); /* Add a subtle shadow on hover */
 }
 
+/* Checkbox */
 .MuiCheckbox-root .MuiSvgIcon-root {
   fill: #ffffff !important;
   transition: fill 0.3s ease;
+  width: 20px; /* Ensure the checkbox is aligned in height */
+  height: 20px; /* Ensure the checkbox is aligned in height */
 }
 
 .MuiCheckbox-root .MuiSvgIcon-root:hover {
@@ -72,11 +90,12 @@
   transition: color 0.3s ease;
 }
 
+/* Select Fields */
 .MuiSelect-select {
   text-align: left !important;
   background-color: rgba(255, 255, 255, 0.1) !important;
-  padding: 8px;
-  border-radius: 8px; /* Retain the outer radius */
+  padding: 0 12px; /* Adjust padding to maintain consistent height */
+  border-radius: 8px;
 }
 
 .MuiIconButton-root {
@@ -85,5 +104,54 @@
 }
 
 .MuiIconButton-root:hover {
+  color: #ffffff !important;
+}
+
+.MuiSelect-icon {
+  color: #7FDBFF !important; /* Blue color for the dropdown arrow */
+}
+
+.MuiSelect-icon.Mui-focused {
+  color: #ffffff !important; /* White color when focused */
+}
+
+.MuiFormControlLabel-label.Mui-focused {
+  color: #ffffff !important; /* White color when checkbox label is focused */
+}
+
+.text-field .MuiInputLabel-root {
+  color: #7FDBFF !important;
+  font-weight: bold;
+  transform: translate(0, -22px) scale(1); /* Move label above the input field */
+  z-index: 1; /* Ensure label stays above the input field */
+  padding: 0 4px; /* Add some padding to give space between label and border */
+  transition: all 0.3s ease; /* Smooth transition for label */
+}
+
+.text-field .MuiInputLabel-root.Mui-focused {
+  color: #ffffff !important;
+}
+
+.text-field .MuiOutlinedInput-root {
+  background-color: transparent !important;
+  border-radius: 8px !important;
+  padding: 12px;
+}
+
+.text-field .MuiOutlinedInput-notchedOutline {
+  transition: border-color 0.3s ease;
+  border-radius: 8px !important;
+  padding: 0px; /* Ensure padding doesn't affect label */
+}
+
+.text-field .MuiOutlinedInput-input {
+  color: #ffffff !important;
+  padding: 12px;
+  background-color: transparent !important;
+}
+
+.text-field .MuiInputLabel-root.Mui-focused,
+.text-field .MuiInputLabel-root.MuiFormLabel-filled {
+  transform: translate(0, -28px) scale(0.75); /* Move label slightly up when focused or filled */
   color: #ffffff !important;
 }

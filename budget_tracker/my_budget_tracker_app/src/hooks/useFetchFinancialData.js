@@ -22,64 +22,82 @@ export function useFetchFinancialData(year, month) {
     const [error, setError] = useState(null);
     const fetchYearData = useFetchYearData();
 
+    const generateMonthlyData = (item, startDate, endDate) => {
+        const results = [];
+        let currentDate = startDate;
+
+        while (currentDate.isBefore(endDate)) {
+            const exactMatchLog = item.change_logs.find(log =>
+                dayjs(log.effective_date).year() === currentDate.year() &&
+                dayjs(log.effective_date).month() === currentDate.month()
+            );
+
+            const closestLog = item.change_logs
+                .filter(log => dayjs(log.effective_date).isBefore(currentDate.startOf('month')))
+                .sort((a, b) => dayjs(b.effective_date).diff(dayjs(a.effective_date)))[0];
+
+            const effectiveAmount = exactMatchLog ? exactMatchLog.new_amount : closestLog ? closestLog.new_amount : item.amount;
+
+            results.push({
+                ...item,
+                date: currentDate.format('YYYY-MM-DD'),
+                amount: effectiveAmount
+            });
+
+            currentDate = currentDate.add(1, 'month');
+        }
+
+        return results;
+    };
+
     const getEffectiveAmount = (items, checkDate) => {
-        console.log(`Calculating effective amounts for check date: ${checkDate.format('YYYY-MM-DD')}`);
-        
-        return items.map(item => {
-            console.log(`Processing item with ID: ${item.id} and original amount: ${item.amount}`);
-            
-            // Only check for effective amounts if the item is recurring
+        return items.flatMap(item => {
             if (!item.is_recurring) {
-                console.log(`Item ID ${item.id} is not recurring. Using original amount: ${item.amount}`);
-                return {
+                return [{
                     ...item,
                     amount: item.amount,
-                };
+                }];
             }
     
-            const startOfCheckMonth = checkDate.startOf('month');
-            console.log(`Start of check month: ${startOfCheckMonth.format('YYYY-MM-DD')}`);
+            const startDate = dayjs(item.date).startOf('month');
     
-            const exactMatchLog = item.change_logs
-                ? item.change_logs.find(log =>
-                    dayjs(log.effective_date).year() === checkDate.year() &&
-                    dayjs(log.effective_date).month() === checkDate.month()
-                )
-                : null;
+            // Ensure we generate data only for the months between the start date and the check date
+            const results = [];
+            let currentDate = startDate;
     
-            if (exactMatchLog) {
-                console.log(`Exact match found for item ID ${item.id}: ${exactMatchLog.new_amount} effective on ${exactMatchLog.effective_date}`);
-                return {
-                    ...item,
-                    amount: exactMatchLog.new_amount,
-                };
+            while (currentDate.isBefore(checkDate) || currentDate.isSame(checkDate, 'month')) {
+                const exactMatchLog = item.change_logs.find(log =>
+                    dayjs(log.effective_date).year() === currentDate.year() &&
+                    dayjs(log.effective_date).month() === currentDate.month()
+                );
+    
+                const closestLog = item.change_logs
+                    .filter(log => dayjs(log.effective_date).isBefore(currentDate.startOf('month')))
+                    .sort((a, b) => dayjs(b.effective_date).diff(dayjs(a.effective_date)))[0];
+    
+                const effectiveAmount = exactMatchLog ? exactMatchLog.new_amount : closestLog ? closestLog.new_amount : item.amount;
+    
+                // Only push the entry for the specific month being checked (avoid accumulating amounts)
+                if (currentDate.isSame(checkDate, 'month')) {
+                    results.push({
+                        ...item,
+                        date: currentDate.format('YYYY-MM-DD'),
+                        amount: effectiveAmount
+                    });
+                }
+    
+                currentDate = currentDate.add(1, 'month');
             }
     
-            const closestLog = item.change_logs
-                ? item.change_logs
-                    .filter(log => dayjs(log.effective_date).isBefore(startOfCheckMonth))
-                    .sort((a, b) => dayjs(b.effective_date).diff(dayjs(a.effective_date)))[0]
-                : null;
-    
-            if (closestLog) {
-                console.log(`Closest log found for item ID ${item.id}: ${closestLog.new_amount} effective on ${closestLog.effective_date}`);
-            } else {
-                console.log(`No relevant change log found for item ID ${item.id}. Using original amount: ${item.amount}`);
-            }
-    
-            return {
-                ...item,
-                amount: closestLog ? closestLog.new_amount : item.amount,
-            };
+            return results;
         });
     };
     
-    
+
     const fetchData = useCallback(async () => {
         setLoading(true);
 
         try {
-            console.log(`Fetching data for year: ${year}, month: ${month}`);
             const limit = pLimit(5);
 
             const currentYearData = await fetchYearData(year);
@@ -106,12 +124,11 @@ export function useFetchFinancialData(year, month) {
             const allCreditCardExpenses = mergeData(currentYearData.creditCardExpenses, pastDataResults.flatMap(res => res.creditCardExpenses || []));
 
             const checkDate = dayjs(new Date(year, month - 1, 1));  // Define check date based on year and month
-            console.log(`Check date set to: ${checkDate.format('YYYY-MM-DD')}`);
 
             setData({
                 incomes: getEffectiveAmount(allIncomes, checkDate),
                 expenses: getEffectiveAmount(allExpenses, checkDate),
-                creditCardExpenses: allCreditCardExpenses,  // Assuming credit card expenses don't need the same treatment
+                creditCardExpenses: allCreditCardExpenses,
             });
 
         } catch (error) {
@@ -138,7 +155,7 @@ export function useFetchFinancialData(year, month) {
     const net = calculateNet(totalIncome, totalExpenses, totalCreditCardDebt);
     const percentages = calculatePercentages(totalIncome, totalExpenses, totalCreditCardDebt, net);
     const barChartData = prepareBarChartData(percentages);
-    console.log("Income Chart Data:", incomeChartData);
+    
     return { 
         data, 
         loading, 

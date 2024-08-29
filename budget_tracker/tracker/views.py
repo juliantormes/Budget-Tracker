@@ -1,6 +1,6 @@
 from django.db.models import Q
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes
@@ -130,10 +130,43 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 start_date = datetime(year, month, 1)
                 end_date = start_date + relativedelta(months=1, days=-1)
 
-                # Filter for transactions of the specific month or recurring transactions
-                monthly_transactions = Q(date__gte=start_date, date__lte=end_date)
-                recurring_transactions = Q(is_recurring=True)
-                queryset = queryset.filter(monthly_transactions | recurring_transactions)
+                # Convert start_date and end_date to date for comparison if necessary
+                start_date = start_date.date()
+                end_date = end_date.date()
+
+                # Filter for transactions of the specific month
+                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date)
+
+                # Handle recurring transactions
+                recurring_transactions = queryset.filter(is_recurring=True, date__lte=end_date)
+                recurring_expenses = []
+
+                for expense in recurring_transactions:
+                    # Find if there's a change log for the specific month
+                    change_log = expense.change_logs.filter(
+                        effective_date__year=year, 
+                        effective_date__month=month
+                    ).first()
+
+                    # If there's a change log, use the new amount; otherwise, use the original amount
+                    effective_amount = change_log.new_amount if change_log else expense.amount
+
+                    # Clone the transaction with the new date and effective amount
+                    recurring_expense = Expense(
+                        id=expense.id,  # Keep the original ID or give a new unique ID if cloning
+                        user=expense.user,
+                        category=expense.category,
+                        amount=effective_amount,
+                        description=expense.description,
+                        date=start_date,  # Use the first day of the month as the date
+                        is_recurring=True,
+                        # ... copy any other relevant fields
+                    )
+                    recurring_expenses.append(recurring_expense)
+
+                # Combine both regular monthly transactions and the calculated recurring transactions
+                queryset = list(monthly_transactions) + recurring_expenses
+
             except ValueError:
                 raise ValidationError('Invalid year or month format.')
 
@@ -156,11 +189,46 @@ class IncomeViewSet(viewsets.ModelViewSet):
             try:
                 year = int(year)
                 month = int(month)
-                start_date = datetime(year, month, 1)
-                end_date = start_date + relativedelta(months=1, days=-1)
-                monthly_transactions = Q(date__gte=start_date, date__lte=end_date)
-                recurring_transactions = Q(is_recurring=True)
-                queryset = queryset.filter(monthly_transactions | recurring_transactions)
+                start_date = datetime(year, month, 1)  # This is already a datetime object
+                end_date = start_date + relativedelta(months=1, days=-1)  # End date is also a datetime object
+
+                # Convert start_date and end_date to date for comparison if necessary
+                start_date = start_date.date()
+                end_date = end_date.date()
+
+                # Filter for transactions of the specific month
+                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date)
+
+                # Handle recurring transactions
+                recurring_transactions = queryset.filter(is_recurring=True, date__lte=end_date)
+                recurring_incomes = []
+
+                for income in recurring_transactions:
+                    # Find if there's a change log for the specific month
+                    change_log = income.change_logs.filter(
+                        effective_date__year=year, 
+                        effective_date__month=month
+                    ).first()
+
+                    # If there's a change log, use the new amount; otherwise, use the original amount
+                    effective_amount = change_log.new_amount if change_log else income.amount
+
+                    # Clone the transaction with the new date and effective amount
+                    recurring_income = Income(
+                        id=income.id,  # Keep the original ID or give a new unique ID if cloning
+                        user=income.user,
+                        category=income.category,
+                        amount=effective_amount,
+                        description=income.description,
+                        date=start_date,  # Use the first day of the month as the date
+                        is_recurring=True,
+                        # ... copy any other relevant fields
+                    )
+                    recurring_incomes.append(recurring_income)
+
+                # Combine both regular monthly transactions and the calculated recurring transactions
+                queryset = list(monthly_transactions) + recurring_incomes
+
             except ValueError:
                 raise ValidationError('Invalid year or month format.')
 

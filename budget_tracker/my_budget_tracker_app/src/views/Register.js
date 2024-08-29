@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import InputField from '../components/InputField';
 import ErrorMessage from '../components/ErrorMessage';
 import SubmitButton from '../components/SubmitButton';
-import AuthFormContainer from '../components/AuthFormContainer';
 import '../styles/AuthFormStyles.css';
 
 const RegisterForm = () => {
@@ -55,35 +54,37 @@ const RegisterForm = () => {
     };
 
     return (
-        <AuthFormContainer>
-            <form onSubmit={handleSubmit} className="form">
-                <h2 className="form-title">Register</h2>
-                <ErrorMessage error={error} />
-                <InputField
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
-                    className="input-field"
-                />
-                <InputField
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
-                    className="input-field"
-                />
-                <InputField
-                    type="password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="Confirm Password"
-                    className="input-field"
-                />
-                <SubmitButton text="Register" className="submit-button" />
-                <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" type="button" className="redirect-button" />
-            </form>
-        </AuthFormContainer>
+        <div className="auth-page-container" style={{ backgroundImage: `url('/images/Preview.png')` }}>
+            <div className="auth-form-overlay">
+                <form onSubmit={handleSubmit} className="form">
+                    <h2 className="form-title">Register</h2>
+                    <ErrorMessage error={error} />
+                    <InputField
+                        type="text"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="Username"
+                        className="input-field"
+                    />
+                    <InputField
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="Password"
+                        className="input-field"
+                    />
+                    <InputField
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        placeholder="Confirm Password"
+                        className="input-field"
+                    />
+                    <SubmitButton text="Register" className="submit-button" />
+                    <SubmitButton onClick={() => navigate('/login')} text="Already have an account? Login" type="button" className="redirect-button" />
+                </form>
+            </div>
+        </div>
     );
 };
 

@@ -1,10 +1,8 @@
-/* global.css */
-
 /* Body */
 body {
     color: #ffffff; /* Default text color */
     background-color: #1f2a40; /* Background color */
-    font-family: 'Roboto', sans-serif;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     margin: 0;
 }
 
@@ -46,16 +44,22 @@ form {
 .button {
     color: #ffffff !important;
     background-color: #1976d2 !important;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background 0.4s ease, transform 0.3s ease;
 }
 
 .button:hover {
     background-color: #1565c0 !important;
+    transform: scale(1.05);
 }
 
 /* Tables */
 .table-cell {
     color: #ffffff; /* White text color */
+    padding: 8px 16px;
 }
+
 .MuiTableCell-root {
     color: #ffffff; /* White text color */
     border-bottom: 1px solid #e0e0e0; /* Light border */
@@ -82,19 +86,15 @@ form {
 
 .MuiDialogActions-root .MuiButton-root {
     color: #ffffff !important; /* Blue color for dialog buttons */
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    border-radius: 8px;
+    padding: 8px 16px;
+    transition: background 0.4s ease, transform 0.3s ease;
 }
 
 .MuiDialogActions-root .MuiButton-root:hover {
-    background-color: rgba(25, 118, 210, 0.15) !important; /* Light blue hover background */
-}
-
-.MuiButton-containedSecondary {
-    color: #ffffff !important; /* White text for secondary button */
-    background-color: #1976d2 !important; /* Blue background for secondary button */
-}
-
-.MuiButton-containedSecondary:hover {
-    background-color: #1565c0 !important; /* Darker blue on hover */
+    background: linear-gradient(135deg, #1565c0, #0d47a1);
+    transform: scale(1.05);
 }
 
 /* Calendar */
@@ -106,36 +106,26 @@ form {
     color: #bbbbbb !important; /* Lighter color for days outside the month */
 }
 
-.MuiPickersCalendarHeader-switchViewButton {
-    color: #1976d2 !important; /* Blue color for month/year switch button */
-}
-
-.MuiPickersArrowSwitcher-root {
-    color: #1976d2 !important; /* Blue color for calendar navigation arrows */
-}
-
-.MuiPickersArrowSwitcher-root .MuiSvgIcon-root {
-    color: #1976d2 !important; /* Blue color for navigation arrows */
-}
-
-.MuiFormLabel-root.Mui-focused {
-    color: #1976d2 !important; /* Blue color for focused labels */
-}
-
-.MuiInputBase-root {
-    color: #ffffff !important; /* White color for input base */
-}
-
-.MuiPickersCalendarHeader-label {
-    color: #1976d2 !important; /* Blue color for calendar labels */
-}
-
-.MuiInputLabel-root {
-    color: #1976d2 !important; /* Blue color for input labels */
-}
-
-.MuiPickersMonth-root, .MuiPickersYear-root {
-    color: #1976d2 !important; /* Blue color for text in month/year picker */
+.MuiPickersCalendarHeader-switchViewButton,
+.MuiPickersArrowSwitcher-root,
+.MuiPickersArrowSwitcher-root .MuiSvgIcon-root,
+.MuiFormLabel-root.Mui-focused,
+.MuiInputBase-root,
+.MuiPickersCalendarHeader-label,
+.MuiInputLabel-root,
+.MuiPickersMonth-root,
+.MuiPickersYear-root,
+.MuiPickersDay-root.Mui-selected,
+.MuiPickersCalendarHeader-labelContainer,
+.MuiPickersSlideTransition-transitionContainer .MuiTypography-root,
+.MuiPickersCalendarHeader-dayLabel,
+.MuiTypography-root.MuiPickersMonth-root,
+.MuiTypography-root.MuiPickersYear-root,
+.MuiPickersSlideTransition-transitionContainer,
+.MuiTypography-root.MuiDayCalendar-weekDayLabel,
+.MuiPickersCalendarHeader-label,
+.MuiTypography-root.MuiTypography-subtitle1 {
+    color: #1976d2 !important; /* Blue color for various calendar and picker elements */
 }
 
 .MuiPickersDay-root.Mui-selected {
@@ -144,7 +134,7 @@ form {
 }
 
 .MuiPickersDay-root.Mui-selected:hover {
-    background-color: #1976d2 !important; /* Blue background for hovered selected day */
+    background-color: #1565c0 !important; /* Blue background for hovered selected day */
     color: #ffffff !important; /* White text for hovered selected day */
 }
 
@@ -156,111 +146,46 @@ form {
     color: #1976d2 !important; /* Blue color for the arrow buttons */
 }
 
-.MuiPickersCalendarHeader-labelContainer {
-    color: #1976d2 !important; /* Blue color for the month and year label */
-}
-
-.MuiPickersSlideTransition-transitionContainer .MuiTypography-root {
-    color: #1976d2 !important; /* Blue color for text in slide transition */
-}
-
-.MuiPickersDay-daySelected {
-    color: #ffffff !important; /* White text for selected day */
-    background-color: #1976d2 !important; /* Blue background for selected day */
-}
-
-.MuiPickersCalendarHeader-dayLabel {
-    color: #1976d2 !important; /* Blue color for day labels */
-}
-
-.MuiTypography-root.MuiPickersMonth-root, 
-.MuiTypography-root.MuiPickersYear-root, 
-.MuiPickersCalendarHeader-labelContainer, 
-.MuiPickersSlideTransition-transitionContainer, 
-.MuiTypography-root.MuiDayCalendar-weekDayLabel {
-    color: #1976d2 !important; /* Blue color for all calendar text */
-}
-
-.MuiPickersCalendar-weekDayLabel {
-    color: #1976d2 !important; /* Blue color for weekday labels */
-}
-
-.MuiPickersCalendarHeader-label {
-    color: #1976d2 !important; /* Blue color for the month and year text */
-}
-
-.MuiTypography-root.MuiTypography-subtitle1 {
-    color: #1976d2 !important; /* Blue color for the date picker subtitle */
-}
-
-/* Dialogs */
 .MuiDialog-paper {
     background-color: #1976d2 !important; /* Blue background for dialogs */
     color: #ffffff !important; /* White text for dialogs */
-}
-
-.MuiDialogTitle-root {
-    color: #ffffff !important; /* White text for dialog title */
-}
-
-.MuiDialogContentText-root {
-    color: #ffffff !important; /* White text for dialog content */
-}
-
-.MuiDialogActions-root .MuiButton-root {
-    color: #ffffff !important; /* White color for dialog buttons */
 }
 
 .MuiDialogActions-root .MuiButton-root:hover {
     background-color: rgba(25, 118, 210, 0.15) !important; /* Light blue hover background */
 }
 
-.MuiButton-containedSecondary {
-    color: #ffffff !important; /* White text for secondary button */
-    background-color: #1565c0 !important; /* Blue background for secondary button */
-}
-
-.MuiButton-containedSecondary:hover {
-    background-color: #0d47a1 !important; /* Darker blue on hover */
-}
 input[type="date"]::-webkit-calendar-picker-indicator {
     filter: invert(100%) brightness(100%); /* This makes the icon white */
     cursor: pointer;
-  }
-  .table-cell {
-    padding: 8px 16px;
-  }
-  
-  .text-field {
-    width: 100%;
-    box-sizing: border-box;
-  }
-  
-  .editing .text-field,
-  .editing .select-field {
+}
+
+.editing .text-field,
+.editing .select-field {
     background-color: #1E1E2F;
     color: white;
     border: 1px solid white;
     box-shadow: none;
     padding: 8px;
     box-sizing: border-box;
-    
-  }
-  
-  .select-field {
+}
+
+.select-field {
     width: 100%;
-  }
-  
-  .checkbox-field {
+}
+
+.checkbox-field {
     margin-left: 0;
-  }
-  .MuiContainer-root {
+}
+
+.MuiContainer-root {
     margin: 0 !important; /* Remove any margin */
     padding: 20 !important; /* Optionally remove padding as well */
     max-width: 100% !important; /* Ensure the container uses the full width */
     width: 100% !important;
     box-sizing: border-box;
-  }
+}
+
 .table-header .MuiTableCell-root {
     color: #ffffff; /* White text color */
     font-weight: bold; /* Bold text */
@@ -276,17 +201,18 @@ input[type="number"]::-webkit-inner-spin-button {
 input[type="number"] {
     -moz-appearance: textfield;
 }
+
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus {
     -webkit-box-shadow: 0 0 0px 1000px #1f2a40 inset !important; /* Match your background color */
     -webkit-text-fill-color: white !important; /* Match your text color */
 }
+
 .MuiInputLabel-root {
     color: #ffffff !important; /* Force label color to white */
-  }
-  
-  .MuiInputBase-input {
+}
+
+.MuiInputBase-input {
     color: #ffffff !important; /* Force input text color to white */
-  }
-  
+}

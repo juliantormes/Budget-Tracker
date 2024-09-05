@@ -83,17 +83,17 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
         return income.is_recurring && incomeMonth <= formattedMonth;
     }).map(income => {
-        // Determine the correct amount to use based on the effective amount and the original amount
-        const amountToUse = parseFloat(income.effective_amount || income.amount);
+        // Ensure effective amount is used here for recurring incomes
+        const amountToUse = parseFloat(income.amount);
         return {
             ...income,
-            amount: amountToUse < income.amount ? amountToUse : income.amount // Use the smaller, correct amount
+            amount: amountToUse < income.amount ? amountToUse : income.amount // Use the correct amount
         };
     });
 
     const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
     const sumsByCategory = processedIncomes.reduce((acc, income) => {
-        const category = (income.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
+        const category = (income.category_name || 'Undefined Category').toLowerCase();
         acc[category] = (acc[category] || 0) + parseFloat(income.amount || 0);
         return acc;
     }, {});
@@ -107,14 +107,12 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         datasets: [{
             label: 'Incomes',
             data,
-            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]),
             borderColor: ['#4b4b4b'],
             borderWidth: 1,
         }]
     };
 };
-
-
 
 export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
@@ -130,17 +128,17 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
         return expense.is_recurring && expenseMonth <= formattedMonth;
     }).map(expense => {
-        // Determine the correct amount to use based on the effective amount and the original amount
-        const amountToUse = parseFloat(expense.effective_amount || expense.amount);
+        // Ensure effective amount is used here for recurring expenses
+        const amountToUse = parseFloat(expense.amount);
         return {
             ...expense,
-            amount: amountToUse < expense.amount ? amountToUse : expense.amount // Use the smaller, correct amount
+            amount: amountToUse < expense.amount ? amountToUse : expense.amount // Use the correct amount
         };
     });
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
     const sumsByCategory = processedExpenses.reduce((acc, expense) => {
-        const category = (expense.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
+        const category = (expense.category_name || 'Undefined Category').toLowerCase();
         acc[category] = (acc[category] || 0) + parseFloat(expense.amount || 0);
         return acc;
     }, {});
@@ -154,7 +152,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Expenses',
             data,
-            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]),
             borderColor: ['#4b4b4b'],
             borderWidth: 1,
         }]

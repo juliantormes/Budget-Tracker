@@ -54,24 +54,14 @@ class IncomeRecurringChangeLogSerializer(serializers.ModelSerializer):
     def validate_effective_date(self, value):
         income = getattr(self.instance, 'income', None) or self.context.get('income')
         if not income:
-            income = self.context['request'].data.get('income')
+            raise serializers.ValidationError("Income data is missing.")
         
         # Ensure the effective date is not before the original income date
         if value < income.date:
             raise serializers.ValidationError("Effective date cannot be earlier than the start date of the income.")
         
-        # Check if there's already a change log for the same month
-        existing_log = income.change_logs.filter(
-            effective_date__year=value.year,
-            effective_date__month=value.month
-        ).exclude(id=self.instance.id if self.instance else None).first()
-
-        if existing_log:
-            raise serializers.ValidationError(
-                "A record for this month already exists. Please edit the existing record."
-            )
-
         return value
+
 class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExpenseRecurringChangeLog
@@ -82,7 +72,6 @@ class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
 
     def validate_effective_date(self, value):
         expense = getattr(self.instance, 'expense', None) or self.context.get('expense')
-        
         if not expense:
             raise serializers.ValidationError("Expense data is missing.")
         
@@ -90,20 +79,8 @@ class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
         if value < expense.date:
             raise serializers.ValidationError("Effective date cannot be earlier than the start date of the expense.")
         
-        # Check if there's already a change log for the same month
-        existing_log = expense.change_logs.filter(
-            effective_date__year=value.year,
-            effective_date__month=value.month
-        ).exclude(id=self.instance.id if self.instance else None).first()
-
-        if existing_log:
-            raise serializers.ValidationError(
-                "A record for this month already exists. Please edit the existing record."
-            )
-
         return value
-
-    
+ 
 class IncomeSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
     change_logs = IncomeRecurringChangeLogSerializer(many=True, read_only=True)

@@ -59,18 +59,28 @@ def update_recurring_expense(request, expense_id):
         # Retrieve the expense or return a 404 error if not found
         expense = get_object_or_404(Expense, id=expense_id, user=request.user)
         
-        # Check if a recurring change log already exists for the given effective date
-        effective_date = request.data.get('effective_date')
-        if effective_date:
-            existing_log = expense.change_logs.filter(effective_date=effective_date).first()
-        else:
-            existing_log = None
+        # Extract the effective_date from the request data
+        effective_date_str = request.data.get('effective_date')
+        if not effective_date_str:
+            return Response({"error": "Effective date is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Convert the effective date string to a datetime object
+            effective_date = datetime.strptime(effective_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # If there's an existing log and it's a PUT request, update it
-        if request.method == 'PUT' and existing_log:
+        # Try to find an existing change log for the same month
+        existing_log = expense.change_logs.filter(
+            effective_date__year=effective_date.year,
+            effective_date__month=effective_date.month
+        ).first()
+
+        if existing_log:
+            # Update the existing record if found
             serializer = ExpenseRecurringChangeLogSerializer(existing_log, data=request.data, partial=True)
         else:
-            # Create a new record if it's a POST request or no existing log was found
+            # Create a new record if no log exists
             serializer = ExpenseRecurringChangeLogSerializer(data=request.data, context={'expense': expense})
 
         if serializer.is_valid():
@@ -78,9 +88,10 @@ def update_recurring_expense(request, expense_id):
             return Response(serializer.data, status=status.HTTP_200_OK if existing_log else status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])
@@ -89,18 +100,28 @@ def update_recurring_income(request, income_id):
         # Retrieve the income or return a 404 error if not found
         income = get_object_or_404(Income, id=income_id, user=request.user)
         
-        # Check if a recurring change log already exists for the given effective date
-        effective_date = request.data.get('effective_date')
-        if effective_date:
-            existing_log = income.change_logs.filter(effective_date=effective_date).first()
-        else:
-            existing_log = None
+        # Extract the effective_date from the request data
+        effective_date_str = request.data.get('effective_date')
+        if not effective_date_str:
+            return Response({"error": "Effective date is required."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Convert the effective date string to a datetime object
+            effective_date = datetime.strptime(effective_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # If there's an existing log and it's a PUT request, update it
-        if request.method == 'PUT' and existing_log:
+        # Try to find an existing change log for the same month
+        existing_log = income.change_logs.filter(
+            effective_date__year=effective_date.year,
+            effective_date__month=effective_date.month
+        ).first()
+
+        if existing_log:
+            # Update the existing record if found
             serializer = IncomeRecurringChangeLogSerializer(existing_log, data=request.data, partial=True)
         else:
-            # Create a new record if it's a POST request or no existing log was found
+            # Create a new record if no log exists
             serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})
 
         if serializer.is_valid():
@@ -108,9 +129,11 @@ def update_recurring_income(request, income_id):
             return Response(serializer.data, status=status.HTTP_200_OK if existing_log else status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 
 class ExpenseViewSet(viewsets.ModelViewSet):

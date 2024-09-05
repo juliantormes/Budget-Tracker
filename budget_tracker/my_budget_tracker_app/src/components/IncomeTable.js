@@ -10,7 +10,7 @@ const IncomeTable = ({
   onCancel,
   onSave,
   onDelete,
-  onUpdateRecurring,  // New prop
+  onUpdateRecurring,
   categories
 }) => (
   <Table className="table">
@@ -27,14 +27,14 @@ const IncomeTable = ({
     <TableBody>
       {incomes.map((income) => (
         <EditableRow
-          key={income.id}
+          key={`${income.id}-${income.amount}`}  // Add amount in the key to force re-render
           item={income}
           isEditing={editingIncomeId === income.id}
           onEdit={onEdit}
           onCancel={onCancel}
           onSave={onSave}
           onDelete={onDelete}
-          onUpdateRecurring={onUpdateRecurring} // Pass the new prop
+          onUpdateRecurring={onUpdateRecurring}
           categories={categories}
           type="income"
           showType={false}
@@ -51,7 +51,7 @@ IncomeTable.propTypes = {
   onCancel: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onDelete: PropTypes.func.isRequired,
-  onUpdateRecurring: PropTypes.func.isRequired,  // Add prop type
+  onUpdateRecurring: PropTypes.func.isRequired,
   categories: PropTypes.array.isRequired,
 };
 

@@ -167,22 +167,30 @@ const ViewExpenses = () => {
     };
   
     try {
-      // Check if there's already a change log for this month
       const existingLog = currentExpense.change_logs.find(log =>
         dayjs(log.effective_date).isSame(effectiveDate, 'month')
       );
   
       let response;
       if (existingLog) {
-        // If a log exists for the current month, update it
         response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
       } else {
-        // Otherwise, create a new log
         response = await axiosInstance.post(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
       }
   
       if (response.status === 200 || response.status === 201) {
+        const updatedExpense = response.data;
+  
+        // Make sure to create a new array for immutability
+        setSelectedExpenses(prevExpenses => 
+          prevExpenses.map(exp => (exp.id === updatedExpense.id ? { ...updatedExpense } : exp))
+        );
+  
+        // Optionally refetch after a slight delay
+        await new Promise(resolve => setTimeout(resolve, 500)); 
         refetch();
+  
+        // Reset dialog and state
         setOpenDialog(false);
         setCurrentExpense(null);
         setNewAmount('');

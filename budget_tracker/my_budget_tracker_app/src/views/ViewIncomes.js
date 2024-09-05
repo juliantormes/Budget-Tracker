@@ -156,22 +156,30 @@ const ViewIncomes = () => {
     };
   
     try {
-      // Check if there's already a change log for this month
       const existingLog = currentIncome.change_logs.find(log =>
         dayjs(log.effective_date).isSame(effectiveDate, 'month')
       );
   
       let response;
       if (existingLog) {
-        // If a log exists for the current month, update it
         response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       } else {
-        // Otherwise, create a new log
         response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       }
   
       if (response.status === 200 || response.status === 201) {
+        const updatedIncome = response.data;
+  
+        // Make sure to create a new array for immutability
+        setSelectedIncomes(prevIncomes => 
+          prevIncomes.map(inc => (inc.id === updatedIncome.id ? { ...updatedIncome } : inc))
+        );
+  
+        // Optionally refetch after a slight delay
+        await new Promise(resolve => setTimeout(resolve, 500)); 
         refetch();
+  
+        // Reset dialog and state
         setOpenDialog(false);
         setCurrentIncome(null);
         setNewAmount('');
@@ -212,7 +220,7 @@ const ViewIncomes = () => {
             onEdit={handleEdit}
             onCancel={() => setEditingIncomeId(null)}
             onSave={handleSave}
-            onDelete={handleDelete}  // Pass the handleDelete function
+            onDelete={handleDelete}
             onUpdateRecurring={handleUpdateRecurring}
             categories={categories}
             isDeleting={isDeleting}
@@ -231,7 +239,7 @@ const ViewIncomes = () => {
             value={newAmount}
             onChange={(e) => setNewAmount(e.target.value)}
             InputLabelProps={{
-              style: { color: '#ffffff' }  // Set label color to white
+              style: { color: '#ffffff' }
             }}
           />
           <TextField
@@ -242,7 +250,7 @@ const ViewIncomes = () => {
             value={effectiveDate.format('YYYY-MM-DD')}
             onChange={(e) => setEffectiveDate(dayjs(e.target.value))}
             InputLabelProps={{
-              style: { color: '#ffffff' }  // Set label color to white
+              style: { color: '#ffffff' }
             }}
           />
         </DialogContent>

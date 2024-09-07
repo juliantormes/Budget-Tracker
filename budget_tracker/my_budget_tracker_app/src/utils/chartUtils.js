@@ -83,17 +83,17 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
         return income.is_recurring && incomeMonth <= formattedMonth;
     }).map(income => {
-        // Ensure effective amount is used here for recurring incomes
-        const amountToUse = parseFloat(income.amount);
+        // Determine the correct amount to use based on the effective amount and the original amount
+        const amountToUse = parseFloat(income.effective_amount || income.amount);
         return {
             ...income,
-            amount: amountToUse < income.amount ? amountToUse : income.amount // Use the correct amount
+            amount: amountToUse < income.amount ? amountToUse : income.amount // Use the smaller, correct amount
         };
     });
 
     const processedIncomes = [...nonRecurringIncomes, ...recurringIncomes];
     const sumsByCategory = processedIncomes.reduce((acc, income) => {
-        const category = (income.category_name || 'Undefined Category').toLowerCase();
+        const category = (income.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
         acc[category] = (acc[category] || 0) + parseFloat(income.amount || 0);
         return acc;
     }, {});
@@ -107,7 +107,7 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
         datasets: [{
             label: 'Incomes',
             data,
-            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]),
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
             borderColor: ['#4b4b4b'],
             borderWidth: 1,
         }]
@@ -128,17 +128,17 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
         return expense.is_recurring && expenseMonth <= formattedMonth;
     }).map(expense => {
-        // Ensure effective amount is used here for recurring expenses
-        const amountToUse = parseFloat(expense.amount);
+        // Determine the correct amount to use based on the effective amount and the original amount
+        const amountToUse = parseFloat(expense.effective_amount || expense.amount);
         return {
             ...expense,
-            amount: amountToUse < expense.amount ? amountToUse : expense.amount // Use the correct amount
+            amount: amountToUse < expense.amount ? amountToUse : expense.amount // Use the smaller, correct amount
         };
     });
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
     const sumsByCategory = processedExpenses.reduce((acc, expense) => {
-        const category = (expense.category_name || 'Undefined Category').toLowerCase();
+        const category = (expense.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
         acc[category] = (acc[category] || 0) + parseFloat(expense.amount || 0);
         return acc;
     }, {});
@@ -152,7 +152,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Expenses',
             data,
-            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]),
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
             borderColor: ['#4b4b4b'],
             borderWidth: 1,
         }]
@@ -171,44 +171,55 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         const totalAmountWithSurcharge = parseFloat(expense.amount) * (1 + surchargeRate);
 
         let startMonth;
+
+        // Adjust the start month to reflect the billing cycle based on the closing day
         if (expenseDate.getDate() <= closingDay) {
+            // Expense was made before or on the closing day: first installment appears in the next month
             startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1);
         } else {
+            // Expense was made after the closing day: first installment appears two months later
             startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1);
         }
 
-        if (expense.is_recurring) {
-            // Handle recurring expenses (installments = 1)
-            const formattedInstallmentMonth = `${startMonth.getFullYear()}-${String(startMonth.getMonth() + 1).padStart(2, '0')}`;
-            if (formattedInstallmentMonth <= formattedMonth) {
-                processedExpenses.push({
-                    ...expense,
-                    month: formattedMonth,
-                    amount: totalAmountWithSurcharge,
-                });
-            }
-        } else if (expense.installments > 1) {
+        // Now, we handle non-recurring, multi-installment expenses and account for the credit card cycle
+        if (expense.installments > 1) {
             for (let i = 0; i < expense.installments; i++) {
                 const installmentMonth = new Date(startMonth);
-                installmentMonth.setMonth(startMonth.getMonth() + i);
+                installmentMonth.setMonth(startMonth.getMonth() + i); // Increment by the number of installments
+
                 const formattedInstallmentMonth = `${installmentMonth.getFullYear()}-${String(installmentMonth.getMonth() + 1).padStart(2, '0')}`;
+                
+                // Push the installment for the correct months
                 processedExpenses.push({
                     ...expense,
                     month: formattedInstallmentMonth,
-                    amount: totalAmountWithSurcharge / expense.installments,
+                    amount: totalAmountWithSurcharge / expense.installments, // Divide by number of installments
                 });
             }
         } else {
+            // Handle single payment credit card expenses, which are deferred by the closing day
+            const formattedSinglePaymentMonth = `${startMonth.getFullYear()}-${String(startMonth.getMonth() + 1).padStart(2, '0')}`;
             processedExpenses.push({
                 ...expense,
-                month: startMonth.getMonth() + 1 === month ? formattedMonth : '', // Ensure it only appears in the correct month
+                month: formattedSinglePaymentMonth,
                 amount: totalAmountWithSurcharge,
             });
         }
     });
 
-    // Filter expenses to include only those for the current month
-    const filteredExpenses = processedExpenses.filter(expense => expense.month === formattedMonth);
+    // Log processed expenses before filtering for debugging
+    console.log("Processed Expenses:", processedExpenses);
+
+    // Filter expenses to include only those for the current month (based on billing cycle and installment plan)
+    const filteredExpenses = processedExpenses.filter(expense => {
+        console.log(`Filtering for current month: ${formattedMonth}, Expense Month: ${expense.month}`);
+        return expense.month === formattedMonth;
+    });
+
+    // Log filtered expenses for the current month for debugging
+    console.log("Filtered Expenses for current month:", filteredExpenses);
+
+    // Reduce filtered expenses to aggregate amounts by credit card
     const chartData = filteredExpenses.reduce((acc, expense) => {
         const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`.toLowerCase(); // Ensure consistent formatting
         const categoryIndex = acc.labels.indexOf(label);
@@ -229,7 +240,7 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
             label: 'Credit Card Expenses',
             data: chartData.data,
             backgroundColor: chartData.labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
-            borderColor: ['#4b4b4b']
+            borderColor: ['#4b4b4b'],
         }]
     };
 };

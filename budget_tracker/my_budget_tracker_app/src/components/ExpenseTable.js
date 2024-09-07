@@ -15,7 +15,6 @@ const ExpenseTable = ({
   creditCards,
   isDeleting
 }) => {
-  console.log('Rendering ExpenseTable with expenses:', expenses); // Add this log to inspect the data
 
   return (
     <Table className="table">

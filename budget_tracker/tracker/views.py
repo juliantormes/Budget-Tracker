@@ -305,10 +305,16 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         start_of_month = make_aware(datetime(int(year), int(month), 1))
         end_of_month = start_of_month + relativedelta(months=1) - relativedelta(days=1)
 
+        # Include expenses that either occur within the current month or span multiple months
         return Expense.objects.filter(
             user=user,
             credit_card__isnull=False,
-            date__range=[start_of_month, end_of_month]
+        ).filter(
+            Q(date__lte=end_of_month) & (
+                Q(installments=1) |  # Include expenses with only one installment
+                Q(end_date__gte=start_of_month) |  # Recurring expenses extending into the current month
+                Q(installments__gt=1)  # Expenses with multiple installments
+            )
         )
 
     def list(self, request, *args, **kwargs):

@@ -116,7 +116,6 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
 
 export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-    
     const nonRecurringExpenses = expenses.filter(expense => {
         const expenseDate = new Date(expense.date);
         const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
@@ -163,7 +162,6 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
 export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const processedExpenses = [];
-
     expenses.forEach(expense => {
         const expenseDate = new Date(expense.date);
         const closingDay = expense.credit_card.close_card_day;
@@ -208,16 +206,13 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     });
 
     // Log processed expenses before filtering for debugging
-    console.log("Processed Expenses:", processedExpenses);
 
     // Filter expenses to include only those for the current month (based on billing cycle and installment plan)
     const filteredExpenses = processedExpenses.filter(expense => {
-        console.log(`Filtering for current month: ${formattedMonth}, Expense Month: ${expense.month}`);
         return expense.month === formattedMonth;
     });
 
     // Log filtered expenses for the current month for debugging
-    console.log("Filtered Expenses for current month:", filteredExpenses);
 
     // Reduce filtered expenses to aggregate amounts by credit card
     const chartData = filteredExpenses.reduce((acc, expense) => {

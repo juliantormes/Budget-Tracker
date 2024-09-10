@@ -58,12 +58,20 @@ const AddExpenses = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Frontend validation for recurring expenses with more than 1 installment
+    if (formData.is_recurring && formData.installments > 1) {
+      setMessage('Recurring expenses cannot have more than 1 installment.');
+      setSeverity('error');
+      return;
+    }
+
     const submissionData = {
       ...formData,
       installments: formData.pay_with_credit_card ? formData.installments : 1,
       surcharge: formData.pay_with_credit_card ? formData.surcharge : 0,
     };
-    console.log('Form Data:', submissionData); // Log the form data being sent
+
     try {
       const response = await axiosInstance.post('/api/expenses/', submissionData);
       if (response.status === 201) {
@@ -84,8 +92,23 @@ const AddExpenses = () => {
         throw new Error('Failed to add expense');
       }
     } catch (error) {
-      console.error('Error:', error.response ? error.response.data : error.message);
-      setMessage(error.response ? error.response.data.detail || 'Error adding expense' : 'Error adding expense');
+      // Display backend validation errors or other errors
+      if (error.response && error.response.data) {
+        // Extract and display specific validation errors from the backend
+        const errorData = error.response.data;
+        let errorMsg = 'Error adding expense: ';
+        if (typeof errorData === 'string') {
+          errorMsg += errorData;
+        } else if (typeof errorData === 'object') {
+          // Parse field-specific error messages
+          errorMsg += Object.entries(errorData)
+            .map(([field, error]) => `${field}: ${error.join(', ')}`)
+            .join(' | ');
+        }
+        setMessage(errorMsg);
+      } else {
+        setMessage('Error adding expense.');
+      }
       setSeverity('error');
     }
   };

@@ -152,42 +152,32 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 month = int(month)
                 start_date = datetime(year, month, 1)
                 end_date = start_date + relativedelta(months=1, days=-1)
-
-                # Convert start_date and end_date to date for comparison if necessary
                 start_date = start_date.date()
                 end_date = end_date.date()
 
-                # Filter for transactions of the specific month
                 monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date)
-
-                # Handle recurring transactions
                 recurring_transactions = queryset.filter(is_recurring=True, date__lte=end_date)
                 recurring_expenses = []
 
                 for expense in recurring_transactions:
-                    # Find if there's a change log for the specific month
                     change_log = expense.change_logs.filter(
-                        effective_date__year=year, 
+                        effective_date__year=year,
                         effective_date__month=month
                     ).first()
 
-                    # If there's a change log, use the new amount; otherwise, use the original amount
                     effective_amount = change_log.new_amount if change_log else expense.amount
 
-                    # Clone the transaction with the new date and effective amount
                     recurring_expense = Expense(
-                        id=expense.id,  # Keep the original ID or give a new unique ID if cloning
+                        id=expense.id,
                         user=expense.user,
                         category=expense.category,
                         amount=effective_amount,
                         description=expense.description,
-                        date=start_date,  # Use the first day of the month as the date
+                        date=start_date,
                         is_recurring=True,
-                        # ... copy any other relevant fields
                     )
                     recurring_expenses.append(recurring_expense)
 
-                # Combine both regular monthly transactions and the calculated recurring transactions
                 queryset = list(monthly_transactions) + recurring_expenses
 
             except ValueError:
@@ -196,6 +186,13 @@ class ExpenseViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
+        # Check for recurring expenses with more than one installment
+        is_recurring = serializer.validated_data.get('is_recurring', False)
+        installments = serializer.validated_data.get('installments', 1)
+
+        if is_recurring and installments > 1:
+            raise ValidationError({'installments': 'Recurring expenses cannot have more than 1 installment.'})
+
         serializer.save(user=self.request.user)
 
 class IncomeViewSet(viewsets.ModelViewSet):

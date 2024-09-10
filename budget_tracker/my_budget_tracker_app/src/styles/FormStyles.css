@@ -7,6 +7,7 @@
   width: 100%;
   align-items: center;
   margin-top: 20px;
+  position: relative;  /* Make sure the alert can position itself above */
 }
 
 
@@ -154,3 +155,42 @@
   transform: translate(0, -28px) scale(0.75); /* Move label slightly up when focused or filled */
   color: #ffffff !important;
 }
+.error-message {
+  color: #FF4136; /* Red color for errors */
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 14px; /* You can adjust the size */
+  padding: 5px;
+}
+/* Customizing the alert */
+.custom-alert {
+  height: 60px; /* Fixed height for the alert */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: -40px; /* Move the alert above the title */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10; /* Keep it above the form */
+  width: 100%;
+  padding: 0 20px;
+}
+/* Title styling */
+.custom-alert .MuiAlertTitle-root {
+  font-size: 18px;
+  font-weight: bold;
+  color: #FF4136;
+}
+
+/* Error message text */
+.error-message {
+  color: #FF4136; /* Red color for errors */
+  margin-bottom: 10px;
+  text-align: center;
+  font-weight: 500;
+  font-size: 14px;
+  padding: 5px;
+}
+

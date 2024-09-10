@@ -119,18 +119,25 @@ const AddExpenses = () => {
 
   return (
     <Layout logout={logout}>
-      <Container className="container-top">
-        <Typography variant="h4" gutterBottom>Add Expenses</Typography>
-        {message && <AlertMessage message={message} severity={severity} />}
-        <ExpenseForm
-          formData={formData}
-          categories={categories}
-          creditCards={creditCards}
-          handleChange={handleChange}
-          handleSubmit={handleSubmit}
-          errors={errors}
-        />
-      </Container>
+      <div className="form-container">
+        {/* Custom Alert */}
+        {message && <AlertMessage message={message} severity={severity} className="custom-alert" />}
+
+        <Container className="container-top">
+          {/* Title "Add Expenses" */}
+          <Typography variant="h4" gutterBottom>Add Expenses</Typography>
+
+          {/* The rest of the form */}
+          <ExpenseForm
+            formData={formData}
+            categories={categories}
+            creditCards={creditCards}
+            handleChange={handleChange}
+            handleSubmit={handleSubmit}
+            errors={errors}
+          />
+        </Container>
+      </div>
     </Layout>
   );
 };

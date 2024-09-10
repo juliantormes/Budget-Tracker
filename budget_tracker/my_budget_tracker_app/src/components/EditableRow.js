@@ -17,7 +17,7 @@ const EditableRow = ({
   onDelete,
   onUpdateRecurring,
   categories = [],
-  type,
+  type,  // expense or income
   creditCards = [],
   isDeleting,
 }) => {
@@ -31,7 +31,6 @@ const EditableRow = ({
     }
   }, [isEditing, item]);
 
-  // Generic input change handler
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -39,9 +38,6 @@ const EditableRow = ({
       [name]: type === 'checkbox' ? checked : value,
     }));
   };
-
-  // Strip decimals for display
-  const stripDecimals = (value) => (parseFloat(value) === parseInt(value, 10) ? parseInt(value, 10) : value);
 
   const handleSave = () => onSave(formData);
 
@@ -59,40 +55,34 @@ const EditableRow = ({
     setConfirmActionOpen(true);
   };
 
-  // Common rendering logic for inputs and display fields
-  const renderField = (field, isInput, inputProps = {}, displayValue) => {
-    if (isEditing && isInput) {
-      return (
-        <TextField
-          variant="outlined"
-          size="small"
-          fullWidth
-          value={formData[field] || ''}
-          name={field}
-          onChange={handleInputChange}
-          {...inputProps}
-          style={{ height: '40px', backgroundColor: 'transparent' }}
-        />
-      );
-    }
-    return displayValue || 'N/A';
-  };
-
   const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
+
+  // Disable amount field if the item is recurring
+  const isRecurring = formData.is_recurring;
+
+  // Common styles for inputs
+  const commonInputStyle = {
+    height: '36px',
+    padding: '0 8px',
+    boxSizing: 'border-box',
+    display: 'flex',
+    alignItems: 'center',
+  };
 
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
-        <TableCell style={{ padding: '0 16px', width: '12%' }}>
+        {/* Category Cell */}
+        <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
           {isEditing ? (
-            <FormControl fullWidth>
+            <FormControl fullWidth sx={commonInputStyle}>
               <Select
                 name="category"
                 value={formData.category || ''}
                 onChange={handleInputChange}
                 displayEmpty
                 size="small"
-                style={{ backgroundColor: 'transparent' }}
+                sx={{ height: '36px' }}  // Match height with other inputs
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -106,48 +96,101 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        <TableCell style={{ padding: '0 16px', width: '12%' }}>
-          {renderField('date', true, { type: 'date', InputLabelProps: { shrink: true } }, dayjs(formData.date).format('YYYY-MM-DD'))}
-        </TableCell>
-
-        <TableCell style={{ padding: '0 16px', width: '10%' }}>
-          {renderField('amount', true, { type: 'number' }, stripDecimals(formData.amount))}
-        </TableCell>
-
-        <TableCell style={{ padding: '0 16px', width: '14%' }}>
-          {renderField('description', true, {}, formData.description || 'N/A')}
-        </TableCell>
-
-        <TableCell style={{ padding: '0 16px', width: '8%' }}>
+        {/* Date Cell */}
+        <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
           {isEditing ? (
-            <Checkbox name="is_recurring" checked={formData.is_recurring || false} onChange={handleInputChange} />
+            <TextField
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={dayjs(formData.date).format('YYYY-MM-DD')}
+              name="date"
+              type="date"
+              onChange={handleInputChange}
+              sx={commonInputStyle}
+            />
+          ) : (
+            dayjs(formData.date).format('YYYY-MM-DD')
+          )}
+        </TableCell>
+
+        {/* Amount Cell */}
+        <TableCell style={{ padding: '4px 8px', width: '10%' }}>  {/* Reduce padding here */}
+          {isEditing ? (
+            <TextField
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={formData.amount || ''}
+              name="amount"
+              onChange={handleInputChange}
+              disabled={isRecurring}  // Disable amount if it's a recurring item
+              type="number"
+              sx={commonInputStyle}
+            />
+          ) : (
+            formData.amount || 'N/A'
+          )}
+        </TableCell>
+
+        {/* Description Cell */}
+        <TableCell style={{ padding: '4px 8px', width: '14%' }}>  {/* Reduce padding here */}
+          {isEditing ? (
+            <TextField
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={formData.description || ''}
+              name="description"
+              onChange={handleInputChange}
+              sx={commonInputStyle}
+            />
+          ) : (
+            formData.description || 'N/A'
+          )}
+        </TableCell>
+
+        {/* Recurring Checkbox Cell */}
+        <TableCell style={{ padding: '4px 8px', width: '8%' }}>  {/* Reduce padding here */}
+          {isEditing ? (
+            <Checkbox
+              name="is_recurring"
+              checked={formData.is_recurring || false}
+              onChange={handleInputChange}
+              sx={{ padding: '0', height: '36px', display: 'flex', alignItems: 'center' }}
+            />
           ) : (
             formData.is_recurring ? 'Yes' : 'No'
           )}
         </TableCell>
 
+        {/* Only for expenses: Paid with Credit Card */}
         {type === 'expense' && (
           <>
-            <TableCell style={{ padding: '0 16px', width: '12%' }}>
+            <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
               {isEditing ? (
                 <Checkbox
                   name="pay_with_credit_card"
                   checked={formData.pay_with_credit_card || false}
                   onChange={handleInputChange}
+                  sx={{ padding: '0', height: '36px', display: 'flex', alignItems: 'center' }}
                 />
               ) : (
                 formData.pay_with_credit_card ? 'Yes' : 'No'
               )}
             </TableCell>
 
-            <TableCell style={{ padding: '0 16px', width: '12%' }}>
+            {/* Credit Card Field */}
+            <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
               {isEditing ? (
-                <FormControl fullWidth>
+                <FormControl fullWidth sx={commonInputStyle}>
                   <Select
                     name="credit_card_id"
                     value={formData.credit_card_id || ''}
                     onChange={handleInputChange}
                     displayEmpty
+                    size="small"
+                    sx={{ height: '36px' }}
                     disabled={!formData.pay_with_credit_card}
                   >
                     {creditCards.map((card) => (
@@ -158,23 +201,52 @@ const EditableRow = ({
                   </Select>
                 </FormControl>
               ) : (
-                creditCards.find((card) => card.id === formData.credit_card_id)
-                  ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}`
-                  : 'N/A'
+                currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'
               )}
             </TableCell>
 
-            <TableCell style={{ padding: '0 16px', width: '8%' }}>
-              {renderField('installments', true, { type: 'number', disabled: !formData.pay_with_credit_card }, stripDecimals(formData.installments))}
+            {/* Installments Cell */}
+            <TableCell style={{ padding: '4px 8px', width: '8%' }}>  {/* Reduce padding here */}
+              {isEditing ? (
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  value={formData.installments || ''}
+                  name="installments"
+                  onChange={handleInputChange}
+                  disabled={!formData.pay_with_credit_card}
+                  type="number"
+                  sx={commonInputStyle}
+                />
+              ) : (
+                formData.installments || 'N/A'
+              )}
             </TableCell>
 
-            <TableCell style={{ padding: '0 16px', width: '10%' }}>
-              {renderField('surcharge', true, { type: 'number', disabled: !formData.pay_with_credit_card }, stripDecimals(formData.surcharge))}
+            {/* Surcharge Cell */}
+            <TableCell style={{ padding: '4px 8px', width: '10%' }}>  {/* Reduce padding here */}
+              {isEditing ? (
+                <TextField
+                  variant="outlined"
+                  size="small"
+                  fullWidth
+                  value={formData.surcharge || ''}
+                  name="surcharge"
+                  onChange={handleInputChange}
+                  disabled={!formData.pay_with_credit_card}
+                  type="number"
+                  sx={commonInputStyle}
+                />
+              ) : (
+                formData.surcharge || 'N/A'
+              )}
             </TableCell>
           </>
         )}
 
-        <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '0 16px', width: '16%' }}>
+        {/* Actions Cell */}
+        <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '4px 8px', width: '16%' }}>  {/* Reduce padding here */}
           {isEditing ? (
             <>
               <IconButton onClick={() => openConfirmDialog('edit')}>

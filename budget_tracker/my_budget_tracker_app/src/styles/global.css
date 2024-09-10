@@ -258,3 +258,20 @@ input:-webkit-autofill:focus {
       transform: translateY(-20px) scale(0.9); /* Move the label further up */
       color: #ffffff !important;
   }
+  .no-border {
+    border: none !important;  /* Forcefully remove border */
+  }
+  
+  .MuiOutlinedInput-root {
+    fieldset {
+      border: none !important;
+    }
+  }
+  .MuiSelect-root {
+    height: 40px;  /* Set the height to match TextFields */
+    line-height: 40px;  /* Set the line height to ensure text is vertically aligned */
+  }
+  
+  .MuiInputBase-input {
+    padding: 8px;  /* Adjust the padding to match the other inputs */
+  }

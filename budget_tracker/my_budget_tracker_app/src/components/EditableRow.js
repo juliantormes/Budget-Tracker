@@ -15,7 +15,7 @@ const EditableRow = ({
   onCancel,
   onSave,
   onDelete,
-  onUpdateRecurring, // Add a prop to handle the update recurring action
+  onUpdateRecurring,
   categories = [],
   type,
   creditCards = [],
@@ -31,91 +31,68 @@ const EditableRow = ({
     }
   }, [isEditing, item]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  // Generic input change handler
+  const handleInputChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
-  const handleCategoryChange = (event) => {
-    setFormData({ ...formData, category: event.target.value });
-  };
+  // Strip decimals for display
+  const stripDecimals = (value) => (parseFloat(value) === parseInt(value, 10) ? parseInt(value, 10) : value);
 
-  const handleCheckboxChange = (e) => {
-    const { name, checked } = e.target;
-    setFormData({ ...formData, [name]: checked });
-  };
+  const handleSave = () => onSave(formData);
 
-  const handlePayWithCreditCardChange = (e) => {
-    const isChecked = e.target.checked;
-    if (!isChecked) {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        pay_with_credit_card: false,
-        credit_card_id: '',
-        installments: 1,
-        surcharge: 0.00,
-      }));
-    } else {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        pay_with_credit_card: true,
-      }));
-    }
-  };
-
-  const handleSave = async () => {
-    onSave(formData); // Trigger save using the onSave prop
-  };
-
-  const handleActionConfirm = () => {
-    console.log('Action confirmed:', actionType); // Log the action type
+  const handleConfirmAction = () => {
     if (actionType === 'delete') {
-        console.log('Deleting item:', item.id);
-        onDelete(item.id); // Trigger deletion using the onDelete prop
+      onDelete(item.id);
     } else if (actionType === 'edit') {
-        console.log('Saving item:', formData);
-        handleSave(); // Trigger save
+      handleSave();
     }
-    setConfirmActionOpen(false); // Close the confirmation dialog
-};
+    setConfirmActionOpen(false);
+  };
+
   const openConfirmDialog = (type) => {
     setActionType(type);
     setConfirmActionOpen(true);
   };
 
-  const currentCategory = categories.find((category) => category.id === formData.category)?.name || 'N/A';
-  const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
-
-  // Function to strip .00 decimals
-  const stripDecimals = (value) => {
-    if (parseFloat(value) === parseInt(value, 10)) {
-      return parseInt(value, 10);
+  // Common rendering logic for inputs and display fields
+  const renderField = (field, isInput, inputProps = {}, displayValue) => {
+    if (isEditing && isInput) {
+      return (
+        <TextField
+          variant="outlined"
+          size="small"
+          fullWidth
+          value={formData[field] || ''}
+          name={field}
+          onChange={handleInputChange}
+          {...inputProps}
+          style={{ height: '40px', backgroundColor: 'transparent' }}
+        />
+      );
     }
-    return value;
+    return displayValue || 'N/A';
   };
 
-  // Common styles for consistent height across all elements
-  const commonHeightStyle = {
-    height: '40px', // Consistent height for all elements
-    lineHeight: '40px',
-    display: 'flex',
-    alignItems: 'center',
-  };
+  const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
 
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
-        <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
+        <TableCell style={{ padding: '0 16px', width: '12%' }}>
           {isEditing ? (
             <FormControl fullWidth>
               <Select
                 name="category"
                 value={formData.category || ''}
-                onChange={handleCategoryChange}
+                onChange={handleInputChange}
                 displayEmpty
-                variant="outlined"
                 size="small"
-                style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
+                style={{ backgroundColor: 'transparent' }}
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -125,103 +102,53 @@ const EditableRow = ({
               </Select>
             </FormControl>
           ) : (
-            currentCategory
+            categories.find((category) => category.id === formData.category)?.name || 'N/A'
           )}
         </TableCell>
-        <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
-          {isEditing ? (
-            <TextField
-              name="date"
-              type="date"
-              value={formData.date ? dayjs(formData.date).format('YYYY-MM-DD') : ''}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              fullWidth
-              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
-              InputProps={{
-                style: { ...commonHeightStyle },
-              }}
-            />
-          ) : (
-            dayjs(formData.date).format('YYYY-MM-DD')
-          )}
+
+        <TableCell style={{ padding: '0 16px', width: '12%' }}>
+          {renderField('date', true, { type: 'date', InputLabelProps: { shrink: true } }, dayjs(formData.date).format('YYYY-MM-DD'))}
         </TableCell>
-        <TableCell className="table-cell" style={{ padding: '0 16px', width: '10%' }}>
-          {isEditing ? (
-            <TextField
-              name="amount"
-              type="number"
-              value={formData.amount || ''}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              fullWidth
-              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
-              InputProps={{
-                style: { ...commonHeightStyle },
-              }}
-            />
-          ) : (
-            stripDecimals(formData.amount) 
-          )}
+
+        <TableCell style={{ padding: '0 16px', width: '10%' }}>
+          {renderField('amount', true, { type: 'number' }, stripDecimals(formData.amount))}
         </TableCell>
-        <TableCell className="table-cell" style={{ padding: '0 16px', width: '14%' }}>
-          {isEditing ? (
-            <TextField
-              name="description"
-              value={formData.description || ''}
-              onChange={handleChange}
-              variant="outlined"
-              size="small"
-              fullWidth
-              style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
-              InputProps={{
-                style: { ...commonHeightStyle },
-              }}
-            />
-          ) : (
-            formData.description || 'N/A'
-          )}
+
+        <TableCell style={{ padding: '0 16px', width: '14%' }}>
+          {renderField('description', true, {}, formData.description || 'N/A')}
         </TableCell>
-        <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
+
+        <TableCell style={{ padding: '0 16px', width: '8%' }}>
           {isEditing ? (
-            <Checkbox
-              name="is_recurring"
-              checked={formData.is_recurring || false}
-              onChange={handleCheckboxChange}
-              style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
-            />
+            <Checkbox name="is_recurring" checked={formData.is_recurring || false} onChange={handleInputChange} />
           ) : (
             formData.is_recurring ? 'Yes' : 'No'
           )}
         </TableCell>
+
         {type === 'expense' && (
           <>
-            <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
+            <TableCell style={{ padding: '0 16px', width: '12%' }}>
               {isEditing ? (
                 <Checkbox
                   name="pay_with_credit_card"
                   checked={formData.pay_with_credit_card || false}
-                  onChange={handlePayWithCreditCardChange}
-                  style={{ ...commonHeightStyle, padding: '0', height: '100%' }}
+                  onChange={handleInputChange}
                 />
               ) : (
                 formData.pay_with_credit_card ? 'Yes' : 'No'
               )}
             </TableCell>
-            <TableCell className="table-cell" style={{ padding: '0 16px', width: '12%' }}>
+
+            <TableCell style={{ padding: '0 16px', width: '12%' }}>
               {isEditing ? (
                 <FormControl fullWidth>
                   <Select
                     name="credit_card_id"
                     value={formData.credit_card_id || ''}
-                    onChange={handleChange}
+                    onChange={handleInputChange}
                     displayEmpty
                     disabled={!formData.pay_with_credit_card}
-                    variant="outlined"
-                    size="small"
-                    style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
                   >
                     {creditCards.map((card) => (
                       <MenuItem key={card.id} value={card.id}>
@@ -231,77 +158,42 @@ const EditableRow = ({
                   </Select>
                 </FormControl>
               ) : (
-                currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'
+                creditCards.find((card) => card.id === formData.credit_card_id)
+                  ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}`
+                  : 'N/A'
               )}
             </TableCell>
-            <TableCell className="table-cell" style={{ padding: '0 16px', width: '8%' }}>
-              {isEditing ? (
-                <TextField
-                  name="installments"
-                  type="number"
-                  value={formData.installments || ''}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
-                  InputProps={{
-                    style: { ...commonHeightStyle },
-                  }}
-                  disabled={!formData.pay_with_credit_card}
-                />
-              ) : (
-                stripDecimals(formData.installments)  // Use the stripDecimals function
-              )}
+
+            <TableCell style={{ padding: '0 16px', width: '8%' }}>
+              {renderField('installments', true, { type: 'number', disabled: !formData.pay_with_credit_card }, stripDecimals(formData.installments))}
             </TableCell>
-            <TableCell className="table-cell" style={{ padding: '0 16px', width: '10%' }}>
-              {isEditing ? (
-                <TextField
-                  name="surcharge"
-                  type="number"
-                  value={formData.surcharge || ''}
-                  onChange={handleChange}
-                  variant="outlined"
-                  size="small"
-                  fullWidth
-                  style={{ ...commonHeightStyle, backgroundColor: 'transparent', border: 'none' }}
-                  InputProps={{
-                    style: { ...commonHeightStyle },
-                  }}
-                  disabled={!formData.pay_with_credit_card}
-                />
-              ) : (
-                stripDecimals(formData.surcharge)  // Use the stripDecimals function
-              )}
+
+            <TableCell style={{ padding: '0 16px', width: '10%' }}>
+              {renderField('surcharge', true, { type: 'number', disabled: !formData.pay_with_credit_card }, stripDecimals(formData.surcharge))}
             </TableCell>
           </>
         )}
-        <TableCell
-          className="table-cell"
-          style={{ ...commonHeightStyle, display: 'flex', flexDirection: 'row', justifyContent: 'flex-start', alignItems: 'center', padding: '0 16px', width: '16%' }}
-        >
+
+        <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '0 16px', width: '16%' }}>
           {isEditing ? (
             <>
-              <IconButton onClick={() => openConfirmDialog('edit')} style={{ padding: '8px' }}>
+              <IconButton onClick={() => openConfirmDialog('edit')}>
                 <SaveIcon />
               </IconButton>
-              <IconButton onClick={onCancel} style={{ padding: '8px' }}>
+              <IconButton onClick={onCancel}>
                 <CancelIcon />
               </IconButton>
             </>
           ) : (
             <>
-              <IconButton onClick={() => onEdit(item)} style={{ padding: '8px' }}>
+              <IconButton onClick={() => onEdit(item)}>
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting} style={{ padding: '8px' }}>
+              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting}>
                 <DeleteIcon />
               </IconButton>
               {formData.is_recurring && (
-                <IconButton
-                  onClick={() => onUpdateRecurring(item.id)} // Trigger the update recurring action
-                  style={{ padding: '8px', marginLeft: '8px' }}
-                >
+                <IconButton onClick={() => onUpdateRecurring(item.id)} style={{ marginLeft: '8px' }}>
                   <MonetizationOnIcon />
                 </IconButton>
               )}
@@ -309,10 +201,11 @@ const EditableRow = ({
           )}
         </TableCell>
       </TableRow>
+
       <ConfirmAction
         open={confirmActionOpen}
         onClose={() => setConfirmActionOpen(false)}
-        onConfirm={handleActionConfirm}
+        onConfirm={handleConfirmAction}
         title={actionType === 'delete' ? 'Confirm Deletion' : 'Confirm Edit'}
         message={actionType === 'delete' ? `Are you sure you want to delete this ${type}?` : `Are you sure you want to save changes to this ${type}?`}
       />

@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from decimal import Decimal
-from datetime import date
+from datetime import date, timezone
 from datetime import datetime
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,7 +41,24 @@ class IncomeCategorySerializer(serializers.ModelSerializer):
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        exclude = ['user']
+        fields = ['last_four_digits', 'brand', 'expire_date', 'credit_limit', 'payment_day', 'close_card_day']
+
+    def validate_last_four_digits(self, value):
+        if len(value) != 4 or not value.isdigit():
+            raise serializers.ValidationError("Last four digits must be exactly 4 numeric digits.")
+        return value
+
+    def validate_expire_date(self, value):
+        if value < timezone.now().date():
+            raise serializers.ValidationError("Expiration date cannot be in the past.")
+        return value
+
+    def validate(self, data):
+        if data['close_card_day'] > data['payment_day']:
+            raise serializers.ValidationError({
+                'payment_day': "Payment day must be after the card closing day."
+            })
+        return data
 
 class IncomeRecurringChangeLogSerializer(serializers.ModelSerializer):
     class Meta:

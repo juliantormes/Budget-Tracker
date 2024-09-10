@@ -48,9 +48,25 @@ const AddCreditCard = () => {
       }
     } catch (error) {
       if (error.response) {
-        setErrors(error.response.data);
+        // Extract the detailed errors and set them
+        const errorData = error.response.data;
+        let formattedErrors = {};
+
+        // If the errors are for specific fields, show them
+        if (typeof errorData === 'object') {
+          formattedErrors = Object.entries(errorData).reduce((acc, [field, messages]) => {
+            acc[field] = messages.join(', ');
+            return acc;
+          }, {});
+        } else {
+          // General error message if available
+          formattedErrors.general = 'An error occurred while adding the credit card.';
+        }
+
+        setErrors(formattedErrors);
       } else {
         console.error('Error message:', error.message);
+        setErrors({ general: 'An unexpected error occurred. Please try again.' });
       }
     }
   };
@@ -59,7 +75,8 @@ const AddCreditCard = () => {
     <Layout logout={logout}>
       <Container maxWidth="sm" className="container-top">
         <Typography variant="h4" gutterBottom>Add Credit Card</Typography>
-        <AlertMessage message={successMessage} severity="success" />
+        {successMessage && <AlertMessage message={successMessage} severity="success" />}
+        {errors.general && <AlertMessage message={errors.general} severity="error" />}
         <CreditCardForm
           formData={formData}
           handleChange={handleChange}

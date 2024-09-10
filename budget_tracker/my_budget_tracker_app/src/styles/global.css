@@ -17,6 +17,13 @@ body {
     margin-top: 50px;
     text-align: center;
 }
+/* Targeting the shared class */
+.MuiTypography-h4 {
+    text-align: center;
+    margin-top: 20px; /* Optional, adjust as needed */
+    width: 100%; /* Ensure it takes up the full width of its container */
+}
+
 
 /* Forms */
 form {

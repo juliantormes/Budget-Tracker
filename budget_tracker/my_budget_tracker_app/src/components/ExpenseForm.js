@@ -9,7 +9,7 @@ const ExpenseForm = ({
   handleChange,
   handleSubmit,
 }) => (
-  <form onSubmit={handleSubmit} className="form-container">
+  <form onSubmit={handleSubmit} className="form-container" autoComplete="off">
     <TextField
       select
       label="Category"
@@ -20,6 +20,7 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      autoComplete="off"
     >
       {categories.map((category) => (
         <MenuItem key={category.id} value={category.id}>
@@ -40,6 +41,7 @@ const ExpenseForm = ({
       InputLabelProps={{
         shrink: true,
       }}
+      autoComplete="off"
     />
     <TextField
       label="Amount"
@@ -51,6 +53,7 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      autoComplete="off"
     />
     <TextField
       label="Description"
@@ -60,6 +63,7 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      autoComplete="off"
     />
     <FormControlLabel
       control={
@@ -95,6 +99,7 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          autoComplete="off"
         >
           {creditCards.map((card) => (
             <MenuItem key={card.id} value={card.id}>
@@ -112,6 +117,7 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          autoComplete="off"
         />
         <TextField
           label="Surcharge (%)"
@@ -123,6 +129,7 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          autoComplete="off"
         />
       </>
     )}

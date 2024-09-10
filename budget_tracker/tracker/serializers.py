@@ -122,6 +122,17 @@ class IncomeSerializer(serializers.ModelSerializer):
         
         return obj.get_effective_amount(check_date)
 
+    # Custom validation for amount, date, or other fields if needed
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be a positive number.")
+        return value
+
+    def validate_date(self, value):
+        if value > date.today():
+            raise serializers.ValidationError("Date cannot be in the future.")
+        return value
+
 
 class ExpenseSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)

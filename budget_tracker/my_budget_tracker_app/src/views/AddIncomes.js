@@ -13,11 +13,13 @@ const AddIncomes = () => {
     category: '',
     date: '',
     amount: '',
-    description: '',  // Ensure this matches the initial state
+    description: '',
     is_recurring: false,
   });
   const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState('');
+  const [severity, setSeverity] = useState(''); // To handle severity (success or error)
+  const [errors, setErrors] = useState({}); // To handle field-specific errors
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -39,17 +41,31 @@ const AddIncomes = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({}); // Clear previous errors
     try {
       const response = await axiosInstance.post('/api/incomes/', formData);
       if (response.status === 201) {
         setMessage('Income added successfully!');
+        setSeverity('success');
         setFormData({ category: '', date: '', amount: '', description: '', is_recurring: false });
       } else {
         throw new Error('Failed to add income');
       }
     } catch (error) {
-      console.error(error);
-      setMessage('Error adding income');
+      if (error.response && error.response.data) {
+        // Capture field-specific errors
+        const errorData = error.response.data;
+        if (typeof errorData === 'object') {
+          setErrors(errorData); // Set errors for specific fields
+        } else {
+          setMessage('Error adding income'); // General error
+        }
+        setSeverity('error');
+      } else {
+        console.error(error);
+        setMessage('Error adding income');
+        setSeverity('error');
+      }
     }
   };
 
@@ -57,12 +73,13 @@ const AddIncomes = () => {
     <Layout logout={logout}>
       <Container className="container-top">
         <Typography variant="h4" gutterBottom>Add Incomes</Typography>
-        <AlertMessage message={message} severity={message === 'Income added successfully!' ? 'success' : 'error'} />
+        <AlertMessage message={message} severity={severity} />
         <IncomeForm
           formData={formData}
           categories={categories}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
+          errors={errors} // Pass down errors to form
         />
       </Container>
     </Layout>

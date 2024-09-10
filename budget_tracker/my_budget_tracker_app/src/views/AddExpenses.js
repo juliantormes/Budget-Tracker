@@ -94,13 +94,11 @@ const AddExpenses = () => {
     } catch (error) {
       // Display backend validation errors or other errors
       if (error.response && error.response.data) {
-        // Extract and display specific validation errors from the backend
         const errorData = error.response.data;
         let errorMsg = 'Error adding expense: ';
         if (typeof errorData === 'string') {
           errorMsg += errorData;
         } else if (typeof errorData === 'object') {
-          // Parse field-specific error messages
           errorMsg += Object.entries(errorData)
             .map(([field, error]) => `${field}: ${error.join(', ')}`)
             .join(' | ');

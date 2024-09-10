@@ -158,10 +158,10 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
     };
 };
 
-
 export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const processedExpenses = [];
+
     expenses.forEach(expense => {
         const expenseDate = new Date(expense.date);
         const closingDay = expense.credit_card.close_card_day;
@@ -172,30 +172,26 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
 
         // Adjust the start month to reflect the billing cycle based on the closing day
         if (expenseDate.getDate() <= closingDay) {
-            // Expense was made before or on the closing day: first installment appears in the next month
             startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1);
         } else {
-            // Expense was made after the closing day: first installment appears two months later
             startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1);
         }
 
-        // Now, we handle non-recurring, multi-installment expenses and account for the credit card cycle
+        // Handle multi-installment expenses
         if (expense.installments > 1) {
             for (let i = 0; i < expense.installments; i++) {
                 const installmentMonth = new Date(startMonth);
-                installmentMonth.setMonth(startMonth.getMonth() + i); // Increment by the number of installments
+                installmentMonth.setMonth(startMonth.getMonth() + i);
 
                 const formattedInstallmentMonth = `${installmentMonth.getFullYear()}-${String(installmentMonth.getMonth() + 1).padStart(2, '0')}`;
                 
-                // Push the installment for the correct months
                 processedExpenses.push({
                     ...expense,
                     month: formattedInstallmentMonth,
-                    amount: totalAmountWithSurcharge / expense.installments, // Divide by number of installments
+                    amount: totalAmountWithSurcharge / expense.installments,
                 });
             }
         } else {
-            // Handle single payment credit card expenses, which are deferred by the closing day
             const formattedSinglePaymentMonth = `${startMonth.getFullYear()}-${String(startMonth.getMonth() + 1).padStart(2, '0')}`;
             processedExpenses.push({
                 ...expense,
@@ -203,20 +199,36 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
                 amount: totalAmountWithSurcharge,
             });
         }
+
+        // Handle recurring expenses
+        if (expense.is_recurring) {
+            let currentMonth = new Date(startMonth);
+
+            // Skip the month in which the expense was originally charged to avoid duplication
+            currentMonth.setMonth(currentMonth.getMonth() + 1);  // Start from the month after the original charge
+
+            // Generate an entry for each month from the month after the charge date until the current month
+            while (currentMonth <= new Date(year, month - 1)) {
+                const formattedRecurringMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
+                
+                processedExpenses.push({
+                    ...expense,
+                    month: formattedRecurringMonth,
+                    amount: totalAmountWithSurcharge,
+                });
+
+                currentMonth.setMonth(currentMonth.getMonth() + 1); // Move to the next month
+            }
+        }
     });
 
-    // Log processed expenses before filtering for debugging
-
-    // Filter expenses to include only those for the current month (based on billing cycle and installment plan)
+    // Filter expenses to include only those for the current month
     const filteredExpenses = processedExpenses.filter(expense => {
         return expense.month === formattedMonth;
     });
 
-    // Log filtered expenses for the current month for debugging
-
-    // Reduce filtered expenses to aggregate amounts by credit card
     const chartData = filteredExpenses.reduce((acc, expense) => {
-        const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`.toLowerCase(); // Ensure consistent formatting
+        const label = `${expense.credit_card.brand} ending in ${expense.credit_card.last_four_digits}`.toLowerCase();
         const categoryIndex = acc.labels.indexOf(label);
         if (categoryIndex === -1) {
             acc.labels.push(label);
@@ -234,12 +246,11 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Credit Card Expenses',
             data: chartData.data,
-            backgroundColor: chartData.labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
+            backgroundColor: chartData.labels.map(label => colorMap[label.toLowerCase()]),
             borderColor: ['#4b4b4b'],
         }]
     };
 };
-
 
 export const pieChartOptions = {
     responsive: true,

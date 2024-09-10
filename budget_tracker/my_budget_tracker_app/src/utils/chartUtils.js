@@ -207,14 +207,28 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
             // Skip the month in which the expense was originally charged to avoid duplication
             currentMonth.setMonth(currentMonth.getMonth() + 1);  // Start from the month after the original charge
 
-            // Generate an entry for each month from the month after the charge date until the current month
+            let effectiveAmount = totalAmountWithSurcharge;
+
+            // Loop through the months and apply changes in amount from change_logs
             while (currentMonth <= new Date(year, month - 1)) {
                 const formattedRecurringMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
-                
+
+                // Check if there's a change in the amount for this month
+                const matchingChangeLog = expense.change_logs.find(log => {
+                    const changeDate = new Date(log.effective_date);
+                    return changeDate.getFullYear() === currentMonth.getFullYear() &&
+                           changeDate.getMonth() === currentMonth.getMonth();
+                });
+
+                // If there's a matching change log, update the effective amount
+                if (matchingChangeLog) {
+                    effectiveAmount = parseFloat(matchingChangeLog.new_amount) * (1 + surchargeRate);
+                }
+
                 processedExpenses.push({
                     ...expense,
                     month: formattedRecurringMonth,
-                    amount: totalAmountWithSurcharge,
+                    amount: effectiveAmount,
                 });
 
                 currentMonth.setMonth(currentMonth.getMonth() + 1); // Move to the next month

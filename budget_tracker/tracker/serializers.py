@@ -41,8 +41,9 @@ class IncomeCategorySerializer(serializers.ModelSerializer):
 class CreditCardSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreditCard
-        fields = ['last_four_digits', 'brand', 'expire_date', 'credit_limit', 'payment_day', 'close_card_day']
-
+        fields = ['id', 'last_four_digits', 'brand', 'expire_date', 'credit_limit', 'payment_day', 'close_card_day']
+    
+    # Additional validation methods stay the same
     def validate_last_four_digits(self, value):
         if len(value) != 4 or not value.isdigit():
             raise serializers.ValidationError("Last four digits must be exactly 4 numeric digits.")

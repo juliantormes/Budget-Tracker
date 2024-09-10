@@ -8,6 +8,7 @@ const ExpenseForm = ({
   creditCards,
   handleChange,
   handleSubmit,
+  errors,
 }) => (
   <form onSubmit={handleSubmit} className="form-container" autoComplete="off">
     <TextField
@@ -20,6 +21,8 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      error={!!errors.category}
+      helperText={errors.category || ''}
       autoComplete="off"
     >
       {categories.map((category) => (
@@ -41,6 +44,8 @@ const ExpenseForm = ({
       InputLabelProps={{
         shrink: true,
       }}
+      error={!!errors.date}
+      helperText={errors.date || ''}
       autoComplete="off"
     />
     <TextField
@@ -53,6 +58,8 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      error={!!errors.amount}
+      helperText={errors.amount || ''}
       autoComplete="off"
     />
     <TextField
@@ -63,6 +70,8 @@ const ExpenseForm = ({
       fullWidth
       variant="outlined"
       className="text-field"
+      error={!!errors.description}
+      helperText={errors.description || ''}
       autoComplete="off"
     />
     <FormControlLabel
@@ -99,6 +108,8 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          error={!!errors.credit_card_id}
+          helperText={errors.credit_card_id || ''}
           autoComplete="off"
         >
           {creditCards.map((card) => (
@@ -117,6 +128,8 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          error={!!errors.installments}
+          helperText={errors.installments || ''}
           autoComplete="off"
         />
         <TextField
@@ -129,6 +142,8 @@ const ExpenseForm = ({
           fullWidth
           variant="outlined"
           className="text-field"
+          error={!!errors.surcharge}
+          helperText={errors.surcharge || ''}
           autoComplete="off"
         />
       </>
@@ -145,6 +160,7 @@ ExpenseForm.propTypes = {
   creditCards: PropTypes.array.isRequired,
   handleChange: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  errors: PropTypes.object.isRequired,
 };
 
 export default ExpenseForm;

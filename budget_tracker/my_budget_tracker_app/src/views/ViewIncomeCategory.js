@@ -5,6 +5,7 @@ import {
   Typography,
   Button,
   IconButton,
+  Alert,
 } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
@@ -27,6 +28,8 @@ const ViewIncomeCategory = () => {
   const [formData, setFormData] = useState({ name: '' });
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const query = useQuery();
   const addMode = query.get('add');
 
@@ -37,6 +40,7 @@ const ViewIncomeCategory = () => {
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setErrorMessage('Failed to load categories. Please try again later.');
       }
     };
 
@@ -61,9 +65,15 @@ const ViewIncomeCategory = () => {
   const handleCancelClick = () => {
     setEditingCategoryId(null);
     setFormData({ name: '' });
+    setErrorMessage('');  // Clear any error messages
   };
 
   const handleSaveClick = async (categoryId) => {
+    if (!formData.name) {
+      setErrorMessage('Category name cannot be empty.');
+      return;
+    }
+
     try {
       const response = await axiosInstance.put(`/api/income_categories/${categoryId}/`, formData);
       if (response.status === 200) {
@@ -72,11 +82,15 @@ const ViewIncomeCategory = () => {
         );
         setCategories(updatedCategories);
         setEditingCategoryId(null);
+        setFormData({ name: '' });
+        setSuccessMessage('Category updated successfully!');
+        setErrorMessage('');
       } else {
         throw new Error('Failed to update category');
       }
     } catch (error) {
       console.error(error);
+      setErrorMessage('Failed to update category. Please try again.');
     }
   };
 
@@ -92,33 +106,44 @@ const ViewIncomeCategory = () => {
         setCategories(categories.filter((cat) => cat.id !== categoryToDelete));
         setOpenDeleteDialog(false);
         setCategoryToDelete(null);
+        setSuccessMessage('Category deleted successfully!');
+        setErrorMessage('');
       } else {
         throw new Error('Failed to delete category');
       }
     } catch (error) {
       console.error('Error deleting category:', error);
+      setErrorMessage('Failed to delete category. Please try again.');
       setOpenDeleteDialog(false);
-      setCategoryToDelete(null);
     }
   };
 
   const handleCloseDeleteDialog = () => {
     setOpenDeleteDialog(false);
     setCategoryToDelete(null);
+    setErrorMessage('');
   };
 
   const handleNewCategorySave = async () => {
+    if (!formData.name) {
+      setErrorMessage('Category name cannot be empty.');
+      return;
+    }
+
     try {
       const response = await axiosInstance.post('/api/income_categories/', formData);
       if (response.status === 201) {
         setCategories([...categories, response.data]);
         setEditingCategoryId(null);
         setFormData({ name: '' });
+        setSuccessMessage('Category added successfully!');
+        setErrorMessage('');
       } else {
         throw new Error('Failed to add category');
       }
     } catch (error) {
       console.error('Error adding category:', error);
+      setErrorMessage('Failed to add category. Please try again.');
     }
   };
 
@@ -138,6 +163,10 @@ const ViewIncomeCategory = () => {
         <Header logout={logout} />
         <Container maxWidth="sm" className="container-top">
           <Typography variant="h4" gutterBottom>View Income Categories</Typography>
+          
+          {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
+          {successMessage && <Alert severity="success">{successMessage}</Alert>}
+          
           <div className="category-list">
             {categories.map((category) => (
               <div key={category.id} className="category-item">

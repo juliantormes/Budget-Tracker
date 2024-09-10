@@ -35,6 +35,7 @@ const ViewCreditCard = () => {
     payment_day: '',
     close_card_day: '',
   });
+  const [editErrors, setEditErrors] = useState({}); // Track edit errors
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [cardToDelete, setCardToDelete] = useState(null);
   const [deleteError, setDeleteError] = useState('');
@@ -62,6 +63,7 @@ const ViewCreditCard = () => {
       payment_day: card.payment_day,
       close_card_day: card.close_card_day,
     });
+    setEditErrors({}); // Clear previous errors
   };
 
   const handleCancelClick = () => {
@@ -74,10 +76,12 @@ const ViewCreditCard = () => {
       payment_day: '',
       close_card_day: '',
     });
+    setEditErrors({});
   };
 
   const handleSaveClick = async () => {
     try {
+      setEditErrors({}); // Clear previous errors
       const response = await axiosInstance.put(`/api/credit_cards/${editingCardId}/`, formData);
       if (response.status === 200) {
         setCreditCards((prevCards) =>
@@ -91,6 +95,13 @@ const ViewCreditCard = () => {
       }
     } catch (error) {
       console.error('Error updating credit card:', error);
+      if (error.response && error.response.data) {
+        // Capture field-specific errors
+        const errorData = error.response.data;
+        setEditErrors(errorData); // Display field-specific errors
+      } else {
+        setEditErrors({ general: 'An unexpected error occurred while updating the credit card.' });
+      }
     }
   };
 
@@ -159,6 +170,7 @@ const ViewCreditCard = () => {
                       handleChange={handleChange}
                       handleSaveClick={handleSaveClick}
                       handleCancelClick={handleCancelClick}
+                      editErrors={editErrors} // Pass errors to form
                     />
                   ) : (
                     <>

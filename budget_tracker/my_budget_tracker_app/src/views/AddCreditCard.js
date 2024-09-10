@@ -52,20 +52,17 @@ const AddCreditCard = () => {
         const errorData = error.response.data;
         let formattedErrors = {};
 
-        // If the errors are for specific fields, show them
         if (typeof errorData === 'object') {
           formattedErrors = Object.entries(errorData).reduce((acc, [field, messages]) => {
             acc[field] = messages.join(', ');
             return acc;
           }, {});
         } else {
-          // General error message if available
           formattedErrors.general = 'An error occurred while adding the credit card.';
         }
 
         setErrors(formattedErrors);
       } else {
-        console.error('Error message:', error.message);
         setErrors({ general: 'An unexpected error occurred. Please try again.' });
       }
     }

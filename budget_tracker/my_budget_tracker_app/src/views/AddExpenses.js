@@ -20,8 +20,10 @@ const AddExpenses = () => {
     installments: 1,
     surcharge: 0,
   });
+
   const [categories, setCategories] = useState([]);
   const [creditCards, setCreditCards] = useState([]);
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState('');
 
@@ -58,6 +60,8 @@ const AddExpenses = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setErrors({});
+    setMessage('');
 
     // Frontend validation for recurring expenses with more than 1 installment
     if (formData.is_recurring && formData.installments > 1) {
@@ -92,22 +96,24 @@ const AddExpenses = () => {
         throw new Error('Failed to add expense');
       }
     } catch (error) {
-      // Display backend validation errors or other errors
       if (error.response && error.response.data) {
         const errorData = error.response.data;
-        let errorMsg = 'Error adding expense: ';
-        if (typeof errorData === 'string') {
-          errorMsg += errorData;
-        } else if (typeof errorData === 'object') {
-          errorMsg += Object.entries(errorData)
-            .map(([field, error]) => `${field}: ${error.join(', ')}`)
-            .join(' | ');
+        const fieldErrors = {};
+
+        // Parse and display specific field errors
+        if (typeof errorData === 'object') {
+          Object.entries(errorData).forEach(([field, messages]) => {
+            fieldErrors[field] = messages.join(', ');
+          });
         }
-        setMessage(errorMsg);
+
+        setErrors(fieldErrors);
+        setMessage('Error adding expense. Please check the fields.');
+        setSeverity('error');
       } else {
-        setMessage('Error adding expense.');
+        setMessage('An unexpected error occurred. Please try again.');
+        setSeverity('error');
       }
-      setSeverity('error');
     }
   };
 
@@ -115,13 +121,14 @@ const AddExpenses = () => {
     <Layout logout={logout}>
       <Container className="container-top">
         <Typography variant="h4" gutterBottom>Add Expenses</Typography>
-        <AlertMessage message={message} severity={severity} duration={3000} />
+        {message && <AlertMessage message={message} severity={severity} />}
         <ExpenseForm
           formData={formData}
           categories={categories}
           creditCards={creditCards}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
+          errors={errors}
         />
       </Container>
     </Layout>

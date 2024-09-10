@@ -18,8 +18,8 @@ const AddIncomes = () => {
   });
   const [categories, setCategories] = useState([]);
   const [message, setMessage] = useState('');
-  const [severity, setSeverity] = useState(''); // To handle severity (success or error)
-  const [errors, setErrors] = useState({}); // To handle field-specific errors
+  const [severity, setSeverity] = useState(''); // To handle success or error messages
+  const [errors, setErrors] = useState({}); // Field-specific errors
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -42,6 +42,8 @@ const AddIncomes = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({}); // Clear previous errors
+    setMessage(''); // Clear previous messages
+
     try {
       const response = await axiosInstance.post('/api/incomes/', formData);
       if (response.status === 201) {
@@ -53,17 +55,22 @@ const AddIncomes = () => {
       }
     } catch (error) {
       if (error.response && error.response.data) {
-        // Capture field-specific errors
         const errorData = error.response.data;
+        const fieldErrors = {};
+
+        // Handle field-specific errors
         if (typeof errorData === 'object') {
-          setErrors(errorData); // Set errors for specific fields
-        } else {
-          setMessage('Error adding income'); // General error
+          Object.entries(errorData).forEach(([field, messages]) => {
+            fieldErrors[field] = messages.join(', ');
+          });
         }
+
+        setErrors(fieldErrors); // Assign errors to the form fields
+        setMessage('Error adding income. Please check the fields.');
         setSeverity('error');
       } else {
-        console.error(error);
-        setMessage('Error adding income');
+        console.error('Error:', error);
+        setMessage('An unexpected error occurred. Please try again.');
         setSeverity('error');
       }
     }
@@ -72,14 +79,14 @@ const AddIncomes = () => {
   return (
     <Layout logout={logout}>
       <Container className="container-top">
-        <Typography variant="h4" gutterBottom>Add Incomes</Typography>
-        <AlertMessage message={message} severity={severity} />
+        <Typography variant="h4" gutterBottom>Add Income</Typography>
+        {message && <AlertMessage message={message} severity={severity} />}
         <IncomeForm
           formData={formData}
           categories={categories}
           handleChange={handleChange}
           handleSubmit={handleSubmit}
-          errors={errors} // Pass down errors to form
+          errors={errors} // Pass field-specific errors down to the form
         />
       </Container>
     </Layout>

@@ -4,7 +4,8 @@ import {
   Container,
   Typography,
   IconButton,
-  Button
+  Button,
+  Alert,
 } from '@mui/material';
 import Header from '../components/Header';
 import SidebarMenu from '../components/SidebarMenu';
@@ -25,6 +26,9 @@ const ViewExpenseCategory = () => {
   const [categories, setCategories] = useState([]);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
   const [formData, setFormData] = useState({ name: '' });
+  const [errors, setErrors] = useState({}); // To handle field-specific errors
+  const [generalError, setGeneralError] = useState(''); // General error for failed API calls
+  const [successMessage, setSuccessMessage] = useState(''); // Success feedback for user actions
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const query = useQuery();
@@ -37,6 +41,7 @@ const ViewExpenseCategory = () => {
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
+        setGeneralError('Failed to load categories.');
       }
     };
 
@@ -61,22 +66,32 @@ const ViewExpenseCategory = () => {
   const handleCancelClick = () => {
     setEditingCategoryId(null);
     setFormData({ name: '' });
+    setErrors({});
   };
 
   const handleSaveClick = async (categoryId) => {
     try {
+      setErrors({}); // Clear previous errors
+      setGeneralError('');
+      setSuccessMessage('');
       const response = await axiosInstance.put(`/api/expense_categories/${categoryId}/`, formData);
       if (response.status === 200) {
         const updatedCategories = categories.map((cat) =>
           cat.id === categoryId ? { ...cat, name: formData.name } : cat
         );
         setCategories(updatedCategories);
+        setSuccessMessage('Category updated successfully!');
         setEditingCategoryId(null);
       } else {
         throw new Error('Failed to update category');
       }
     } catch (error) {
       console.error(error);
+      if (error.response && error.response.data) {
+        setErrors(error.response.data); // Capture field-specific errors
+      } else {
+        setGeneralError('Failed to update category. Please try again.');
+      }
     }
   };
 
@@ -87,16 +102,19 @@ const ViewExpenseCategory = () => {
 
   const handleConfirmDelete = async () => {
     try {
+      setGeneralError('');
       const response = await axiosInstance.delete(`/api/expense_categories/${categoryToDelete}/`);
       if (response.status === 204) {
         setCategories(categories.filter((cat) => cat.id !== categoryToDelete));
         setOpenDeleteDialog(false);
         setCategoryToDelete(null);
+        setSuccessMessage('Category deleted successfully!');
       } else {
         throw new Error('Failed to delete category');
       }
     } catch (error) {
       console.error('Error deleting category:', error);
+      setGeneralError('Failed to delete category. Please try again.');
       setOpenDeleteDialog(false);
       setCategoryToDelete(null);
     }
@@ -109,9 +127,12 @@ const ViewExpenseCategory = () => {
 
   const handleNewCategorySave = async () => {
     try {
+      setErrors({});
+      setGeneralError('');
       const response = await axiosInstance.post('/api/expense_categories/', formData);
       if (response.status === 201) {
         setCategories([...categories, response.data]);
+        setSuccessMessage('Category added successfully!');
         setEditingCategoryId(null);
         setFormData({ name: '' });
       } else {
@@ -119,6 +140,11 @@ const ViewExpenseCategory = () => {
       }
     } catch (error) {
       console.error('Error adding category:', error);
+      if (error.response && error.response.data) {
+        setErrors(error.response.data); // Capture field-specific errors
+      } else {
+        setGeneralError('Failed to add category. Please try again.');
+      }
     }
   };
 
@@ -138,6 +164,10 @@ const ViewExpenseCategory = () => {
         <Header logout={logout} />
         <Container maxWidth="sm" className="container-top">
           <Typography variant="h4" gutterBottom>View Expense Categories</Typography>
+
+          {generalError && <Alert severity="error">{generalError}</Alert>}
+          {successMessage && <Alert severity="success">{successMessage}</Alert>}
+
           <div className="category-list">
             {categories.map((category) => (
               <div key={category.id} className="category-item">
@@ -147,6 +177,7 @@ const ViewExpenseCategory = () => {
                     handleChange={handleChange}
                     handleSave={() => handleSaveClick(category.id)}
                     handleCancel={handleCancelClick}
+                    errors={errors} // Pass errors down to the form
                   />
                 ) : (
                   <>
@@ -169,9 +200,11 @@ const ViewExpenseCategory = () => {
                 handleChange={handleChange}
                 handleSave={handleNewCategorySave}
                 handleCancel={handleCancelClick}
+                errors={errors} // Pass errors down to the form
               />
             )}
           </div>
+
           <div className="add-button-container">
             <Button
               variant="contained"
@@ -183,6 +216,7 @@ const ViewExpenseCategory = () => {
             </Button>
           </div>
         </Container>
+
         <DeleteDialog
           open={openDeleteDialog}
           handleClose={handleCloseDeleteDialog}

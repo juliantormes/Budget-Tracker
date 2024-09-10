@@ -43,7 +43,6 @@ class CreditCardSerializer(serializers.ModelSerializer):
         model = CreditCard
         fields = ['id', 'last_four_digits', 'brand', 'expire_date', 'credit_limit', 'payment_day', 'close_card_day']
     
-    # Additional validation methods stay the same
     def validate_last_four_digits(self, value):
         if len(value) != 4 or not value.isdigit():
             raise serializers.ValidationError("Last four digits must be exactly 4 numeric digits.")
@@ -123,7 +122,6 @@ class IncomeSerializer(serializers.ModelSerializer):
         
         return obj.get_effective_amount(check_date)
 
-    # Custom validation for amount, date, or other fields if needed
     def validate_amount(self, value):
         if value <= 0:
             raise serializers.ValidationError("Amount must be a positive number.")
@@ -162,10 +160,10 @@ class ExpenseSerializer(serializers.ModelSerializer):
             current_balance = credit_card.current_balance()
             total_new_expense = data['amount'] + (data['amount'] * data['surcharge'] / 100)
             if current_balance + total_new_expense > credit_card.credit_limit:
-                raise serializers.ValidationError(
-                    f"Credit limit exceeded. Current balance: {current_balance}, "
-                    f"New expense total: {total_new_expense}, Credit limit: {credit_card.credit_limit}"
-                )
+                raise serializers.ValidationError({
+                    'non_field_errors': f"Credit limit exceeded. Current balance: {current_balance}, "
+                                        f"New expense total: {total_new_expense}, Credit limit: {credit_card.credit_limit}"
+                })
 
         if not data.get('pay_with_credit_card', False):
             data['credit_card'] = None
@@ -173,6 +171,11 @@ class ExpenseSerializer(serializers.ModelSerializer):
             data['surcharge'] = Decimal('0.00')
 
         return data
+
+    def validate_amount(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("Amount must be a positive number.")
+        return value
 
     def create(self, validated_data):
         credit_card = validated_data.pop('credit_card', None)

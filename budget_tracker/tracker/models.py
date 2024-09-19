@@ -9,6 +9,10 @@ from datetime import date
 class ExpenseCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_category_per_user')
+        ]
 
     def __str__(self):
         return self.name
@@ -26,7 +30,11 @@ class CreditCard(models.Model):
     )
     brand = models.CharField(max_length=50)
     expire_date = models.DateField()
-    credit_limit = models.DecimalField(max_digits=10, decimal_places=2)
+    credit_limit = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        validators=[MinValueValidator(0.00)]  # Add this to enforce non-negative values
+    )
     payment_day = models.IntegerField(
         validators=[
             MinValueValidator(1),
@@ -46,21 +54,27 @@ class CreditCard(models.Model):
         now_date = timezone.now().date()
         total_balance = Decimal('0')
 
+        # Non-recurring expenses
         non_recurring_expenses = self.expenses.filter(is_recurring=False)
         for expense in non_recurring_expenses:
-            total_balance += expense.amount + (expense.amount * expense.surcharge / 100)
+            if expense.pay_with_credit_card:  # Ensure it's a credit card expense
+                total_balance += expense.amount + (expense.amount * expense.surcharge / 100)
 
+        # Recurring expenses (only include if they started before or on today)
         recurring_expenses = self.expenses.filter(is_recurring=True)
         for expense in recurring_expenses:
-            if expense.date <= now_date:
+            if expense.date <= now_date and expense.pay_with_credit_card:
                 total_payment = expense.amount + (expense.amount * expense.surcharge / 100)
-                total_balance += total_payment / expense.installments if expense.installments else total_payment
+                # Divide the total payment by the number of installments, only add the installment for the current period
+                installment_payment = total_payment / expense.installments
+                total_balance += installment_payment
 
         return total_balance
 
+
     def available_credit(self):
         """Calculate available credit, factoring in surcharges and installments."""
-        return round(self.credit_limit - self.current_balance(), 2)
+        return round(Decimal(self.credit_limit) - self.current_balance(), 2)
 
     def __str__(self):
         return f"{self.brand} ending in {self.last_four_digits}"
@@ -75,7 +89,7 @@ class Expense(models.Model):
     is_recurring = models.BooleanField(default=False)
     pay_with_credit_card = models.BooleanField(default=False)
     credit_card = models.ForeignKey(CreditCard, related_name='expenses', on_delete=models.CASCADE, null=True, blank=True)
-    installments = models.IntegerField(default=1)
+    installments = models.IntegerField(default=1, validators=[MinValueValidator(1)])  # Ensure at least 1 installment
     surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def save(self, *args, **kwargs):

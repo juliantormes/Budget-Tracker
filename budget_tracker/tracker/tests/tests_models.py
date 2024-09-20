@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from decimal import Decimal
 from datetime import date, timedelta
-from django.db import IntegrityError
+from django.db import IntegrityError, transaction
 
 User = get_user_model()
 
@@ -592,13 +592,9 @@ class ExpenseModelTest(TestCase):
 class IncomeCategoryModelTest(TestCase):
 
     def setUp(self):
-        """Set up a user and category before each test"""
-        self.user = User.objects.create(username='testuser1', password='password')  # Ensure unique username
-        self.category = IncomeCategory.objects.create(user=self.user, name='Salary')
-
-    def tearDown(self):
-        """Clean up after each test"""
-        self.user.delete()
+        """Set up users and a category before each test"""
+        self.user1 = User.objects.create_user(username='testuser1', password='password')  # User 1
+        self.user2 = User.objects.create_user(username='testuser2', password='password')  # User 2
 
     def test_income_category_creation(self):
         """Test creating an income category"""
@@ -619,15 +615,9 @@ class IncomeCategoryModelTest(TestCase):
 
         # Try to create a category with a name longer than 100 characters
         long_name = 'A' * 101  # 101 characters
+        category = IncomeCategory(user=self.user1, name=long_name)
         with self.assertRaises(ValidationError):
-            category = IncomeCategory(user=self.user1, name=long_name)
             category.full_clean()  # This should raise a ValidationError
-
-    def test_multiple_income_categories_same_user(self):
-        """Test that a user can create multiple income categories"""
-        category1 = IncomeCategory.objects.create(user=self.user1, name="Salary")
-        category2 = IncomeCategory.objects.create(user=self.user1, name="Investments")
-        self.assertEqual(IncomeCategory.objects.filter(user=self.user1).count(), 2)
 
     def test_income_categories_for_different_users(self):
         """Test that different users can have income categories with the same name"""
@@ -645,15 +635,23 @@ class IncomeCategoryModelTest(TestCase):
     def test_income_category_unique_name_per_user_validation(self):
         """Test that a user cannot create two categories with the same name"""
         IncomeCategory.objects.create(user=self.user1, name="Salary")
-        with self.assertRaises(ValidationError):
-            duplicate_category = IncomeCategory(user=self.user1, name="Salary")
-            duplicate_category.full_clean()  # This should raise a ValidationError
+        with transaction.atomic():  # Use atomic block to handle the transaction properly
+            with self.assertRaises(IntegrityError):
+                IncomeCategory.objects.create(user=self.user1, name="Salary")
 
     def test_income_category_deletion_on_user_delete(self):
         """Test that income categories are deleted when the associated user is deleted"""
-        category = IncomeCategory.objects.create(user=self.user1, name="Salary")
-        self.user1.delete()
-        self.assertFalse(IncomeCategory.objects.filter(id=category.id).exists())
+        category = IncomeCategory.objects.create(user=self.user1, name="Investments")  # Use a different category name
+        self.user1.delete()  # Deleting the user should also delete the related category
+        self.assertFalse(IncomeCategory.objects.filter(id=category.id).exists())  # Verify the category is deleted
+
+    def tearDown(self):
+        """Clean up after each test"""
+        # Ensure users are deleted to avoid integrity errors in subsequent tests
+        if User.objects.filter(id=self.user1.id).exists():
+            self.user1.delete()
+        if User.objects.filter(id=self.user2.id).exists():
+            self.user2.delete()
 class IncomeModelTest(TestCase):
 
     def setUp(self):

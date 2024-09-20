@@ -1,13 +1,14 @@
 import django
 django.setup()
 
-from tracker.models import ExpenseCategory , CreditCard, Expense , IncomeCategory,Income
+from tracker.models import ExpenseCategory , CreditCard, Expense , IncomeCategory, Income, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from decimal import Decimal
 from datetime import date, timedelta
+from django.db import IntegrityError
 
 User = get_user_model()
 
@@ -810,3 +811,173 @@ class IncomeModelTest(TestCase):
 
         # Ensure the income no longer exists
         self.assertFalse(Income.objects.filter(id=income.id).exists())
+class IncomeRecurringChangeLogModelTest(TestCase):
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(username='testuser', password='password')
+        
+        # Create a test income category and income
+        self.income_category = IncomeCategory.objects.create(user=self.user, name="Salary")
+        self.income = Income.objects.create(
+            description="Test Income",
+            amount=Decimal('100.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+
+    def test_income_recurring_change_log_creation(self):
+        """Test that an IncomeRecurringChangeLog can be created successfully"""
+        log = IncomeRecurringChangeLog.objects.create(
+            income=self.income,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        self.assertEqual(log.new_amount, Decimal('150.00'))
+
+    def test_effective_date_before_income_start(self):
+        """Test that effective date cannot be before the income's start date"""
+        with self.assertRaises(ValidationError):
+            log = IncomeRecurringChangeLog(
+                income=self.income,
+                new_amount=Decimal('150.00'),
+                effective_date=self.income.date - timezone.timedelta(days=1)
+            )
+            log.clean()
+
+    def test_new_amount_greater_than_zero(self):
+        """Test that new_amount cannot be less than or equal to zero"""
+        log = IncomeRecurringChangeLog(
+            income=self.income,
+            new_amount=Decimal('0.00'),  # Invalid amount
+            effective_date=timezone.now().date()
+        )
+        
+        # Explicitly call full_clean to trigger validation
+        with self.assertRaises(ValidationError):
+            log.full_clean()
+
+
+    def test_unique_together_constraint(self):
+        """Test that duplicate income and effective_date raises an IntegrityError"""
+        # Create the first log with a given income and effective date
+        IncomeRecurringChangeLog.objects.create(
+            income=self.income,
+            new_amount=Decimal('200.00'),
+            effective_date=timezone.now().date()
+        )
+        
+        # Attempt to create a duplicate log with the same income and effective date
+        with self.assertRaises(IntegrityError):
+            IncomeRecurringChangeLog.objects.create(
+                income=self.income,
+                new_amount=Decimal('250.00'),
+                effective_date=timezone.now().date()  # Same effective date
+            )
+
+
+    def test_string_representation(self):
+        """Test the string representation of the change log"""
+        log = IncomeRecurringChangeLog.objects.create(
+            income=self.income,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        self.assertEqual(str(log), f"Change {self.income.description} to {log.new_amount} effective {log.effective_date}")
+
+    def test_ordering_by_effective_date(self):
+        """Test that the change logs are ordered by effective_date"""
+        IncomeRecurringChangeLog.objects.create(
+            income=self.income,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        IncomeRecurringChangeLog.objects.create(
+            income=self.income,
+            new_amount=Decimal('200.00'),
+            effective_date=timezone.now().date() + timezone.timedelta(days=10)
+        )
+        logs = self.income.change_logs.all()
+        self.assertEqual(logs[0].new_amount, Decimal('150.00'))
+        self.assertEqual(logs[1].new_amount, Decimal('200.00'))
+class ExpenseRecurringChangeLogModelTest(TestCase):
+    def setUp(self):
+        self.expense = Expense.objects.create(
+            description="Test Expense",
+            amount=Decimal('100.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+
+    def test_expense_recurring_change_log_creation(self):
+        """Test that an ExpenseRecurringChangeLog can be created successfully"""
+        log = ExpenseRecurringChangeLog.objects.create(
+            expense=self.expense,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        self.assertEqual(log.new_amount, Decimal('150.00'))
+
+    def test_effective_date_before_expense_start(self):
+        """Test that effective date cannot be before the expense's start date"""
+        with self.assertRaises(ValidationError):
+            log = ExpenseRecurringChangeLog(
+                expense=self.expense,
+                new_amount=Decimal('150.00'),
+                effective_date=self.expense.date - timezone.timedelta(days=1)
+            )
+            log.clean()
+
+    def test_new_amount_greater_than_zero(self):
+        """Test that new_amount cannot be zero or negative"""
+        log = ExpenseRecurringChangeLog(
+            expense=self.expense,
+            new_amount=Decimal('0.00'),
+            effective_date=timezone.now().date()
+        )
+        # Call full_clean to trigger the validation
+        with self.assertRaises(ValidationError):
+            log.full_clean()
+
+
+    def test_unique_together_constraint(self):
+        """Test that an IntegrityError is raised when two logs have the same expense and effective_date"""
+        
+        # First log creation with unique values
+        ExpenseRecurringChangeLog.objects.create(
+            expense=self.expense,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+
+        # Try creating another log with the same expense and effective_date, which should raise an IntegrityError
+        with self.assertRaises(IntegrityError):
+            ExpenseRecurringChangeLog.objects.create(
+                expense=self.expense,
+                new_amount=Decimal('200.00'),
+                effective_date=timezone.now().date()  # Same effective date
+            )
+
+    def test_string_representation(self):
+        """Test the string representation of the change log"""
+        log = ExpenseRecurringChangeLog.objects.create(
+            expense=self.expense,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        self.assertEqual(str(log), f"Change {self.expense.description} to {log.new_amount} effective {log.effective_date}")
+
+    def test_ordering_by_effective_date(self):
+        """Test that the change logs are ordered by effective_date"""
+        ExpenseRecurringChangeLog.objects.create(
+            expense=self.expense,
+            new_amount=Decimal('150.00'),
+            effective_date=timezone.now().date()
+        )
+        ExpenseRecurringChangeLog.objects.create(
+            expense=self.expense,
+            new_amount=Decimal('200.00'),
+            effective_date=timezone.now().date() + timezone.timedelta(days=10)
+        )
+        logs = self.expense.change_logs.all()
+        self.assertEqual(logs[0].new_amount, Decimal('150.00'))
+        self.assertEqual(logs[1].new_amount, Decimal('200.00'))

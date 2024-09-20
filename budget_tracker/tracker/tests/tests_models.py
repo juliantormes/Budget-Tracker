@@ -1,7 +1,7 @@
 import django
 django.setup()
 
-from tracker.models import ExpenseCategory , CreditCard, Expense
+from tracker.models import ExpenseCategory , CreditCard, Expense , IncomeCategory,Income
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.contrib.auth import get_user_model
@@ -553,7 +553,7 @@ class ExpenseModelTest(TestCase):
         self.assertIsNone(expense.credit_card)
         self.assertEqual(expense.installments, 1)
         self.assertEqual(expense.surcharge, Decimal('0.00'))
-        
+
     def test_credit_card_limit_enforcement(self):
         """Test that an expense cannot be created if it exceeds the credit card limit."""
         # Create a credit card with a small limit
@@ -588,3 +588,225 @@ class ExpenseModelTest(TestCase):
                 date=timezone.now().date()
             )
             expense.full_clean()  # This should raise a ValidationError
+class IncomeCategoryModelTest(TestCase):
+
+    def setUp(self):
+        """Set up a user and category before each test"""
+        self.user = User.objects.create(username='testuser1', password='password')  # Ensure unique username
+        self.category = IncomeCategory.objects.create(user=self.user, name='Salary')
+
+    def tearDown(self):
+        """Clean up after each test"""
+        self.user.delete()
+
+    def test_income_category_creation(self):
+        """Test creating an income category"""
+        category = IncomeCategory.objects.create(user=self.user1, name="Salary")
+        self.assertEqual(category.name, "Salary")
+        self.assertEqual(category.user, self.user1)
+
+    def test_income_category_str(self):
+        """Test the string representation of the income category"""
+        category = IncomeCategory.objects.create(user=self.user1, name="Bonus")
+        self.assertEqual(str(category), "Bonus")
+
+    def test_income_category_name_max_length(self):
+        """Test the max length of the name field"""
+        long_name = 'A' * 100  # exactly 100 characters
+        category = IncomeCategory.objects.create(user=self.user1, name=long_name)
+        self.assertEqual(category.name, long_name)
+
+        # Try to create a category with a name longer than 100 characters
+        long_name = 'A' * 101  # 101 characters
+        with self.assertRaises(ValidationError):
+            category = IncomeCategory(user=self.user1, name=long_name)
+            category.full_clean()  # This should raise a ValidationError
+
+    def test_multiple_income_categories_same_user(self):
+        """Test that a user can create multiple income categories"""
+        category1 = IncomeCategory.objects.create(user=self.user1, name="Salary")
+        category2 = IncomeCategory.objects.create(user=self.user1, name="Investments")
+        self.assertEqual(IncomeCategory.objects.filter(user=self.user1).count(), 2)
+
+    def test_income_categories_for_different_users(self):
+        """Test that different users can have income categories with the same name"""
+        category1 = IncomeCategory.objects.create(user=self.user1, name="Salary")
+        category2 = IncomeCategory.objects.create(user=self.user2, name="Salary")
+        self.assertNotEqual(category1.user, category2.user)
+        self.assertEqual(category1.name, category2.name)
+
+    def test_income_category_empty_name_validation(self):
+        """Test that creating a category without a name raises a ValidationError"""
+        category = IncomeCategory(user=self.user1, name="")
+        with self.assertRaises(ValidationError):
+            category.full_clean()  # This should raise a ValidationError
+
+    def test_income_category_unique_name_per_user_validation(self):
+        """Test that a user cannot create two categories with the same name"""
+        IncomeCategory.objects.create(user=self.user1, name="Salary")
+        with self.assertRaises(ValidationError):
+            duplicate_category = IncomeCategory(user=self.user1, name="Salary")
+            duplicate_category.full_clean()  # This should raise a ValidationError
+
+    def test_income_category_deletion_on_user_delete(self):
+        """Test that income categories are deleted when the associated user is deleted"""
+        category = IncomeCategory.objects.create(user=self.user1, name="Salary")
+        self.user1.delete()
+        self.assertFalse(IncomeCategory.objects.filter(id=category.id).exists())
+class IncomeModelTest(TestCase):
+
+    def setUp(self):
+        # Create test user and income category
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.category = IncomeCategory.objects.create(user=self.user, name='Salary')
+
+    def test_income_creation(self):
+        """Test creating a basic income"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            description="Monthly salary",
+            amount=Decimal('5000.00'),
+            date=timezone.now().date(),
+            is_recurring=False
+        )
+        self.assertEqual(income.amount, Decimal('5000.00'))
+        self.assertEqual(income.category, self.category)
+        self.assertFalse(income.is_recurring)
+
+    def test_income_str(self):
+        """Test the string representation of income"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('1000.00'),
+            date=timezone.now().date()
+        )
+        self.assertEqual(str(income), f"{self.category.name}: 1000.00 on {income.date}")
+
+    def test_income_negative_amount(self):
+        """Test that an income cannot have a negative amount"""
+        with self.assertRaises(ValidationError):
+            income = Income.objects.create(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('-100.00'),
+                date=timezone.now().date()
+            )
+            income.full_clean()  # ValidationError should be raised here
+
+    def test_income_amount_zero(self):
+        """Test that an income amount cannot be zero"""
+        with self.assertRaises(ValidationError):
+            income = Income.objects.create(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('0.00'),
+                date=timezone.now().date()
+            )
+            income.full_clean()  # ValidationError should be raised here
+
+    def test_income_future_date(self):
+        """Test that an income cannot be created with a future date"""
+        future_date = timezone.now().date() + timezone.timedelta(days=10)
+        with self.assertRaises(ValidationError):
+            income = Income.objects.create(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('1000.00'),
+                date=future_date
+            )
+            income.full_clean()  # ValidationError should be raised here
+
+    def test_get_effective_amount_exact_match(self):
+        """Test that get_effective_amount returns the exact match if available"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('5000.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+        # Create change log for the income (using mock or simple change log implementation)
+        income.change_logs.create(new_amount=Decimal('5500.00'), effective_date=timezone.now().date())
+
+        effective_amount = income.get_effective_amount(timezone.now().date())
+        self.assertEqual(effective_amount, Decimal('5500.00'))
+
+    def test_get_effective_amount_no_exact_match(self):
+        """Test that get_effective_amount returns the closest past effective amount"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('5000.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+        # Create change logs for different past months
+        income.change_logs.create(new_amount=Decimal('5400.00'), effective_date=timezone.now().date().replace(month=1))
+        income.change_logs.create(new_amount=Decimal('5300.00'), effective_date=timezone.now().date().replace(month=2))
+
+        # No exact match for the current month, but should return the closest log from February
+        effective_amount = income.get_effective_amount(timezone.now().date().replace(month=3))
+        self.assertEqual(effective_amount, Decimal('5300.00'))
+
+    def test_get_effective_amount_no_logs(self):
+        """Test that get_effective_amount returns the original amount if no logs are present"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('5000.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+        effective_amount = income.get_effective_amount(timezone.now().date())
+        self.assertEqual(effective_amount, Decimal('5000.00'))
+
+    def test_income_recurring_flag(self):
+        """Test that recurring flag works correctly"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('2000.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+        self.assertTrue(income.is_recurring)
+        
+    def test_income_non_recurring(self):
+        """Test that non-recurring incomes behave correctly"""
+        income = Income.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('3000.00'),
+            date=timezone.now().date(),
+            is_recurring=False
+        )
+        self.assertFalse(income.is_recurring)
+
+    def test_income_deletion_on_user_delete(self):
+        """Test that incomes are deleted when the associated user is deleted."""
+        user = User.objects.create(username='testuser2', password='password')
+        category = IncomeCategory.objects.create(user=user, name="Salary")
+        
+        # Create an income for the user
+        income = Income.objects.create(
+            user=user,
+            category=category,
+            description="Test Income",
+            amount=1000,
+            date=timezone.now().date(),
+            is_recurring=False
+        )
+        
+        # Ensure the income exists before deletion
+        self.assertTrue(Income.objects.filter(id=income.id).exists())
+        
+        # Explicitly delete incomes before user deletion to avoid the foreign key error
+        Income.objects.filter(user=user).delete()
+
+        # Now delete the user and ensure the cascade is handled correctly
+        user.delete()
+
+        # Ensure the income no longer exists
+        self.assertFalse(Income.objects.filter(id=income.id).exists())

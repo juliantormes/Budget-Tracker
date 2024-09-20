@@ -144,42 +144,45 @@ class Expense(models.Model):
 class IncomeCategory(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     name = models.CharField(max_length=100)
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'name'], name='unique_income_category_per_user')
+        ]
 
     def __str__(self):
         return self.name
-
 class Income(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    category = models.ForeignKey(IncomeCategory, related_name='incomes', on_delete=models.CASCADE, null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # This already cascades
+    category = models.ForeignKey(IncomeCategory, related_name='incomes', on_delete=models.CASCADE, null=True)  # Add CASCADE here as well
     description = models.CharField(max_length=255, blank=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
     date = models.DateField()
     is_recurring = models.BooleanField(default=False)
-    
+
+    def clean(self):
+        """Ensure that the date is not in the future."""
+        if self.date > timezone.now().date():
+            raise ValidationError('Income date cannot be in the future.')
+
     def get_effective_amount(self, check_date=None):
         if check_date is None:
             check_date = date.today()
-        # Convert check_date to first day of the month for comparison
         start_of_check_month = check_date.replace(day=1)
-        
-        # Check for an exact match in the same month
+
         exact_match_log = self.change_logs.filter(
             effective_date__year=check_date.year,
             effective_date__month=check_date.month
         ).first()
-        
+
         if exact_match_log:
             return exact_match_log.new_amount
 
-        # If no exact match, find the closest log with an effective date before the check month
         closest_log = self.change_logs.filter(
             effective_date__lt=start_of_check_month
         ).order_by('-effective_date').first()
-        
-        if closest_log:
-            return closest_log.new_amount
 
-        return self.amount
+        return closest_log.new_amount if closest_log else self.amount
     
     def __str__(self):
         return f"{self.category.name}: {self.amount} on {self.date}"

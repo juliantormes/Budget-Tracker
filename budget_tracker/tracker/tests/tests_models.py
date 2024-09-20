@@ -371,3 +371,220 @@ class CreditCardModelTest(TestCase):
                 date=timezone.now().date()
             )
             expense.full_clean()  # This should raise a ValidationError
+class ExpenseModelTest(TestCase):
+    
+    def setUp(self):
+        # Create a user, a category, and a credit card for testing
+        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.category = ExpenseCategory.objects.create(user=self.user, name="Groceries")
+        self.credit_card = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='1234',
+            brand='Visa',
+            expire_date='2025-12-31',
+            credit_limit=Decimal('5000.00'),
+            payment_day=15,
+            close_card_day=21
+        )
+
+    def test_expense_creation(self):
+        """Test that an expense is created successfully"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('100.00'),
+            date=timezone.now().date()
+        )
+        self.assertEqual(expense.amount, Decimal('100.00'))
+        self.assertEqual(expense.user, self.user)
+        self.assertEqual(expense.category, self.category)
+
+    def test_expense_with_credit_card(self):
+        """Test that an expense with a credit card is handled correctly"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('200.00'),
+            date=timezone.now().date(),
+            pay_with_credit_card=True,
+            credit_card=self.credit_card,
+            surcharge=Decimal('5.00'),
+            installments=2
+        )
+        self.assertEqual(expense.credit_card, self.credit_card)
+        self.assertEqual(expense.surcharge, Decimal('5.00'))
+        self.assertEqual(expense.installments, 2)
+
+    def test_expense_without_credit_card(self):
+        """Test that expense fields are reset when not paid with a credit card"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('200.00'),
+            date=timezone.now().date(),
+            pay_with_credit_card=False,
+            installments=3,  # This should reset to 1
+            surcharge=Decimal('5.00')  # This should reset to 0
+        )
+        self.assertIsNone(expense.credit_card)
+        self.assertEqual(expense.installments, 1)
+        self.assertEqual(expense.surcharge, Decimal('0.00'))
+
+    def test_expense_credit_limit_exceeded(self):
+        """Test that exceeding the credit limit raises a ValidationError"""
+        expense = Expense(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('4900.00'),
+            date=timezone.now().date(),
+            pay_with_credit_card=True,
+            credit_card=self.credit_card,
+            surcharge=Decimal('10.00')  # This makes the total expense exceed the limit
+        )
+        with self.assertRaises(ValidationError):
+            expense.save()
+
+    def test_expense_valid_within_credit_limit(self):
+        """Test that an expense within the credit limit is saved successfully"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('300.00'),
+            date=timezone.now().date(),
+            pay_with_credit_card=True,
+            credit_card=self.credit_card,
+            surcharge=Decimal('2.00'),
+            installments=1
+        )
+        expense.save()
+        self.assertEqual(expense.amount, Decimal('300.00'))
+
+    def test_expense_with_zero_installments(self):
+        """Test that an expense cannot have zero installments"""
+        with self.assertRaises(ValidationError):
+            expense = Expense.objects.create(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('100.00'),
+                date=timezone.now().date(),
+                pay_with_credit_card=True,
+                credit_card=self.credit_card,
+                installments=0  # Invalid number of installments
+            )
+            expense.full_clean()
+
+    def test_expense_get_effective_amount(self):
+        """Test that get_effective_amount returns the correct amount based on the date"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            amount=Decimal('500.00'),
+            date=timezone.now().date(),
+            is_recurring=True
+        )
+        
+        # Simulate a change log for this expense with an effective date
+        expense.change_logs.create(effective_date=timezone.now().date() - timedelta(days=30), new_amount=Decimal('550.00'))
+        
+        # Test effective amount with a check date (this should return 550.00)
+        effective_amount = expense.get_effective_amount(check_date=timezone.now().date())
+        self.assertEqual(effective_amount, Decimal('550.00'))
+
+        # Test the original amount if no change logs are found for the date
+        past_date = timezone.now().date() - timedelta(days=60)
+        self.assertEqual(expense.get_effective_amount(check_date=past_date), Decimal('500.00'))
+
+    def test_expense_invalid_future_expense(self):
+        """Test that an expense cannot be created for a future date"""
+        future_date = timezone.now().date() + timedelta(days=30)
+        with self.assertRaises(ValidationError):
+            expense = Expense(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('100.00'),
+                date=future_date  # Future date
+            )
+            expense.full_clean()
+    def test_expense_negative_amount(self):
+        """Test that an expense cannot have a negative amount."""
+        with self.assertRaises(ValidationError):
+            expense = Expense(
+                user=self.user,
+                category=self.category,
+                amount=Decimal('-100.00'),
+                date=timezone.now().date(),
+                pay_with_credit_card=True,
+                credit_card=self.credit_card
+            )
+            expense.full_clean()  # This should raise a ValidationError
+
+    def test_recurring_expense_future_date(self):
+        """Test that a recurring expense cannot be created with a future date."""
+        future_date = timezone.now().date() + timedelta(days=1)
+        with self.assertRaises(ValidationError):
+            expense = Expense(
+                user=self.user,
+                amount=Decimal('100.00'),
+                is_recurring=True,
+                date=future_date,
+                pay_with_credit_card=True,
+                credit_card=self.credit_card
+            )
+            expense.full_clean()  # This should raise a ValidationError
+    def test_expense_surcharge_limits(self):
+        """Test that surcharge is within reasonable limits."""
+        with self.assertRaises(ValidationError):
+            expense = Expense(
+                user=self.user,
+                amount=Decimal('100.00'),
+                surcharge=Decimal('200.00'),  # Unreasonable surcharge
+                pay_with_credit_card=True,
+                credit_card=self.credit_card
+            )
+            expense.full_clean()  # This should raise a ValidationError
+
+    def test_expense_save_method_no_credit_card(self):
+        """Test that the credit card fields are reset if pay_with_credit_card is False."""
+        expense = Expense.objects.create(
+            user=self.user,
+            amount=Decimal('100.00'),
+            pay_with_credit_card=False
+        )
+        self.assertIsNone(expense.credit_card)
+        self.assertEqual(expense.installments, 1)
+        self.assertEqual(expense.surcharge, Decimal('0.00'))
+        
+    def test_credit_card_limit_enforcement(self):
+        """Test that an expense cannot be created if it exceeds the credit card limit."""
+        # Create a credit card with a small limit
+        card = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='1234',
+            brand='Visa',
+            expire_date='2025-12-31',
+            credit_limit=Decimal('500.00'),  # Small credit limit
+            payment_day=15,
+            close_card_day=21
+        )
+
+        # Add an initial expense within the credit limit
+        Expense.objects.create(
+            user=self.user,
+            amount=Decimal('300.00'),
+            surcharge=Decimal('10.00'),
+            pay_with_credit_card=True,
+            credit_card=card,
+            date=timezone.now().date()
+        )
+
+        # Attempt to add another expense that would exceed the credit limit
+        with self.assertRaises(ValidationError):
+            expense = Expense(
+                user=self.user,
+                amount=Decimal('250.00'),  # Exceeds the remaining credit (500 - 300 - 10%)
+                surcharge=Decimal('10.00'),
+                pay_with_credit_card=True,
+                credit_card=card,
+                date=timezone.now().date()
+            )
+            expense.full_clean()  # This should raise a ValidationError

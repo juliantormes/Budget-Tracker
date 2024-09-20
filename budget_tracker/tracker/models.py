@@ -92,6 +92,12 @@ class Expense(models.Model):
     installments = models.IntegerField(default=1, validators=[MinValueValidator(1)])  # Ensure at least 1 installment
     surcharge = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
+    def clean(self):
+        if self.date and self.date > timezone.now().date():  # Ensure date is not None
+            raise ValidationError("Expenses cannot be created for a future date.")
+        if self.amount < 0:
+            raise ValidationError("Expense amount cannot be negative.")
+        
     def save(self, *args, **kwargs):
         if not self.pay_with_credit_card:
             self.credit_card = None
@@ -100,7 +106,7 @@ class Expense(models.Model):
         else:
             if self.credit_card:
                 current_balance = self.credit_card.current_balance()
-                total_new_expense = self.amount + (self.amount * self.surcharge / 100)
+                total_new_expense = self.amount + (self.amount * Decimal(self.surcharge) / Decimal('100'))  # Ensure Decimal division
                 if current_balance + total_new_expense > self.credit_card.credit_limit:
                     raise ValidationError(
                         f"Credit limit exceeded. Current balance: {current_balance}, "
@@ -108,6 +114,7 @@ class Expense(models.Model):
                         f"Available credit: {self.credit_card.available_credit()}."
                     )
         super().save(*args, **kwargs)
+
     def get_effective_amount(self, check_date=None):
         if check_date is None:
             check_date = date.today()

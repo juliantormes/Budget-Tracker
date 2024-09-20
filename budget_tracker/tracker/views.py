@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 from .serializers import ExpenseSerializer, ExpenseCategorySerializer, IncomeCategorySerializer, IncomeSerializer, CreditCardSerializer, SignUpSerializer, LoginSerializer, IncomeSerializer, IncomeCategorySerializer, CreditCardSerializer, ExpenseRecurringChangeLogSerializer, IncomeRecurringChangeLogSerializer
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.exceptions import ValidationError
 from django.utils.timezone import make_aware
@@ -15,10 +15,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 
 @api_view(['POST'])
-@csrf_exempt
 def login(request):
     if request.user.is_authenticated:
-        return Response({'message': 'You are already logged in'}, status=400)
+        return Response({'message': 'You are already logged in'}, status=status.HTTP_400_BAD_REQUEST)
+    
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         username = serializer.validated_data['username']
@@ -26,31 +26,39 @@ def login(request):
         user = authenticate(username=username, password=password)
         if user and user.is_active:
             token, _ = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=200)
-        else:
-            return Response({'error': 'Invalid Credentials'}, status=401)
-    return Response(serializer.errors, status=400)
+            return Response({'token': token.key}, status=status.HTTP_200_OK)
+        return Response({'error': 'Invalid Credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
-@csrf_exempt
 def signup(request):
     if request.user.is_authenticated:
-        return Response({'message': 'You are already authenticated'}, status=400)
+        return Response({'message': 'You are already authenticated'}, status=status.HTTP_400_BAD_REQUEST)
+    
     serializer = SignUpSerializer(data=request.data)
     if serializer.is_valid():
         user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key})
-    else:
-        if 'username' in serializer.errors:
-            return Response({'username': 'This username is already in use.'}, status=status.HTTP_409_CONFLICT)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key}, status=status.HTTP_201_CREATED)  # 201 for creation
+    
+    if 'username' in serializer.errors:
+        return Response({'username': 'This username is already in use.'}, status=status.HTTP_409_CONFLICT)  # 409 for duplicate
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])  # Ensure only authenticated users can access this view
+@permission_classes([AllowAny])  # Allow access to the view without authentication
 def logout(request):
+    # Manually check if the user is authenticated
+    if not request.auth:
+        return Response({'error': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    # If the user is authenticated, proceed with token deletion
     request.auth.delete()  # Deletes the token, logging the user out
-    return Response({'message': 'Logged out successfully'})
+    return Response({'message': 'Logged out successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 @api_view(['POST', 'PUT'])
 @permission_classes([IsAuthenticated])

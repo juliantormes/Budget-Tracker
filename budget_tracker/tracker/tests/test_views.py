@@ -5,6 +5,7 @@ from rest_framework.authtoken.models import Token
 from django.urls import reverse
 from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory, IncomeCategory, CreditCard
 from datetime import datetime
+from django.utils.timezone import make_aware
 
 class AuthViewsTest(APITestCase):
 
@@ -713,3 +714,168 @@ class CreditCardViewSetTestCase(APITestCase):
         # Ensure the other user's credit card is not returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)  # Only the current user's cards
+class ExpenseCategoryViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user and categories for the user"""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+
+        # Create expense categories for the user
+        self.expense_category1 = ExpenseCategory.objects.create(user=self.user, name='Food')
+        self.expense_category2 = ExpenseCategory.objects.create(user=self.user, name='Travel')
+
+    # Test Case 1: Retrieve all expense categories for the authenticated user
+    def test_retrieve_expense_categories(self):
+        """Test retrieving expense categories for the authenticated user"""
+        url = reverse('expensecategory-list')
+        response = self.client.get(url)
+
+        # Check response status and number of categories returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    # Test Case 2: Create a new expense category
+    def test_create_expense_category(self):
+        """Test creating a new expense category"""
+        url = reverse('expensecategory-list')
+        data = {
+            'name': 'Utilities'
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure the expense category is created successfully
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Utilities')
+
+    # Test Case 3: Create an expense category with missing fields
+    def test_create_expense_category_missing_fields(self):
+        """Test creating an expense category with missing fields"""
+        url = reverse('expensecategory-list')
+        data = {
+            'name': ''
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('name', response.data)
+
+    # Test Case 4: Update an existing expense category
+    def test_update_expense_category(self):
+        """Test updating an existing expense category"""
+        url = reverse('expensecategory-detail', kwargs={'pk': self.expense_category1.id})
+        data = {
+            'name': 'Groceries'
+        }
+        response = self.client.put(url, data, format='json')
+
+        # Ensure the expense category is updated successfully
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Groceries')
+
+    # Test Case 5: Delete an expense category
+    def test_delete_expense_category(self):
+        """Test deleting an existing expense category"""
+        url = reverse('expensecategory-detail', kwargs={'pk': self.expense_category1.id})
+        response = self.client.delete(url)
+
+        # Ensure the expense category is deleted successfully
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    # Test Case 6: Access another user's expense categories (should return empty)
+    def test_access_other_user_expense_categories(self):
+        """Test that a user cannot access expense categories belonging to another user"""
+        # Create a new user and an expense category for them
+        other_user = User.objects.create_user(username='otheruser', password='password')
+        ExpenseCategory.objects.create(user=other_user, name='Entertainment')
+
+        url = reverse('expensecategory-list')
+        response = self.client.get(url)
+
+        # Ensure the other user's category is not returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)  # Only the current user's categories
+
+class IncomeCategoryViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user and categories for the user"""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+
+        # Create income categories for the user
+        self.income_category1 = IncomeCategory.objects.create(user=self.user, name='Salary')
+        self.income_category2 = IncomeCategory.objects.create(user=self.user, name='Freelance')
+
+    # Test Case 1: Retrieve all income categories for the authenticated user
+    def test_retrieve_income_categories(self):
+        """Test retrieving income categories for the authenticated user"""
+        url = reverse('incomecategory-list')
+        response = self.client.get(url)
+
+        # Check response status and number of categories returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    # Test Case 2: Create a new income category
+    def test_create_income_category(self):
+        """Test creating a new income category"""
+        url = reverse('incomecategory-list')
+        data = {
+            'name': 'Investments'
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure the income category is created successfully
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['name'], 'Investments')
+
+    # Test Case 3: Create an income category with missing fields
+    def test_create_income_category_missing_fields(self):
+        """Test creating an income category with missing fields"""
+        url = reverse('incomecategory-list')
+        data = {
+            'name': ''
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('name', response.data)
+
+    # Test Case 4: Update an existing income category
+    def test_update_income_category(self):
+        """Test updating an existing income category"""
+        url = reverse('incomecategory-detail', kwargs={'pk': self.income_category1.id})
+        data = {
+            'name': 'Bonus'
+        }
+        response = self.client.put(url, data, format='json')
+
+        # Ensure the income category is updated successfully
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['name'], 'Bonus')
+
+    # Test Case 5: Delete an income category
+    def test_delete_income_category(self):
+        """Test deleting an existing income category"""
+        url = reverse('incomecategory-detail', kwargs={'pk': self.income_category1.id})
+        response = self.client.delete(url)
+
+        # Ensure the income category is deleted successfully
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    # Test Case 6: Access another user's income categories (should return empty)
+    def test_access_other_user_income_categories(self):
+        """Test that a user cannot access income categories belonging to another user"""
+        # Create a new user and an income category for them
+        other_user = User.objects.create_user(username='otheruser', password='password')
+        IncomeCategory.objects.create(user=other_user, name='Dividends')
+
+        url = reverse('incomecategory-list')
+        response = self.client.get(url)
+
+        # Ensure the other user's category is not returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)  # Only the current user's categories

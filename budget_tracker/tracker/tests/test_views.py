@@ -896,3 +896,84 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         url = reverse('credit-card-expense-list') + f'?year=abcd&month=12'
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+class IncomeRecurringChangeLogViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user and income for recurring change logs."""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+        IncomeRecurringChangeLog.objects.all().delete()
+
+        self.income = Income.objects.create(
+            user=self.user,
+            amount=1000.00,
+            description='Test Income',
+            date='2024-01-01',
+            is_recurring=True
+        )
+
+    # Test Case 1: Test creating a valid recurring change log for an income
+    def test_create_income_recurring_change_log(self):
+        """Test creating a new recurring change log for an income."""
+        url = reverse('update_recurring_income', kwargs={'income_id': self.income.id})
+        data = {
+            'new_amount': 1200.00,
+            'effective_date': '2024-02-01'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['new_amount'], '1200.00')
+        self.assertEqual(IncomeRecurringChangeLog.objects.count(), 1)
+
+    # Test Case 2: Test validation when required fields are missing in the request
+    def test_create_income_recurring_change_log_invalid(self):
+        """Test validation when creating a change log with missing fields."""
+        url = reverse('update_recurring_income', kwargs={'income_id': self.income.id})
+        data = {
+            'effective_date': '2024-02-01' 
+        }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('new_amount', response.data)
+
+class ExpenseRecurringChangeLogViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user and expense for recurring change logs."""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+        ExpenseRecurringChangeLog.objects.all().delete()
+
+        self.expense = Expense.objects.create(
+            user=self.user,
+            amount=500.00,
+            description='Test Expense',
+            date='2024-01-01',
+            is_recurring=True
+        )
+
+    # Test Case 1: Test creating a valid recurring change log for an expense
+    def test_create_expense_recurring_change_log(self):
+        """Test creating a new recurring change log for an expense."""
+        url = reverse('update_recurring_expense', kwargs={'expense_id': self.expense.id})
+        data = {
+            'new_amount': 600.00,
+            'effective_date': '2024-03-01'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['new_amount'], '600.00')
+        self.assertEqual(ExpenseRecurringChangeLog.objects.count(), 1)
+
+    # Test Case 2: Test validation when required fields are missing in the request
+    def test_create_expense_recurring_change_log_invalid(self):
+        """Test validation when creating a change log with missing fields."""
+        url = reverse('update_recurring_expense', kwargs={'expense_id': self.expense.id})
+        data = {
+            'effective_date': '2024-03-01'
+        }
+        response = self.client.post(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('new_amount', response.data)

@@ -301,7 +301,6 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         user = self.request.user
         year = self.request.query_params.get('year', datetime.now().year)
         month = self.request.query_params.get('month', datetime.now().month)
-        installments_gt = self.request.query_params.get('installments_gt')  # New query param to filter by installments
 
         # Validate year and month
         try:
@@ -344,10 +343,6 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
 
         # Combine all three types of transactions into one queryset
         queryset = monthly_transactions | installment_transactions | recurring_transactions
-
-        # Apply the filter for installments greater than a specific number, if provided
-        if installments_gt:
-            queryset = queryset.filter(installments__gt=int(installments_gt))
 
         # Remove potential duplicates (if any) using distinct()
         return queryset.distinct()

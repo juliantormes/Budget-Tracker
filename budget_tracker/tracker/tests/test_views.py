@@ -370,10 +370,6 @@ class ExpenseViewSetTestCase(APITestCase):
             'installments': 1
         }
         response = self.client.post(url, data, format='json')
-
-        print("Response status:", response.status_code)
-        print("Response data:", response.data)
-
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     # 9. Recurring expense with more than 1 installment (invalid)
@@ -450,8 +446,6 @@ class IncomeViewSetTestCase(APITestCase):
         """Set up a test user, income categories, and token for authentication"""
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=self.user)
-
-        # Create an income category
         self.category = IncomeCategory.objects.create(name='Salary')
 
     # Test Case 1: Successful retrieval of monthly incomes
@@ -463,8 +457,6 @@ class IncomeViewSetTestCase(APITestCase):
 
         url = reverse('income-list')
         response = self.client.get(url, {'year': 2024, 'month': 9})
-
-        # Check response status and the number of incomes returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
@@ -473,8 +465,6 @@ class IncomeViewSetTestCase(APITestCase):
     def test_no_incomes_for_given_month(self):
         url = reverse('income-list')
         response = self.client.get(url, {'year': 2024, 'month': 10})
-        
-        # Ensure the response is successful and no incomes are returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
@@ -483,8 +473,6 @@ class IncomeViewSetTestCase(APITestCase):
     def test_invalid_year_and_month(self):
         url = reverse('income-list')
         response = self.client.get(url, {'year': 'invalid', 'month': 'invalid'})
-        
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('Invalid year or month format.', str(response.data))
 
@@ -500,8 +488,6 @@ class IncomeViewSetTestCase(APITestCase):
             'is_recurring': False
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure the income is created successfully
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['amount'], '3000.00')
 
@@ -517,8 +503,6 @@ class IncomeViewSetTestCase(APITestCase):
             'is_recurring': True
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure the recurring income is created successfully
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['amount'], '2000.00')
         self.assertTrue(response.data['is_recurring'])
@@ -531,8 +515,6 @@ class IncomeViewSetTestCase(APITestCase):
             'amount': 3000,  # Missing date and category
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('This field is required.', str(response.data))
 
@@ -548,8 +530,6 @@ class IncomeViewSetTestCase(APITestCase):
             'category': self.category.id
         }
         response = self.client.put(url, data, format='json')
-
-        # Ensure the income is updated successfully
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['amount'], '3500.00')
 
@@ -558,10 +538,7 @@ class IncomeViewSetTestCase(APITestCase):
     def test_delete_income(self):
         income = Income.objects.create(user=self.user, amount=3000, date='2024-09-10', category=self.category)
         url = reverse('income-detail', kwargs={'pk': income.id})
-        
         response = self.client.delete(url)
-
-        # Ensure the income is deleted successfully
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     # Test Case 9: Create recurring income with effective date in change logs
@@ -572,11 +549,6 @@ class IncomeViewSetTestCase(APITestCase):
 
         url = reverse('income-list')
         response = self.client.get(url, {'year': 2024, 'month': 9})
-
-        # Debug the response data to see what's being returned
-        print("Response data:", response.data)
-
-        # Ensure the income amount reflects the change log
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['amount'], '2500.00')
 class CreditCardViewSetTestCase(APITestCase):
@@ -585,8 +557,6 @@ class CreditCardViewSetTestCase(APITestCase):
         """Set up a test user and two credit cards for that user"""
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=self.user)
-
-        # Create two credit cards for the user
         self.credit_card1 = CreditCard.objects.create(
             user=self.user,
             last_four_digits='1234',
@@ -611,8 +581,6 @@ class CreditCardViewSetTestCase(APITestCase):
         """Test retrieving credit cards for the authenticated user"""
         url = reverse('creditcard-list')
         response = self.client.get(url)
-
-        # Check response status and number of credit cards returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
@@ -625,15 +593,10 @@ class CreditCardViewSetTestCase(APITestCase):
             'brand': 'Amex',
             'expire_date': '2026-05-31',
             'credit_limit': 7000.00,
-            'payment_day': 28,  # Ensure payment day is after close card day
+            'payment_day': 28, 
             'close_card_day': 25
         }
         response = self.client.post(url, data, format='json')
-
-        # Debug the response data
-        print("Response data (Create):", response.data)
-
-        # Ensure the credit card is created successfully
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
     # Test Case 3: Create a new credit card with missing fields
     def test_create_credit_card_missing_fields(self):
@@ -641,14 +604,11 @@ class CreditCardViewSetTestCase(APITestCase):
         url = reverse('creditcard-list')
         data = {
             'last_four_digits': '3456',
-            # Missing 'brand' and 'expire_date'
             'credit_limit': 5000.00,
             'payment_day': 15,
             'close_card_day': 25
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('brand', response.data)
         self.assertIn('expire_date', response.data)
@@ -662,15 +622,10 @@ class CreditCardViewSetTestCase(APITestCase):
             'brand': 'Visa Platinum',
             'expire_date': '2025-12-31',
             'credit_limit': 6000.00,
-            'payment_day': 30,  # Ensure payment day is after close card day
+            'payment_day': 30, 
             'close_card_day': 28
         }
         response = self.client.put(url, data, format='json')
-
-        # Debug the response data
-        print("Response data (Update):", response.data)
-
-        # Ensure the credit card is updated successfully
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     # Test Case 5: Delete a credit card
@@ -678,8 +633,6 @@ class CreditCardViewSetTestCase(APITestCase):
         """Test deleting an existing credit card"""
         url = reverse('creditcard-detail', kwargs={'pk': self.credit_card1.id})
         response = self.client.delete(url)
-
-        # Ensure the credit card is deleted successfully
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     # Test Case 6: Unauthorized access to credit cards
@@ -688,15 +641,12 @@ class CreditCardViewSetTestCase(APITestCase):
         self.client.logout()
         url = reverse('creditcard-list')
         response = self.client.get(url)
-
-        # Adjust expectation to 403
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
 
     # Test Case 7: Access credit cards belonging to another user (should return empty list)
     def test_access_other_user_credit_cards(self):
         """Test that users cannot access credit cards belonging to others"""
-        # Create a new user and a credit card for that user
         other_user = User.objects.create_user(username='otheruser', password='password')
         CreditCard.objects.create(
             user=other_user,
@@ -710,18 +660,14 @@ class CreditCardViewSetTestCase(APITestCase):
 
         url = reverse('creditcard-list')
         response = self.client.get(url)
-
-        # Ensure the other user's credit card is not returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Only the current user's cards
+        self.assertEqual(len(response.data), 2)
 class ExpenseCategoryViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and categories for the user"""
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=self.user)
-
-        # Create expense categories for the user
         self.expense_category1 = ExpenseCategory.objects.create(user=self.user, name='Food')
         self.expense_category2 = ExpenseCategory.objects.create(user=self.user, name='Travel')
 
@@ -730,8 +676,6 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
         """Test retrieving expense categories for the authenticated user"""
         url = reverse('expensecategory-list')
         response = self.client.get(url)
-
-        # Check response status and number of categories returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
@@ -743,8 +687,6 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
             'name': 'Utilities'
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure the expense category is created successfully
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'Utilities')
 
@@ -756,8 +698,6 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
             'name': ''
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('name', response.data)
 
@@ -769,8 +709,6 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
             'name': 'Groceries'
         }
         response = self.client.put(url, data, format='json')
-
-        # Ensure the expense category is updated successfully
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], 'Groceries')
 
@@ -779,23 +717,18 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
         """Test deleting an existing expense category"""
         url = reverse('expensecategory-detail', kwargs={'pk': self.expense_category1.id})
         response = self.client.delete(url)
-
-        # Ensure the expense category is deleted successfully
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     # Test Case 6: Access another user's expense categories (should return empty)
     def test_access_other_user_expense_categories(self):
         """Test that a user cannot access expense categories belonging to another user"""
-        # Create a new user and an expense category for them
         other_user = User.objects.create_user(username='otheruser', password='password')
         ExpenseCategory.objects.create(user=other_user, name='Entertainment')
 
         url = reverse('expensecategory-list')
         response = self.client.get(url)
-
-        # Ensure the other user's category is not returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Only the current user's categories
+        self.assertEqual(len(response.data), 2) 
 
 class IncomeCategoryViewSetTestCase(APITestCase):
 
@@ -803,8 +736,6 @@ class IncomeCategoryViewSetTestCase(APITestCase):
         """Set up a test user and categories for the user"""
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=self.user)
-
-        # Create income categories for the user
         self.income_category1 = IncomeCategory.objects.create(user=self.user, name='Salary')
         self.income_category2 = IncomeCategory.objects.create(user=self.user, name='Freelance')
 
@@ -814,7 +745,6 @@ class IncomeCategoryViewSetTestCase(APITestCase):
         url = reverse('incomecategory-list')
         response = self.client.get(url)
 
-        # Check response status and number of categories returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
 
@@ -827,7 +757,6 @@ class IncomeCategoryViewSetTestCase(APITestCase):
         }
         response = self.client.post(url, data, format='json')
 
-        # Ensure the income category is created successfully
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['name'], 'Investments')
 
@@ -839,8 +768,6 @@ class IncomeCategoryViewSetTestCase(APITestCase):
             'name': ''
         }
         response = self.client.post(url, data, format='json')
-
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('name', response.data)
 
@@ -852,8 +779,6 @@ class IncomeCategoryViewSetTestCase(APITestCase):
             'name': 'Bonus'
         }
         response = self.client.put(url, data, format='json')
-
-        # Ensure the income category is updated successfully
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['name'], 'Bonus')
 
@@ -862,23 +787,19 @@ class IncomeCategoryViewSetTestCase(APITestCase):
         """Test deleting an existing income category"""
         url = reverse('incomecategory-detail', kwargs={'pk': self.income_category1.id})
         response = self.client.delete(url)
-
-        # Ensure the income category is deleted successfully
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     # Test Case 6: Access another user's income categories (should return empty)
     def test_access_other_user_income_categories(self):
         """Test that a user cannot access income categories belonging to another user"""
-        # Create a new user and an income category for them
         other_user = User.objects.create_user(username='otheruser', password='password')
         IncomeCategory.objects.create(user=other_user, name='Dividends')
 
         url = reverse('incomecategory-list')
         response = self.client.get(url)
 
-        # Ensure the other user's category is not returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Only the current user's categories
+        self.assertEqual(len(response.data), 2)
 class CreditCardExpenseViewSetTestCase(APITestCase):
 
     def setUp(self):
@@ -886,7 +807,6 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.force_authenticate(user=self.user)
 
-        # Create a credit card for the user
         self.credit_card = CreditCard.objects.create(
             user=self.user,
             last_four_digits='1234',
@@ -897,7 +817,6 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
             close_card_day=25
         )
 
-        # Create credit card expenses (pay_with_credit_card = True)
         self.expense1 = Expense.objects.create(
             user=self.user,
             description='Single installment expense',
@@ -929,14 +848,12 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
             installments=6,
             pay_with_credit_card=True
         )
-
-        # Create a non-credit card expense (pay_with_credit_card = False)
         self.expense4 = Expense.objects.create(
             user=self.user,
             description='Non-credit card expense',
             amount=150.00,
             date=make_aware(datetime(2024, 8, 20)),
-            credit_card=None,  # Not linked to a credit card
+            credit_card=None,
             installments=1,
             pay_with_credit_card=False
         )
@@ -946,14 +863,7 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         """Test retrieving credit card expenses for the current month"""
         url = reverse('credit-card-expense-list') + f'?year=2024&month=8'
         response = self.client.get(url)
-
-        # Debug the response to verify what is returned
-        print("Response data for current month:", response.data)
-
-        # Check response status and number of credit card expenses returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-        # Expecting 3 expenses: the single installment, the recurring, and the multi-installment expense
         self.assertEqual(len(response.data), 3)
 
     # Test Case 2: Retrieve credit card expenses for a past month
@@ -961,34 +871,22 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         """Test retrieving credit card expenses for a past month"""
         url = reverse('credit-card-expense-list') + f'?year=2024&month=7'
         response = self.client.get(url)
-        # Check response status and number of credit card expenses returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)  # Should return the recurring and multi-installment expenses for July (expense2 and expense3)
+        self.assertEqual(len(response.data), 2)
 
     # Test Case 3: Retrieve credit card expenses with multi-installments
     def test_retrieve_credit_card_expenses_with_installments(self):
         """Test retrieving credit card expenses with multiple installments"""
-        # Modify the URL to filter for installments > 1 (installments query param)
-        url = reverse('credit-card-expense-list') + '?installments_gt=1'  # Assuming installments_gt is the query param you're using
+        url = reverse('credit-card-expense-list') + '?installments_gt=1'
         response = self.client.get(url)
-
-        # Print the response data for debugging
-        print("Response data for installments:", response.data)
-
-        # Check response status and number of expenses returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        
-        # Expecting only multi-installment expenses in the result
         self.assertEqual(len(response.data), 1)  # Should return only the multi-installment expense
 
     # Test Case 4: Test when no expenses exist for a given month
     def test_retrieve_credit_card_expenses_no_results(self):
         """Test retrieving credit card expenses when no expenses exist for a given month"""
-        # Query a month before the first expense is added (June 2024)
         url = reverse('credit-card-expense-list') + f'?year=2024&month=6'
         response = self.client.get(url)
-
-        # Check response status and ensure no expenses are returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)  # Should return no expenses
 
@@ -997,5 +895,4 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         """Test retrieving credit card expenses with invalid year and month"""
         url = reverse('credit-card-expense-list') + f'?year=abcd&month=12'
         response = self.client.get(url)
-        # Ensure validation error is raised
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.urls import reverse
-from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory, IncomeCategory
+from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory, IncomeCategory, CreditCard
 from datetime import datetime
 
 class AuthViewsTest(APITestCase):
@@ -578,3 +578,138 @@ class IncomeViewSetTestCase(APITestCase):
         # Ensure the income amount reflects the change log
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data[0]['amount'], '2500.00')
+class CreditCardViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user and two credit cards for that user"""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+
+        # Create two credit cards for the user
+        self.credit_card1 = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='1234',
+            brand='Visa',
+            expire_date=datetime(2025, 12, 31),
+            credit_limit=5000.00,
+            payment_day=15,
+            close_card_day=25
+        )
+        self.credit_card2 = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='5678',
+            brand='Mastercard',
+            expire_date=datetime(2024, 6, 30),
+            credit_limit=3000.00,
+            payment_day=10,
+            close_card_day=20
+        )
+
+    # Test Case 1: Retrieve all credit cards for the authenticated user
+    def test_retrieve_credit_cards(self):
+        """Test retrieving credit cards for the authenticated user"""
+        url = reverse('creditcard-list')
+        response = self.client.get(url)
+
+        # Check response status and number of credit cards returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    # Test Case 2: Create a new credit card with valid data
+    def test_create_credit_card(self):
+        """Test creating a new credit card"""
+        url = reverse('creditcard-list')
+        data = {
+            'last_four_digits': '9876',
+            'brand': 'Amex',
+            'expire_date': '2026-05-31',
+            'credit_limit': 7000.00,
+            'payment_day': 28,  # Ensure payment day is after close card day
+            'close_card_day': 25
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Debug the response data
+        print("Response data (Create):", response.data)
+
+        # Ensure the credit card is created successfully
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+    # Test Case 3: Create a new credit card with missing fields
+    def test_create_credit_card_missing_fields(self):
+        """Test validation when creating a credit card with missing fields"""
+        url = reverse('creditcard-list')
+        data = {
+            'last_four_digits': '3456',
+            # Missing 'brand' and 'expire_date'
+            'credit_limit': 5000.00,
+            'payment_day': 15,
+            'close_card_day': 25
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('brand', response.data)
+        self.assertIn('expire_date', response.data)
+
+    # Test Case 4: Update an existing credit card
+    def test_update_credit_card(self):
+        """Test updating an existing credit card"""
+        url = reverse('creditcard-detail', kwargs={'pk': self.credit_card1.id})
+        data = {
+            'last_four_digits': '1234',
+            'brand': 'Visa Platinum',
+            'expire_date': '2025-12-31',
+            'credit_limit': 6000.00,
+            'payment_day': 30,  # Ensure payment day is after close card day
+            'close_card_day': 28
+        }
+        response = self.client.put(url, data, format='json')
+
+        # Debug the response data
+        print("Response data (Update):", response.data)
+
+        # Ensure the credit card is updated successfully
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    # Test Case 5: Delete a credit card
+    def test_delete_credit_card(self):
+        """Test deleting an existing credit card"""
+        url = reverse('creditcard-detail', kwargs={'pk': self.credit_card1.id})
+        response = self.client.delete(url)
+
+        # Ensure the credit card is deleted successfully
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    # Test Case 6: Unauthorized access to credit cards
+    def test_unauthorized_access(self):
+        """Test that unauthorized users cannot access credit cards"""
+        self.client.logout()
+        url = reverse('creditcard-list')
+        response = self.client.get(url)
+
+        # Adjust expectation to 403
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+
+    # Test Case 7: Access credit cards belonging to another user (should return empty list)
+    def test_access_other_user_credit_cards(self):
+        """Test that users cannot access credit cards belonging to others"""
+        # Create a new user and a credit card for that user
+        other_user = User.objects.create_user(username='otheruser', password='password')
+        CreditCard.objects.create(
+            user=other_user,
+            last_four_digits='4321',
+            brand='Discover',
+            expire_date=datetime(2025, 8, 31),
+            credit_limit=4000.00,
+            payment_day=20,
+            close_card_day=10
+        )
+
+        url = reverse('creditcard-list')
+        response = self.client.get(url)
+
+        # Ensure the other user's credit card is not returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)  # Only the current user's cards

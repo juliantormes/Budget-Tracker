@@ -2,8 +2,9 @@ from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Expense, ExpenseCategory, IncomeCategory, Income, CreditCard, IncomeRecurringChangeLog, ExpenseRecurringChangeLog
 from decimal import Decimal
-from datetime import date, timezone
+from datetime import date
 from datetime import datetime
+from django.utils import timezone
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:

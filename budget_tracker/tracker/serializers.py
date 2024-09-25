@@ -152,6 +152,11 @@ class ExpenseSerializer(serializers.ModelSerializer):
         extra_kwargs = {'user': {'read_only': True}}
 
     def validate(self, data):
+        # First validate recurring expenses with more than 1 installment
+        if data.get('is_recurring') and data.get('installments', 1) > 1:
+            raise serializers.ValidationError('Recurring expenses cannot have more than 1 installment.')
+
+        # Then handle the logic for credit card and installments
         if data.get('pay_with_credit_card', False) and not data.get('credit_card'):
             raise serializers.ValidationError("Credit card must be provided if paying with credit card.")
 
@@ -165,12 +170,14 @@ class ExpenseSerializer(serializers.ModelSerializer):
                                         f"New expense total: {total_new_expense}, Credit limit: {credit_card.credit_limit}"
                 })
 
+        # Only set default values for non-credit card payments after validation
         if not data.get('pay_with_credit_card', False):
             data['credit_card'] = None
             data['installments'] = 1
             data['surcharge'] = Decimal('0.00')
 
         return data
+
 
     def validate_amount(self, value):
         if value <= 0:

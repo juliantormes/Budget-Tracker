@@ -159,29 +159,36 @@ class ExpenseViewSet(viewsets.ModelViewSet):
                 start_date = start_date.date()
                 end_date = end_date.date()
 
-                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date)
+                # Fetch monthly transactions but exclude recurring ones
+                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date, is_recurring=False)
+                
                 recurring_transactions = queryset.filter(is_recurring=True, date__lte=end_date)
                 recurring_expenses = []
 
+                recurring_ids = set()  # Set to track already added recurring expenses
+                
                 for expense in recurring_transactions:
-                    change_log = expense.change_logs.filter(
-                        effective_date__year=year,
-                        effective_date__month=month
-                    ).first()
+                    if expense.id not in recurring_ids:  # Avoid duplicates
+                        change_log = expense.change_logs.filter(
+                            effective_date__year=year,
+                            effective_date__month=month
+                        ).first()
 
-                    effective_amount = change_log.new_amount if change_log else expense.amount
+                        effective_amount = change_log.new_amount if change_log else expense.amount
 
-                    recurring_expense = Expense(
-                        id=expense.id,
-                        user=expense.user,
-                        category=expense.category,
-                        amount=effective_amount,
-                        description=expense.description,
-                        date=start_date,
-                        is_recurring=True,
-                    )
-                    recurring_expenses.append(recurring_expense)
+                        recurring_expense = Expense(
+                            id=expense.id,
+                            user=expense.user,
+                            category=expense.category,
+                            amount=effective_amount,
+                            description=expense.description,
+                            date=start_date,  # Set date to start of the month
+                            is_recurring=True,
+                        )
+                        recurring_expenses.append(recurring_expense)
+                        recurring_ids.add(expense.id)  # Add to the set to track duplicates
 
+                # Combine the two lists
                 queryset = list(monthly_transactions) + recurring_expenses
 
             except ValueError:

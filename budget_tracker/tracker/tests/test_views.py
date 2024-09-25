@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.urls import reverse
-from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory
+from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory, IncomeCategory
 from datetime import datetime
 
 class AuthViewsTest(APITestCase):
@@ -443,3 +443,138 @@ class ExpenseViewSetTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
         self.assertEqual(response.data[0]['date'], '2024-08-25')
+class IncomeViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user, income categories, and token for authentication"""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+
+        # Create an income category
+        self.category = IncomeCategory.objects.create(name='Salary')
+
+    # Test Case 1: Successful retrieval of monthly incomes
+    # This test case checks if the API correctly returns all incomes (both regular and recurring) for a specific month.
+    def test_retrieve_incomes_for_month(self):
+        # Create two incomes: one recurring, one non-recurring
+        Income.objects.create(user=self.user, amount=3000, date=datetime(2024, 9, 15), is_recurring=False, category=self.category)
+        Income.objects.create(user=self.user, amount=2000, date=datetime(2024, 9, 1), is_recurring=True, category=self.category)
+
+        url = reverse('income-list')
+        response = self.client.get(url, {'year': 2024, 'month': 9})
+
+        # Check response status and the number of incomes returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    # Test Case 2: No incomes for the given month
+    # This test checks if the API returns an empty list when no incomes are present for the specified month.
+    def test_no_incomes_for_given_month(self):
+        url = reverse('income-list')
+        response = self.client.get(url, {'year': 2024, 'month': 10})
+        
+        # Ensure the response is successful and no incomes are returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+    # Test Case 3: Invalid year or month format
+    # This test checks if the API raises a validation error for invalid year or month format.
+    def test_invalid_year_and_month(self):
+        url = reverse('income-list')
+        response = self.client.get(url, {'year': 'invalid', 'month': 'invalid'})
+        
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('Invalid year or month format.', str(response.data))
+
+    # Test Case 4: Create non-recurring income
+    # This test case checks the creation of a non-recurring income with valid data.
+    def test_create_non_recurring_income(self):
+        url = reverse('income-list')
+        data = {
+            'amount': 3000,
+            'date': '2024-09-10',
+            'description': 'September Salary',
+            'category': self.category.id,
+            'is_recurring': False
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure the income is created successfully
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['amount'], '3000.00')
+
+    # Test Case 5: Create recurring income
+    # This test case checks the creation of a recurring income.
+    def test_create_recurring_income(self):
+        url = reverse('income-list')
+        data = {
+            'amount': 2000,
+            'date': '2024-09-01',
+            'description': 'Monthly Freelance Income',
+            'category': self.category.id,
+            'is_recurring': True
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure the recurring income is created successfully
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['amount'], '2000.00')
+        self.assertTrue(response.data['is_recurring'])
+
+    # Test Case 6: Create income with missing fields
+    # This test checks the validation error when required fields are missing during income creation.
+    def test_create_income_missing_fields(self):
+        url = reverse('income-list')
+        data = {
+            'amount': 3000,  # Missing date and category
+        }
+        response = self.client.post(url, data, format='json')
+
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('This field is required.', str(response.data))
+
+    # Test Case 7: Successful update of an income
+    # This test checks the update of an existing income with valid data.
+    def test_update_income(self):
+        income = Income.objects.create(user=self.user, amount=3000, date='2024-09-10', category=self.category)
+        url = reverse('income-detail', kwargs={'pk': income.id})
+        data = {
+            'amount': 3500,
+            'date': '2024-09-10',
+            'description': 'Updated September Salary',
+            'category': self.category.id
+        }
+        response = self.client.put(url, data, format='json')
+
+        # Ensure the income is updated successfully
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['amount'], '3500.00')
+
+    # Test Case 8: Delete income
+    # This test checks the deletion of an existing income.
+    def test_delete_income(self):
+        income = Income.objects.create(user=self.user, amount=3000, date='2024-09-10', category=self.category)
+        url = reverse('income-detail', kwargs={'pk': income.id})
+        
+        response = self.client.delete(url)
+
+        # Ensure the income is deleted successfully
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+    # Test Case 9: Create recurring income with effective date in change logs
+    # This test case checks if recurring income is correctly handled with effective dates from change logs.
+    def test_create_recurring_income_with_change_log(self):
+        income = Income.objects.create(user=self.user, amount=2000, date='2024-09-01', is_recurring=True, category=self.category)
+        IncomeRecurringChangeLog.objects.create(income=income, new_amount=2500, effective_date='2024-09-01')
+
+        url = reverse('income-list')
+        response = self.client.get(url, {'year': 2024, 'month': 9})
+
+        # Debug the response data to see what's being returned
+        print("Response data:", response.data)
+
+        # Ensure the income amount reflects the change log
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data[0]['amount'], '2500.00')

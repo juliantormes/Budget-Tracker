@@ -225,30 +225,29 @@ class IncomeViewSet(viewsets.ModelViewSet):
                 start_date = start_date.date()
                 end_date = end_date.date()
 
-                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date)
-
+                # Fetch monthly transactions but exclude recurring ones
+                monthly_transactions = queryset.filter(date__gte=start_date, date__lte=end_date, is_recurring=False)
+                
                 recurring_transactions = queryset.filter(is_recurring=True, date__lte=end_date)
                 recurring_incomes = []
 
+                recurring_ids = set()  # Track IDs to avoid duplication
+                
                 for income in recurring_transactions:
-                    change_log = income.change_logs.filter(
-                        effective_date__year=year, 
-                        effective_date__month=month
-                    ).first()
+                    if income.id not in recurring_ids:  # Avoid adding duplicates
+                        change_log = income.change_logs.filter(
+                            effective_date__year=year, 
+                            effective_date__month=month
+                        ).first()
 
-                    effective_amount = change_log.new_amount if change_log else income.amount
+                        effective_amount = change_log.new_amount if change_log else income.amount
 
-                    recurring_income = Income(
-                        id=income.id,
-                        user=income.user,
-                        category=income.category,
-                        amount=effective_amount,
-                        description=income.description,
-                        date=start_date,
-                        is_recurring=True,
-                    )
-                    recurring_incomes.append(recurring_income)
+                        # Update the original income object with the effective amount
+                        income.amount = effective_amount
+                        recurring_incomes.append(income)
+                        recurring_ids.add(income.id)
 
+                # Return only unique incomes
                 queryset = list(monthly_transactions) + recurring_incomes
 
             except ValueError:

@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from django.contrib.auth.models import User
 from rest_framework.authtoken.models import Token
 from django.urls import reverse
-from tracker.models import Expense, ExpenseRecurringChangeLog ,Income, IncomeRecurringChangeLog, ExpenseCategory
+from tracker.models import Expense, ExpenseRecurringChangeLog, Income, IncomeRecurringChangeLog, ExpenseCategory
 from datetime import datetime
 
 class AuthViewsTest(APITestCase):
@@ -116,29 +116,20 @@ class UpdateRecurringExpenseTest(APITestCase):
         self.client.login(username='testuser', password='password')
 
         self.expense = Expense.objects.create(user=self.user, amount=100, description='Test Expense')
-
         self.url = reverse('update_recurring_expense', kwargs={'expense_id': self.expense.id})
 
     def test_successful_update_existing_log(self):
         """Test updating an existing recurring expense log with all fields"""
         log = ExpenseRecurringChangeLog.objects.create(expense=self.expense, new_amount=150, effective_date='2024-09-20')
 
-        data = {
-            'new_amount': 200,
-            'effective_date': '2024-09-20'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '2024-09-20'}
         response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['new_amount'], '200.00')
 
     def test_create_new_log(self):
         """Test creating a new recurring expense log"""
-        data = {
-            'new_amount': 200,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '2024-10-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['new_amount'], '200.00')
@@ -146,10 +137,7 @@ class UpdateRecurringExpenseTest(APITestCase):
 
     def test_missing_effective_date(self):
         """Test that the effective_date field is required"""
-        data = {
-            'new_amount': 200
-        }
-
+        data = {'new_amount': 200}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -157,11 +145,7 @@ class UpdateRecurringExpenseTest(APITestCase):
 
     def test_invalid_effective_date_format(self):
         """Test validation of effective_date format"""
-        data = {
-            'new_amount': 200,
-            'effective_date': '01/10/2024'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '01/10/2024'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -170,34 +154,21 @@ class UpdateRecurringExpenseTest(APITestCase):
     def test_invalid_expense_id(self):
         """Test using an invalid or non-existent expense ID (404)"""
         url = reverse('update_recurring_expense', kwargs={'expense_id': 9999})
-        data = {
-            'new_amount': 200,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '2024-10-01'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_without_authentication(self):
         """Test that updating without being authenticated returns a 403 error"""
         self.client.logout()
-
-        data = {
-            'new_amount': 200,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '2024-10-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_partial_update(self):
         """Test that partial updates (i.e., missing fields) are not allowed"""
         log = ExpenseRecurringChangeLog.objects.create(expense=self.expense, new_amount=150, effective_date='2024-09-20')
-
-        data = {
-            'new_amount': 250
-        }
-
+        data = {'new_amount': 250}
         response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -206,23 +177,14 @@ class UpdateRecurringExpenseTest(APITestCase):
     def test_create_log_existing_effective_date(self):
         """Test creating a log with an effective_date that already exists"""
         ExpenseRecurringChangeLog.objects.create(expense=self.expense, new_amount=150, effective_date='2024-09-20')
-
-        data = {
-            'new_amount': 200,
-            'effective_date': '2024-09-20'
-        }
-
+        data = {'new_amount': 200, 'effective_date': '2024-09-20'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['new_amount'], '200.00')
 
     def test_create_log_future_effective_date(self):
         """Test creating a log with a future effective date"""
-        data = {
-            'new_amount': 300,
-            'effective_date': '2025-01-01'
-        }
-
+        data = {'new_amount': 300, 'effective_date': '2025-01-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['new_amount'], '300.00')
@@ -233,29 +195,20 @@ class UpdateRecurringIncomeTest(APITestCase):
         self.client.login(username='testuser', password='password')
 
         self.income = Income.objects.create(user=self.user, amount=1000, description='Test Income')
-
         self.url = reverse('update_recurring_income', kwargs={'income_id': self.income.id})
 
     def test_successful_update_existing_log(self):
         """Test updating an existing recurring income log successfully"""
         log = IncomeRecurringChangeLog.objects.create(income=self.income, new_amount=1200, effective_date='2024-09-20')
 
-        data = {
-            'new_amount': 1500,
-            'effective_date': '2024-09-20'
-        }
-
+        data = {'new_amount': 1500, 'effective_date': '2024-09-20'}
         response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['new_amount'], '1500.00')
 
     def test_create_new_log(self):
         """Test creating a new recurring income log"""
-        data = {
-            'new_amount': 2000,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 2000, 'effective_date': '2024-10-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['new_amount'], '2000.00')
@@ -263,10 +216,7 @@ class UpdateRecurringIncomeTest(APITestCase):
 
     def test_missing_effective_date(self):
         """Test that the effective_date field is required"""
-        data = {
-            'new_amount': 1500
-        }
-
+        data = {'new_amount': 1500}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -274,11 +224,7 @@ class UpdateRecurringIncomeTest(APITestCase):
 
     def test_invalid_effective_date_format(self):
         """Test validation of effective_date format"""
-        data = {
-            'new_amount': 1500,
-            'effective_date': '01/10/2024'
-        }
-
+        data = {'new_amount': 1500, 'effective_date': '01/10/2024'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('error', response.data)
@@ -287,63 +233,37 @@ class UpdateRecurringIncomeTest(APITestCase):
     def test_invalid_income_id(self):
         """Test using an invalid or non-existent income ID (404)"""
         url = reverse('update_recurring_income', kwargs={'income_id': 9999})
-        data = {
-            'new_amount': 2000,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 2000, 'effective_date': '2024-10-01'}
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_update_without_authentication(self):
         """Test that updating without being authenticated returns a 403 error"""
         self.client.logout()
-
-        data = {
-            'new_amount': 1500,
-            'effective_date': '2024-10-01'
-        }
-
+        data = {'new_amount': 1500, 'effective_date': '2024-10-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_partial_update(self):
         """Test that partial updates (i.e., missing fields) are not allowed"""
         log = IncomeRecurringChangeLog.objects.create(income=self.income, new_amount=1200, effective_date='2024-09-20')
-
-        data = {
-            'new_amount': 1800
-        }
-
+        data = {'new_amount': 1800}
         response = self.client.put(self.url, data, format='json')
-        
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        
         self.assertIn('error', response.data)
-        
         self.assertEqual(response.data['error'], 'Effective date is required.')
-
 
     def test_create_log_existing_effective_date(self):
         """Test creating a log with an effective_date that already exists"""
         IncomeRecurringChangeLog.objects.create(income=self.income, new_amount=1200, effective_date='2024-09-20')
-
-        data = {
-            'new_amount': 1500,
-            'effective_date': '2024-09-20'
-        }
-
+        data = {'new_amount': 1500, 'effective_date': '2024-09-20'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['new_amount'], '1500.00')
 
     def test_create_log_future_effective_date(self):
         """Test creating a log with a future effective date"""
-        data = {
-            'new_amount': 2500,
-            'effective_date': '2025-01-01'
-        }
-
+        data = {'new_amount': 2500, 'effective_date': '2025-01-01'}
         response = self.client.post(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['new_amount'], '2500.00')

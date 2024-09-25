@@ -99,6 +99,12 @@ class Expense(models.Model):
             raise ValidationError("Expense amount cannot be negative.")
         
     def save(self, *args, **kwargs):
+        
+        if isinstance(self.amount, float):
+            self.amount = Decimal(self.amount)
+
+        if isinstance(self.surcharge, float):
+            self.surcharge = Decimal(self.surcharge)
         if not self.pay_with_credit_card:
             self.credit_card = None
             self.installments = 1

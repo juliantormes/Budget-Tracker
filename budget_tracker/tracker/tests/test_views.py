@@ -879,3 +879,123 @@ class IncomeCategoryViewSetTestCase(APITestCase):
         # Ensure the other user's category is not returned
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)  # Only the current user's categories
+class CreditCardExpenseViewSetTestCase(APITestCase):
+
+    def setUp(self):
+        """Set up a test user, credit card, and expenses"""
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.client.force_authenticate(user=self.user)
+
+        # Create a credit card for the user
+        self.credit_card = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='1234',
+            brand='Visa',
+            expire_date=datetime(2025, 12, 31),
+            credit_limit=5000.00,
+            payment_day=15,
+            close_card_day=25
+        )
+
+        # Create credit card expenses (pay_with_credit_card = True)
+        self.expense1 = Expense.objects.create(
+            user=self.user,
+            description='Single installment expense',
+            amount=100.00,
+            date=make_aware(datetime(2024, 8, 15)),
+            credit_card=self.credit_card,
+            installments=1,
+            pay_with_credit_card=True
+        )
+
+        self.expense2 = Expense.objects.create(
+            user=self.user,
+            description='Recurring expense',
+            amount=50.00,
+            date=make_aware(datetime(2024, 7, 1)),
+            is_recurring=True,
+            credit_card=self.credit_card,
+            installments=1,
+            pay_with_credit_card=True
+        )
+
+        self.expense3 = Expense.objects.create(
+            user=self.user,
+            description='Multi-installment expense',
+            amount=300.00,
+            date=make_aware(datetime(2024, 7, 10)),
+            end_date=make_aware(datetime(2024, 12, 10)),
+            credit_card=self.credit_card,
+            installments=6,
+            pay_with_credit_card=True
+        )
+
+        # Create a non-credit card expense (pay_with_credit_card = False)
+        self.expense4 = Expense.objects.create(
+            user=self.user,
+            description='Non-credit card expense',
+            amount=150.00,
+            date=make_aware(datetime(2024, 8, 20)),
+            credit_card=None,  # Not linked to a credit card
+            installments=1,
+            pay_with_credit_card=False
+        )
+
+    # Test Case 1: Retrieve all credit card expenses for the current month
+    def test_retrieve_credit_card_expenses_for_current_month(self):
+        """Test retrieving credit card expenses for the current month"""
+        url = reverse('credit-card-expense-list') + f'?year=2024&month=8'
+        response = self.client.get(url)
+
+        # Debug the response to verify what is returned
+        print("Response data for current month:", response.data)
+
+        # Check response status and number of credit card expenses returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Expecting 3 expenses: the single installment, the recurring, and the multi-installment expense
+        self.assertEqual(len(response.data), 3)
+
+    # Test Case 2: Retrieve credit card expenses for a past month
+    def test_retrieve_credit_card_expenses_for_past_month(self):
+        """Test retrieving credit card expenses for a past month"""
+        url = reverse('credit-card-expense-list') + f'?year=2024&month=7'
+        response = self.client.get(url)
+        # Check response status and number of credit card expenses returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)  # Should return the recurring and multi-installment expenses for July (expense2 and expense3)
+
+    # Test Case 3: Retrieve credit card expenses with multi-installments
+    def test_retrieve_credit_card_expenses_with_installments(self):
+        """Test retrieving credit card expenses with multiple installments"""
+        # Modify the URL to filter for installments > 1 (installments query param)
+        url = reverse('credit-card-expense-list') + '?installments_gt=1'  # Assuming installments_gt is the query param you're using
+        response = self.client.get(url)
+
+        # Print the response data for debugging
+        print("Response data for installments:", response.data)
+
+        # Check response status and number of expenses returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        
+        # Expecting only multi-installment expenses in the result
+        self.assertEqual(len(response.data), 1)  # Should return only the multi-installment expense
+
+    # Test Case 4: Test when no expenses exist for a given month
+    def test_retrieve_credit_card_expenses_no_results(self):
+        """Test retrieving credit card expenses when no expenses exist for a given month"""
+        # Query a month before the first expense is added (June 2024)
+        url = reverse('credit-card-expense-list') + f'?year=2024&month=6'
+        response = self.client.get(url)
+
+        # Check response status and ensure no expenses are returned
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)  # Should return no expenses
+
+    # Test Case 5: Invalid year and month parameters
+    def test_retrieve_credit_card_expenses_invalid_year_month(self):
+        """Test retrieving credit card expenses with invalid year and month"""
+        url = reverse('credit-card-expense-list') + f'?year=abcd&month=12'
+        response = self.client.get(url)
+        # Ensure validation error is raised
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

@@ -105,16 +105,15 @@ def update_recurring_expense(request, expense_id):
 @permission_classes([IsAuthenticated])
 def update_recurring_income(request, income_id):
     try:
-        # Retrieve the income or return a 404 error if not found
+        # First check if the income exists
         income = get_object_or_404(Income, id=income_id, user=request.user)
         
-        # Extract the effective_date from the request data
+        # Then proceed with other validation
         effective_date_str = request.data.get('effective_date')
         if not effective_date_str:
             return Response({"error": "Effective date is required."}, status=status.HTTP_400_BAD_REQUEST)
         
         try:
-            # Convert the effective date string to a datetime object
             effective_date = datetime.strptime(effective_date_str, '%Y-%m-%d').date()
         except ValueError:
             return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=status.HTTP_400_BAD_REQUEST)
@@ -126,11 +125,9 @@ def update_recurring_income(request, income_id):
         ).first()
 
         if existing_log:
-            # Update the existing record if found
-            serializer = IncomeRecurringChangeLogSerializer(existing_log, data=request.data, partial=True)
+            serializer = IncomeRecurringChangeLogSerializer(existing_log, data=request.data)
         else:
-            # Create a new record if no log exists
-            serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})
+            serializer = IncomeRecurringChangeLogSerializer(data=request.data, context={'income': income})  # Ensure this always passes the income object
 
         if serializer.is_valid():
             serializer.save(income=income)
@@ -138,6 +135,8 @@ def update_recurring_income(request, income_id):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    except Http404:
+        return Response({'error': 'Income not found.'}, status=status.HTTP_404_NOT_FOUND)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 

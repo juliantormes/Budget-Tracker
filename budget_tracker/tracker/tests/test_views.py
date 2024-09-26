@@ -881,7 +881,6 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)  # Should return only the multi-installment expense
-
     # Test Case 4: Test when no expenses exist for a given month
     def test_retrieve_credit_card_expenses_no_results(self):
         """Test retrieving credit card expenses when no expenses exist for a given month"""

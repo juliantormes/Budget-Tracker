@@ -2,7 +2,6 @@ from django.db import models
 from django.conf import settings
 from decimal import Decimal
 from django.utils import timezone
-from .utils import calculate_total_payment_with_surcharge
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
 from django.core.exceptions import ValidationError
 from datetime import date

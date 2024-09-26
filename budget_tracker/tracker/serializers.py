@@ -69,16 +69,26 @@ class IncomeRecurringChangeLogSerializer(serializers.ModelSerializer):
             'income': {'read_only': True},
         }
 
-def validate_effective_date(self, value):
-    income = getattr(self.instance, 'income', None) or self.context.get('income')
-    if not income:
-        raise serializers.ValidationError("Income data is missing.")
-    
-    # Ensure the effective date is not before the original income date
-    if value < income.date:
-        raise serializers.ValidationError("Effective date cannot be earlier than the start date of the income.")
-    
-    return value
+    def validate_effective_date(self, value):
+        income = getattr(self.instance, 'income', None) or self.context.get('income')
+        if not income:
+            raise serializers.ValidationError("Income data is missing.")
+        
+        # Ensure both dates are of the same type
+        if isinstance(value, datetime):
+            value = value.date()
+        
+        if isinstance(income.date, datetime):
+            income_date = income.date.date()
+        else:
+            income_date = income.date
+
+        # Ensure the effective date is not before the original income date
+        if value < income_date:
+            raise serializers.ValidationError("Effective date cannot be earlier than the start date of the income.")
+        
+        return value
+
 
 class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
@@ -88,16 +98,26 @@ class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
             'expense': {'read_only': True},
         }
 
-def validate_effective_date(self, value):
-    expense = getattr(self.instance, 'expense', None) or self.context.get('expense')
-    print("Expense in validation:", expense)
-    if not expense:
-        raise serializers.ValidationError("Expense data is missing.")
-    
-    if value < expense.date:
-        raise serializers.ValidationError("Effective date cannot be earlier than the start date of the expense.")
-    
-    return value
+    def validate_effective_date(self, value):
+        expense = getattr(self.instance, 'expense', None) or self.context.get('expense')
+
+        if not expense:
+            raise serializers.ValidationError("Expense data is missing.")
+        
+        # Ensure both dates are of the same type
+        if isinstance(value, datetime):
+            value = value.date()
+        
+        if isinstance(expense.date, datetime):
+            expense_date = expense.date.date()
+        else:
+            expense_date = expense.date
+
+        # Ensure the effective date is not before the original expense date
+        if value < expense_date:
+            raise serializers.ValidationError("Effective date cannot be earlier than the start date of the expense.")
+        
+        return value
  
 class IncomeSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)

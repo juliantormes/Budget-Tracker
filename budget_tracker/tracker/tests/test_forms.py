@@ -3,7 +3,7 @@ django.setup()
 from django.test import TestCase
 from django.utils import timezone
 from decimal import Decimal
-from tracker.forms import IncomeCategoryForm, ExpenseCategoryForm, ExpenseForm, IncomeForm
+from tracker.forms import IncomeCategoryForm, ExpenseCategoryForm, ExpenseForm, IncomeForm, CreditCardForm
 from tracker.models import IncomeCategory, ExpenseCategory, CreditCard
 from datetime import datetime, timedelta
 from django.contrib.auth import get_user_model
@@ -434,7 +434,6 @@ class IncomeFormTest(TestCase):
         # Assert that the correct error message is raised
         self.assertIn('__all__', form.errors)
         self.assertIn('Income date cannot be in the future.', form.errors['__all__'])
-
     def test_income_form_description_max_length(self):
         """Test that the form validates the max length for description."""
         form_data = {
@@ -447,3 +446,119 @@ class IncomeFormTest(TestCase):
         form = IncomeForm(data=form_data, user=self.user)
         self.assertFalse(form.is_valid())
         self.assertIn('description', form.errors)
+class CreditCardFormTest(TestCase):
+
+    def setUp(self):
+        """Set up test data."""
+        self.valid_data = {
+            'last_four_digits': '1234',
+            'brand': 'Visa',
+            'expire_date': '12/25',  # MM/YY format
+            'credit_limit': '5000.00',
+            'payment_day': 15,
+            'close_card_day': 10
+        }
+
+    def test_credit_card_form_saves_with_valid_data(self):
+        """Test that the credit card form saves correctly with valid data."""
+        form = CreditCardForm(data=self.valid_data)
+        self.assertTrue(form.is_valid(), form.errors)
+        credit_card = form.save()
+        self.assertEqual(credit_card.last_four_digits, '1234')
+        self.assertEqual(credit_card.brand, 'Visa')
+        self.assertEqual(credit_card.credit_limit, Decimal('5000.00'))
+        self.assertEqual(credit_card.payment_day, 15)
+        self.assertEqual(credit_card.close_card_day, 10)
+
+    def test_credit_card_form_fails_with_expired_date(self):
+        """Test that the credit card form fails with an expired card date."""
+        expired_date = (datetime.now() - timedelta(days=365)).strftime('%m/%y')  # One year ago
+        data = self.valid_data.copy()
+        data['expire_date'] = expired_date
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('expire_date', form.errors)
+        self.assertIn('The credit card has expired.', form.errors['expire_date'])
+
+    def test_credit_card_form_fails_with_invalid_expiry_format(self):
+        """Test that the credit card form fails with an invalid expiry format."""
+        data = self.valid_data.copy()
+        data['expire_date'] = '13/25'  # Invalid month
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('expire_date', form.errors)
+
+    def test_credit_card_form_fails_with_payment_day_before_close_day(self):
+        """Test that the form fails if the payment day is before the close card day."""
+        data = self.valid_data.copy()
+        data['payment_day'] = 5  # Payment day before close card day
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('__all__', form.errors)
+        self.assertIn('Payment day must be after the card closing day.', form.errors['__all__'])
+
+    def test_credit_card_form_fails_with_out_of_range_days(self):
+        """Test that the form fails with out-of-range values for payment or close days."""
+        # Payment day out of range
+        data = self.valid_data.copy()
+        data['payment_day'] = 32  # Invalid day
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('payment_day', form.errors)
+
+        # Close card day out of range
+        data['payment_day'] = 15  # Valid
+        data['close_card_day'] = 0  # Invalid day
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('close_card_day', form.errors)
+
+    def test_credit_card_form_fails_with_invalid_last_four_digits(self):
+        """Test that the form fails when last four digits are not exactly four digits."""
+        data = self.valid_data.copy()
+        data['last_four_digits'] = '12'  # Too short
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('last_four_digits', form.errors)
+
+    def test_credit_card_form_saves_with_edge_days(self):
+        """Test that the form saves correctly when edge days (1st and 31st) are used."""
+        data = self.valid_data.copy()
+        data['payment_day'] = 31
+        data['close_card_day'] = 1
+        form = CreditCardForm(data=data)
+        self.assertTrue(form.is_valid(), form.errors)
+        credit_card = form.save()
+        self.assertEqual(credit_card.payment_day, 31)
+        self.assertEqual(credit_card.close_card_day, 1)
+    def test_credit_card_form_negative_credit_limit(self):
+        """Test that the credit card form fails when the credit limit is negative."""
+        data = self.valid_data.copy()
+        data['credit_limit'] = -5000
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('credit_limit', form.errors)
+    def test_credit_card_form_max_credit_limit(self):
+        """Test that the credit card form is valid for large credit limits."""
+        data = self.valid_data.copy()
+        data['credit_limit'] = 9999999
+        form = CreditCardForm(data=data)
+        self.assertTrue(form.is_valid())
+    def test_credit_card_form_payment_day_equals_close_day(self):
+        """Test that the credit card form fails when the payment day and close card day are the same."""
+        data = self.valid_data.copy()
+        data['payment_day'] = 15
+        data['close_card_day'] = 15
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('__all__', form.errors)
+    def test_credit_card_form_invalid_day_range(self):
+        """Test that the credit card form fails if payment or close card day is out of the valid range."""
+        data = self.valid_data.copy()
+        data['payment_day'] = 32  # Invalid day
+        data['close_card_day'] = 0  # Invalid day
+        form = CreditCardForm(data=data)
+        self.assertFalse(form.is_valid())
+        self.assertIn('payment_day', form.errors)
+        self.assertIn('close_card_day', form.errors)
+

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import forms
 from django.utils import timezone
 from .models import Expense, Income, ExpenseCategory, IncomeCategory, CreditCard
@@ -94,7 +95,6 @@ class IncomeForm(forms.ModelForm):
         if not cleaned_data.get('date'):
             cleaned_data['date'] = timezone.now().date()
         return cleaned_data
-
 class CreditCardForm(forms.ModelForm):
     expire_date = forms.DateField(
         input_formats=['%m/%y'], 
@@ -106,3 +106,22 @@ class CreditCardForm(forms.ModelForm):
     class Meta:
         model = CreditCard
         fields = ['last_four_digits', 'brand', 'expire_date', 'credit_limit', 'payment_day', 'close_card_day']
+
+    def clean(self):
+        cleaned_data = super().clean()
+        payment_day = cleaned_data.get('payment_day')
+        close_card_day = cleaned_data.get('close_card_day')
+
+        if payment_day and close_card_day:
+            if payment_day <= close_card_day:
+                raise forms.ValidationError("Payment day must be after the card closing day.")
+        return cleaned_data
+
+    def clean_expire_date(self):
+        expire_date = self.cleaned_data.get('expire_date')
+        if expire_date:
+            today = datetime.now().date()
+            expire_last_day = expire_date.replace(day=1) + relativedelta(months=1, days=-1)  # Last day of the expiration month
+            if expire_last_day < today:
+                raise forms.ValidationError("The credit card has expired.")
+        return expire_date

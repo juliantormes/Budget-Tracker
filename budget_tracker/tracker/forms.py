@@ -51,17 +51,20 @@ class ExpenseForm(forms.ModelForm):
 
     def save(self, commit=True):
         expense = super().save(commit=False)
-        if expense.is_recurring and expense.credit_card and expense.installments:
-            P = expense.amount
-            R = Decimal(expense.surcharge) / Decimal(100)
-            T = Decimal(expense.installments) / Decimal(12)
-            SI = P * R * T
+
+        # Apply surcharge for credit card payments with any number of installments
+        if expense.credit_card and expense.installments and expense.installments > 1:
+            P = expense.amount  # Principal amount
+            R = Decimal(expense.surcharge) / Decimal(100)  # Surcharge rate
+            T = Decimal(expense.installments) / Decimal(12)  # Time period in years
+            SI = P * R * T  # Simple interest calculation
             total_amount = P + SI
             expense.amount = total_amount
 
-        if expense.is_recurring and expense.credit_card and expense.installments:
-            expense.end_date = expense.date + relativedelta(months=expense.installments-1)
-        
+        # Set the end_date for expenses with multiple installments
+        if expense.credit_card and expense.installments and expense.installments > 1:
+            expense.end_date = expense.date + relativedelta(months=expense.installments - 1)
+
         if commit:
             expense.save()
         return expense
@@ -73,19 +76,24 @@ class IncomeCategoryForm(forms.ModelForm):
 
 class IncomeForm(forms.ModelForm):
     is_recurring = forms.BooleanField(required=False, label='Is recurring monthly? (e.g., subscription fees, salary).')
+    date = forms.DateField(required=False, widget=forms.DateInput(attrs={'type': 'date'}))  # Make date optional
 
     class Meta:
         model = Income
         fields = ['category', 'description', 'amount', 'date', 'is_recurring']
-        widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user')
         super().__init__(*args, **kwargs)
         self.fields['category'].queryset = IncomeCategory.objects.filter(user=user)
         self.fields['date'].initial = timezone.now().date()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Ensure date defaults to today if not provided
+        if not cleaned_data.get('date'):
+            cleaned_data['date'] = timezone.now().date()
+        return cleaned_data
 
 class CreditCardForm(forms.ModelForm):
     expire_date = forms.DateField(

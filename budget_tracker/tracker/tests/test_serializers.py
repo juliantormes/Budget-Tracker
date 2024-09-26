@@ -1,15 +1,18 @@
 import django
 django.setup()
 from django.contrib.auth.models import User
-from rest_framework.test import APITestCase
-from tracker.serializers import UserSerializer, SignUpSerializer, LoginSerializer, ExpenseCategorySerializer, IncomeCategorySerializer,CreditCardSerializer, IncomeRecurringChangeLogSerializer, ExpenseRecurringChangeLogSerializer
+from django.test import TestCase
+from tracker.serializers import UserSerializer, SignUpSerializer, LoginSerializer, ExpenseCategorySerializer, IncomeCategorySerializer,CreditCardSerializer, IncomeRecurringChangeLogSerializer, ExpenseRecurringChangeLogSerializer, IncomeSerializer, ExpenseSerializer
 from tracker.models import IncomeRecurringChangeLog, ExpenseRecurringChangeLog, Income, Expense, ExpenseCategory, IncomeCategory, CreditCard
 from django.utils import timezone
 from decimal import Decimal
-from datetime import datetime
+from datetime import datetime,date ,timedelta
+from rest_framework.test import APIRequestFactory
+from rest_framework.exceptions import ValidationError
+from rest_framework.request import Request
 
 
-class UserSerializerTest(APITestCase):
+class UserSerializerTest(TestCase):
 
     def setUp(self):
         """Set up a user to test serialization."""
@@ -34,7 +37,7 @@ class UserSerializerTest(APITestCase):
             'username': 'partialuser'
         }
         self.assertEqual(serializer.data, expected_data)
-class SignUpSerializerTest(APITestCase):
+class SignUpSerializerTest(TestCase):
 
     def test_create_user(self):
         """Test if the SignUpSerializer correctly creates a user."""
@@ -74,7 +77,7 @@ class SignUpSerializerTest(APITestCase):
         self.assertFalse(serializer.is_valid())
         self.assertIn('username', serializer.errors)
 
-class LoginSerializerTest(APITestCase):
+class LoginSerializerTest(TestCase):
 
     def test_login_serializer(self):
         """Test if the LoginSerializer validates and returns the correct data."""
@@ -102,7 +105,7 @@ class LoginSerializerTest(APITestCase):
         serializer = LoginSerializer(data=data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('password', serializer.errors)
-class ExpenseCategorySerializerTest(APITestCase):
+class ExpenseCategorySerializerTest(TestCase):
     
     def setUp(self):
         """Set up a test user and expense category"""
@@ -142,7 +145,7 @@ class ExpenseCategorySerializerTest(APITestCase):
         self.assertIn('name', serializer.errors)
 
 
-class IncomeCategorySerializerTest(APITestCase):
+class IncomeCategorySerializerTest(TestCase):
     
     def setUp(self):
         """Set up a test user and income category"""
@@ -178,7 +181,7 @@ class IncomeCategorySerializerTest(APITestCase):
         serializer = IncomeCategorySerializer(data=invalid_data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('name', serializer.errors)
-class CreditCardSerializerTest(APITestCase):
+class CreditCardSerializerTest(TestCase):
 
     def setUp(self):
         self.valid_data = {
@@ -232,7 +235,7 @@ class CreditCardSerializerTest(APITestCase):
         serializer = CreditCardSerializer(data=invalid_data)
         self.assertFalse(serializer.is_valid())
         self.assertIn('payment_day', serializer.errors)
-class IncomeRecurringChangeLogSerializerTest(APITestCase):
+class IncomeRecurringChangeLogSerializerTest(TestCase):
 
     def setUp(self):
         self.income = Income.objects.create(
@@ -282,7 +285,7 @@ class IncomeRecurringChangeLogSerializerTest(APITestCase):
         self.assertEqual(serializer.data['income'], self.income.id)
 
 
-class ExpenseRecurringChangeLogSerializerTest(APITestCase):
+class ExpenseRecurringChangeLogSerializerTest(TestCase):
 
     def setUp(self):
         self.expense = Expense.objects.create(
@@ -334,3 +337,201 @@ class ExpenseRecurringChangeLogSerializerTest(APITestCase):
         )
         serializer = ExpenseRecurringChangeLogSerializer(expense_change_log)
         self.assertEqual(serializer.data['expense'], self.expense.id)
+class IncomeSerializerTestCase(TestCase):
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.category = IncomeCategory.objects.create(name="Salary", user=self.user)
+        self.factory = APIRequestFactory()
+
+    def test_income_serializer_positive_amount(self):
+        """Test that the serializer validates positive amounts."""
+        data = {
+            'amount': 1000,
+            'date': date.today(),
+            'category': self.category.id,
+            'description': 'Monthly salary',
+            'is_recurring': True,
+        }
+        serializer = IncomeSerializer(data=data, context={'request': None})
+        self.assertTrue(serializer.is_valid())
+
+        data['amount'] = -1000  # Invalid negative amount
+        serializer = IncomeSerializer(data=data, context={'request': None})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('amount', serializer.errors)
+
+    def test_income_serializer_date_in_future(self):
+        """Test that the date cannot be set in the future."""
+        data = {
+            'amount': 1000,
+            'date': date.today() + timedelta(days=1),  # Future date
+            'category': self.category.id,
+            'description': 'Bonus',
+            'is_recurring': False,
+        }
+        serializer = IncomeSerializer(data=data, context={'request': None})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('date', serializer.errors)
+
+    def test_income_serializer_user_and_category_read_only(self):
+        """Test that the user and category_name fields are read-only."""
+        income = Income.objects.create(
+            user=self.user,
+            amount=1000,
+            date=date.today(),
+            category=self.category,
+            description='Monthly salary',
+            is_recurring=True
+        )
+        serializer = IncomeSerializer(income, data={'user': self.user.id, 'category_name': 'Changed'}, partial=True)
+        self.assertTrue(serializer.is_valid())
+        # Check that user and category_name were not altered
+        self.assertEqual(serializer.validated_data.get('user'), None)  # User is read-only
+        self.assertNotIn('category_name', serializer.validated_data)  # Category name is read-only
+
+    def test_income_serializer_effective_amount(self):
+        """Test that the effective amount is calculated based on the check_date."""
+        income = Income.objects.create(
+            user=self.user,
+            amount=1000,
+            date=date.today() - timedelta(days=30),
+            category=self.category,
+            description='Monthly salary',
+            is_recurring=True
+        )
+
+        # Create a WSGIRequest and then wrap it in DRF's Request object
+        wsgi_request = self.factory.get('/income/', {'date': str(date.today())})
+        request = Request(wsgi_request)  # Wrap in DRF Request
+        
+        serializer = IncomeSerializer(income, context={'request': request})
+        effective_amount = serializer.data['effective_amount']
+        
+        # Assuming `get_effective_amount` in the model adjusts amount based on the date
+        self.assertEqual(effective_amount, income.amount)  # Modify based on logic in `get_effective_amount`
+
+    def test_income_serializer_invalid_date_format(self):
+        """Test that the serializer raises an error for invalid date format."""
+        income = Income.objects.create(
+            user=self.user,
+            amount=1000,
+            date=date.today(),
+            category=self.category,
+            description='Monthly salary',
+            is_recurring=True
+        )
+
+        wsgi_request = self.factory.get('/income/', {'date': 'invalid-date'})
+        request = Request(wsgi_request)  # Wrap WSGIRequest in DRF Request
+
+        serializer = IncomeSerializer(income, context={'request': request})
+
+        with self.assertRaises(ValidationError):
+            serializer.data['effective_amount']  # This should raise the ValidationError for invalid date format
+class ExpenseSerializerTestCase(TestCase):
+    
+    def setUp(self):
+        self.user = User.objects.create_user(username='testuser', password='password')
+        self.category = ExpenseCategory.objects.create(name='Transport', user=self.user)
+        self.credit_card = CreditCard.objects.create(
+            user=self.user,
+            last_four_digits='1234',
+            brand='Visa',
+            expire_date='2025-12-31',
+            credit_limit=5000.00,
+            payment_day=15,
+            close_card_day=25
+        )
+        self.factory = APIRequestFactory()
+
+    def test_valid_expense_creation(self):
+        """Test valid expense creation"""
+        data = {
+            'category': self.category.id,
+            'description': 'Bus fare',
+            'amount': 100.00,
+            'date': date.today(),
+            'pay_with_credit_card': False
+        }
+        serializer = ExpenseSerializer(data=data, context={'request': self.factory.get('/expenses/')})
+        self.assertTrue(serializer.is_valid(), serializer.errors)
+        expense = serializer.save()
+        self.assertEqual(expense.amount, Decimal('100.00'))
+
+    def test_invalid_recurring_expense_with_installments(self):
+        """Test that recurring expenses cannot have more than 1 installment"""
+        data = {
+            'category': self.category.id,
+            'description': 'Gym subscription',
+            'amount': 200.00,
+            'date': date.today(),
+            'is_recurring': True,
+            'installments': 3,
+            'pay_with_credit_card': False
+        }
+        serializer = ExpenseSerializer(data=data, context={'request': self.factory.get('/expenses/')})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+        self.assertEqual(serializer.errors['non_field_errors'][0], 'Recurring expenses cannot have more than 1 installment.')
+
+    def test_missing_credit_card_for_payment(self):
+        """Test that a credit card is required when paying with a credit card"""
+        data = {
+            'category': self.category.id,
+            'description': 'Flight ticket',
+            'amount': 500.00,
+            'date': date.today(),
+            'pay_with_credit_card': True,
+            'installments': 1
+        }
+        serializer = ExpenseSerializer(data=data, context={'request': self.factory.get('/expenses/')})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+        self.assertEqual(serializer.errors['non_field_errors'][0], "Credit card must be provided if paying with credit card.")
+
+    def test_credit_limit_exceeded(self):
+        """Test that the serializer raises a validation error if credit limit is exceeded"""
+        data = {
+            'category': self.category.id,
+            'description': 'Laptop purchase',
+            'amount': 6000.00,  # Amount exceeds credit limit
+            'date': date.today(),
+            'pay_with_credit_card': True,
+            'credit_card_id': self.credit_card.id,
+            'surcharge': 5.00,
+            'installments': 1
+        }
+        serializer = ExpenseSerializer(data=data, context={'request': self.factory.get('/expenses/')})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('non_field_errors', serializer.errors)
+        self.assertIn('Credit limit exceeded.', serializer.errors['non_field_errors'][0])
+
+    def test_effective_amount_calculation(self):
+        """Test the effective amount calculation based on the query parameter date"""
+        expense = Expense.objects.create(
+            user=self.user,
+            category=self.category,
+            description='Monthly rent',
+            amount=1000.00,
+            date=date.today(),
+            is_recurring=True
+        )
+        request = Request(self.factory.get('/expenses/', {'date': '2024-01-01'}))
+        serializer = ExpenseSerializer(expense, context={'request': request})
+        effective_amount = serializer.data['effective_amount']
+        self.assertEqual(effective_amount, expense.get_effective_amount(date(2024, 1, 1)))
+
+    def test_invalid_amount(self):
+        """Test that amount must be a positive number"""
+        data = {
+            'category': self.category.id,
+            'description': 'Groceries',
+            'amount': -50.00,  # Negative amount should fail
+            'date': date.today(),
+            'pay_with_credit_card': False
+        }
+        serializer = ExpenseSerializer(data=data, context={'request': self.factory.get('/expenses/')})
+        self.assertFalse(serializer.is_valid())
+        self.assertIn('amount', serializer.errors)
+        self.assertEqual(serializer.errors['amount'][0], 'Amount must be a positive number.')

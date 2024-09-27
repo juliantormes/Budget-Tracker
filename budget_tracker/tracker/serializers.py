@@ -89,7 +89,6 @@ class IncomeRecurringChangeLogSerializer(serializers.ModelSerializer):
         
         return value
 
-
 class ExpenseRecurringChangeLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExpenseRecurringChangeLog

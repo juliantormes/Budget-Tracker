@@ -115,14 +115,12 @@ class UpdateRecurringExpenseTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.login(username='testuser', password='password')
-
-        self.expense = Expense.objects.create(user=self.user, amount=100, description='Test Expense')
+        self.expense = Expense.objects.create(user=self.user, amount=100, description='Test Expense', date='2024-09-01')
         self.url = reverse('update_recurring_expense', kwargs={'expense_id': self.expense.id})
 
     def test_successful_update_existing_log(self):
         """Test updating an existing recurring expense log with all fields"""
         log = ExpenseRecurringChangeLog.objects.create(expense=self.expense, new_amount=150, effective_date='2024-09-20')
-
         data = {'new_amount': 200, 'effective_date': '2024-09-20'}
         response = self.client.put(self.url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -194,8 +192,7 @@ class UpdateRecurringIncomeTest(APITestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='testuser', password='password')
         self.client.login(username='testuser', password='password')
-
-        self.income = Income.objects.create(user=self.user, amount=1000, description='Test Income')
+        self.income = Income.objects.create(user=self.user, amount=1000, description='Test Income', date='2024-09-01')
         self.url = reverse('update_recurring_income', kwargs={'income_id': self.income.id})
 
     def test_successful_update_existing_log(self):

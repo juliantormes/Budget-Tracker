@@ -1,4 +1,3 @@
-// EditCreditCardForm.js
 import React from 'react';
 import { TextField, IconButton } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
@@ -70,10 +69,10 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
       />
     </TableCell>
     <TableCell>
-      <IconButton onClick={handleSaveClick}>
+      <IconButton aria-label="Save" onClick={handleSaveClick}>
         <SaveIcon />
       </IconButton>
-      <IconButton onClick={handleCancelClick}>
+      <IconButton aria-label="Cancel" onClick={handleCancelClick}>
         <CancelIcon />
       </IconButton>
     </TableCell>

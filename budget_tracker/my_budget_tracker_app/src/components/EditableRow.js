@@ -249,7 +249,7 @@ const EditableRow = ({
         <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '4px 8px', width: '16%' }}>  {/* Reduce padding here */}
           {isEditing ? (
             <>
-              <IconButton onClick={() => openConfirmDialog('edit')}>
+              <IconButton onClick={() => openConfirmDialog('edit')} aria-label='Save'>
                 <SaveIcon />
               </IconButton>
               <IconButton onClick={onCancel}>

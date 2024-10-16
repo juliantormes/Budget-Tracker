@@ -1,4 +1,3 @@
-// EditCategoryForm.js
 import React from 'react';
 import { TextField, IconButton } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
@@ -15,10 +14,10 @@ const EditCategoryForm = ({ formData, handleChange, handleSave, handleCancel }) 
       className="text-field"
     />
     <div className="actions">
-      <IconButton onClick={handleSave}>
+      <IconButton data-testid="save-button" onClick={handleSave}>
         <SaveIcon />
       </IconButton>
-      <IconButton onClick={handleCancel}>
+      <IconButton data-testid="cancel-button" onClick={handleCancel}>
         <CancelIcon />
       </IconButton>
     </div>

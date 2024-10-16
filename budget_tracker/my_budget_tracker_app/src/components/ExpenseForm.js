@@ -148,7 +148,13 @@ const ExpenseForm = ({
         />
       </>
     )}
-    <Button type="submit" variant="contained" color="primary" className="submit-button">
+    <Button
+      type="submit"
+      variant="contained"
+      color="primary"
+      className="submit-button"
+      data-testid="submit-expense"
+    >
       Add Expense
     </Button>
   </form>

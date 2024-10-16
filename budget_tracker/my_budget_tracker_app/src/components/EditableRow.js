@@ -39,7 +39,9 @@ const EditableRow = ({
     }));
   };
 
-  const handleSave = () => onSave(formData);
+  const handleSave = () => {
+    onSave(formData); // Make sure the correct formData is passed to onSave
+  };
 
   const handleConfirmAction = () => {
     if (actionType === 'delete') {
@@ -57,10 +59,8 @@ const EditableRow = ({
 
   const currentCreditCard = creditCards.find((card) => card.id === formData.credit_card_id);
 
-  // Disable amount field if the item is recurring
   const isRecurring = formData.is_recurring;
 
-  // Common styles for inputs
   const commonInputStyle = {
     height: '36px',
     padding: '0 8px',
@@ -72,8 +72,7 @@ const EditableRow = ({
   return (
     <>
       <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
-        {/* Category Cell */}
-        <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ padding: '4px 8px', width: '12%' }}>
           {isEditing ? (
             <FormControl fullWidth sx={commonInputStyle}>
               <Select
@@ -82,7 +81,7 @@ const EditableRow = ({
                 onChange={handleInputChange}
                 displayEmpty
                 size="small"
-                sx={{ height: '36px' }}  // Match height with other inputs
+                sx={{ height: '36px' }}
               >
                 {categories.map((category) => (
                   <MenuItem key={category.id} value={category.id}>
@@ -96,8 +95,7 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        {/* Date Cell */}
-        <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ padding: '4px 8px', width: '12%' }}>
           {isEditing ? (
             <TextField
               variant="outlined"
@@ -114,8 +112,7 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        {/* Amount Cell */}
-        <TableCell style={{ padding: '4px 8px', width: '10%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ padding: '4px 8px', width: '10%' }}>
           {isEditing ? (
             <TextField
               variant="outlined"
@@ -124,7 +121,7 @@ const EditableRow = ({
               value={formData.amount || ''}
               name="amount"
               onChange={handleInputChange}
-              disabled={isRecurring}  // Disable amount if it's a recurring item
+              disabled={isRecurring}
               type="number"
               sx={commonInputStyle}
             />
@@ -133,8 +130,7 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        {/* Description Cell */}
-        <TableCell style={{ padding: '4px 8px', width: '14%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ padding: '4px 8px', width: '14%' }}>
           {isEditing ? (
             <TextField
               variant="outlined"
@@ -143,6 +139,7 @@ const EditableRow = ({
               value={formData.description || ''}
               name="description"
               onChange={handleInputChange}
+              aria-label='description'
               sx={commonInputStyle}
             />
           ) : (
@@ -150,8 +147,7 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        {/* Recurring Checkbox Cell */}
-        <TableCell style={{ padding: '4px 8px', width: '8%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ padding: '4px 8px', width: '8%' }}>
           {isEditing ? (
             <Checkbox
               name="is_recurring"
@@ -164,10 +160,9 @@ const EditableRow = ({
           )}
         </TableCell>
 
-        {/* Only for expenses: Paid with Credit Card */}
         {type === 'expense' && (
           <>
-            <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
+            <TableCell style={{ padding: '4px 8px', width: '12%' }}>
               {isEditing ? (
                 <Checkbox
                   name="pay_with_credit_card"
@@ -180,8 +175,7 @@ const EditableRow = ({
               )}
             </TableCell>
 
-            {/* Credit Card Field */}
-            <TableCell style={{ padding: '4px 8px', width: '12%' }}>  {/* Reduce padding here */}
+            <TableCell style={{ padding: '4px 8px', width: '12%' }}>
               {isEditing ? (
                 <FormControl fullWidth sx={commonInputStyle}>
                   <Select
@@ -205,8 +199,7 @@ const EditableRow = ({
               )}
             </TableCell>
 
-            {/* Installments Cell */}
-            <TableCell style={{ padding: '4px 8px', width: '8%' }}>  {/* Reduce padding here */}
+            <TableCell style={{ padding: '4px 8px', width: '8%' }}>
               {isEditing ? (
                 <TextField
                   variant="outlined"
@@ -224,8 +217,7 @@ const EditableRow = ({
               )}
             </TableCell>
 
-            {/* Surcharge Cell */}
-            <TableCell style={{ padding: '4px 8px', width: '10%' }}>  {/* Reduce padding here */}
+            <TableCell style={{ padding: '4px 8px', width: '10%' }}>
               {isEditing ? (
                 <TextField
                   variant="outlined"
@@ -245,27 +237,26 @@ const EditableRow = ({
           </>
         )}
 
-        {/* Actions Cell */}
-        <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '4px 8px', width: '16%' }}>  {/* Reduce padding here */}
+        <TableCell style={{ display: 'flex', justifyContent: 'flex-start', padding: '4px 8px', width: '16%' }}>
           {isEditing ? (
             <>
-              <IconButton onClick={() => openConfirmDialog('edit')} aria-label='Save'>
+              <IconButton onClick={() => openConfirmDialog('edit')} aria-label="Save changes">
                 <SaveIcon />
               </IconButton>
-              <IconButton onClick={onCancel}>
+              <IconButton onClick={onCancel} aria-label="Cancel changes">
                 <CancelIcon />
               </IconButton>
             </>
           ) : (
             <>
-              <IconButton onClick={() => onEdit(item)}>
+              <IconButton onClick={() => onEdit(item)} aria-label="Edit item">
                 <EditIcon />
               </IconButton>
-              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting}>
+              <IconButton onClick={() => openConfirmDialog('delete')} disabled={isDeleting} aria-label="Delete item">
                 <DeleteIcon />
               </IconButton>
               {formData.is_recurring && (
-                <IconButton onClick={() => onUpdateRecurring(item.id)} style={{ marginLeft: '8px' }}>
+                <IconButton onClick={() => onUpdateRecurring(item.id)} style={{ marginLeft: '8px' }} aria-label="Update recurring">
                   <MonetizationOnIcon />
                 </IconButton>
               )}

@@ -35,7 +35,8 @@ const ExpenseTable = ({
       <TableBody>
         {expenses.map((expense) => (
           <EditableRow
-            key={`${expense.id}-${expense.amount}`}  // Add amount in the key to force re-render
+            key={`${expense.id}-${expense.amount}`}
+            data-testid="editable-row"
             item={expense}
             isEditing={editingExpenseId === expense.id}
             onEdit={onEdit}

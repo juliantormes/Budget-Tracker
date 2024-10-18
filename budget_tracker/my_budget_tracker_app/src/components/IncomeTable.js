@@ -13,7 +13,7 @@ const IncomeTable = ({
   onUpdateRecurring,
   categories
 }) => (
-  <Table className="table">
+  <Table className="table" aria-label="income table">
     <TableHead>
       <TableRow className="table-header">
         <TableCell style={{ color: '#ffffff', fontWeight: 'bold', width: '20%' }}>Category</TableCell>
@@ -28,6 +28,7 @@ const IncomeTable = ({
       {incomes.map((income) => (
         <EditableRow
           key={`${income.id}-${income.amount}`}  // Add amount in the key to force re-render
+          data-testid="editable-row"
           item={income}
           isEditing={editingIncomeId === income.id}
           onEdit={onEdit}
@@ -37,6 +38,7 @@ const IncomeTable = ({
           onUpdateRecurring={onUpdateRecurring}
           categories={categories}
           type="income"
+          aria-label={`Editable row for income ${income.description}`}  // This line adds aria-label correctly
           showType={false}
         />
       ))}

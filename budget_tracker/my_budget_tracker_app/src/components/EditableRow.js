@@ -40,7 +40,7 @@ const EditableRow = ({
   };
 
   const handleSave = () => {
-    onSave(formData); // Make sure the correct formData is passed to onSave
+    onSave(formData);
   };
 
   const handleConfirmAction = () => {
@@ -71,7 +71,7 @@ const EditableRow = ({
 
   return (
     <>
-      <TableRow key={item.id} className={isEditing ? 'editing' : ''}>
+      <TableRow key={item.id} className={isEditing ? 'editing' : ''} data-testid="editable-row">
         <TableCell style={{ padding: '4px 8px', width: '12%' }}>
           {isEditing ? (
             <FormControl fullWidth sx={commonInputStyle}>

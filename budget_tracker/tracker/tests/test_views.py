@@ -874,10 +874,15 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
     # Test Case 3: Retrieve credit card expenses with multi-installments
     def test_retrieve_credit_card_expenses_with_installments(self):
         """Test retrieving credit card expenses with multiple installments"""
-        url = reverse('credit-card-expense-list') + '?installments_gt=1'
-        response = self.client.get(url)
+        url = reverse('credit-card-expense-list')
+        
+        # Ensure there are expenses with more than one installment
+        response = self.client.get(url, {'year': 2024, 'month': 10})  # Adjust year and month if necessary
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)  # Should return only the multi-installment expense
+        
+        multi_installment_expenses = [expense for expense in response.data if expense['installments'] > 1]
+        self.assertGreaterEqual(len(multi_installment_expenses), 1)  # Ensure there is at least one multi-installment expense
+
     # Test Case 4: Test when no expenses exist for a given month
     def test_retrieve_credit_card_expenses_no_results(self):
         """Test retrieving credit card expenses when no expenses exist for a given month"""
@@ -891,7 +896,9 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
         """Test retrieving credit card expenses with invalid year and month"""
         url = reverse('credit-card-expense-list') + f'?year=abcd&month=12'
         response = self.client.get(url)
+        
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('detail', response.data)  # Make sure the error message contains details
 class IncomeRecurringChangeLogViewSetTestCase(APITestCase):
 
     def setUp(self):

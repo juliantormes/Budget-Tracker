@@ -301,64 +301,33 @@ class CreditCardExpenseViewSet(viewsets.ModelViewSet):
         user = self.request.user
         year = self.request.query_params.get('year', datetime.now().year)
         month = self.request.query_params.get('month', datetime.now().month)
-        installments_gt = self.request.query_params.get('installments_gt')
 
-        # Validate year and month
+                # Validate year and month
         try:
             year = int(year)
             month = int(month)
             if month < 1 or month > 12:
                 raise ValueError
         except ValueError:
-            raise ValidationError('Invalid year or month format.')
-
-        start_of_month = make_aware(datetime(year, month, 1))
+            raise ValidationError({'detail': 'Invalid year or month format.'})  # Proper validation error for invalid inputs
+        
+        start_of_month = make_aware(datetime(int(year), int(month), 1))
         end_of_month = start_of_month + relativedelta(months=1) - relativedelta(days=1)
-
-        # Filter multi-installment expenses if requested
-        if installments_gt:
-            try:
-                installments_gt = int(installments_gt)
-                queryset = Expense.objects.filter(
-                    user=user,
-                    credit_card__isnull=False,
-                    installments__gt=installments_gt
-                )
-            except ValueError:
-                raise ValidationError('Invalid installments_gt value.')
-        else:
-            # Fetch non-recurring, single-installment expenses for the current month
-            monthly_transactions = Expense.objects.filter(
-                user=user,
-                credit_card__isnull=False,
-                date__gte=start_of_month,
-                date__lte=end_of_month,
-                is_recurring=False,
-                installments=1
+        
+        return Expense.objects.filter(
+            user=user,
+            credit_card__isnull=False,
+        ).filter(
+            Q(date__lte=end_of_month) & (
+                # Include expenses with a single installment if they are within this month
+                Q(installments=1) |  
+                # Recurring expenses: ensure they appear every month after their initial date
+                Q(is_recurring=True, date__lte=end_of_month) | 
+                # Expenses with multiple installments extending over months
+                Q(end_date__gte=start_of_month) |  
+                Q(installments__gt=1)
             )
-
-            # Fetch multi-installment expenses where installments span the current month
-            installment_transactions = Expense.objects.filter(
-                user=user,
-                credit_card__isnull=False,
-                installments__gt=1,
-                date__lte=end_of_month,
-                end_date__gte=start_of_month
-            )
-
-            # Fetch recurring expenses that apply to the current month
-            recurring_transactions = Expense.objects.filter(
-                user=user,
-                credit_card__isnull=False,
-                is_recurring=True,
-                date__lte=end_of_month  # Ongoing recurring expenses
-            )
-
-            # Combine all three types of transactions into one queryset
-            queryset = monthly_transactions | installment_transactions | recurring_transactions
-
-        # Remove potential duplicates (if any) using distinct()
-        return queryset.distinct()
+        )
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()

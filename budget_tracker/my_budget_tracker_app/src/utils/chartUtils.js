@@ -201,38 +201,40 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
             });
         }
 
-        // Handle recurring expenses
         if (expense.is_recurring) {
             let currentMonth = new Date(startMonth);
-
-            // Skip the month in which the expense was originally charged to avoid duplication
-            currentMonth.setMonth(currentMonth.getMonth() + 1);  // Start from the month after the original charge
-
-            let effectiveAmount = totalAmountWithSurcharge;
-
-            // Loop through the months and apply changes in amount from change_logs
+            
+            // Skip the initial charge month to avoid duplication
+            currentMonth.setMonth(currentMonth.getMonth() + 1);  // Move to the next month after the original charge
+        
+            // Start with the `effective_amount`, which should already account for any changes
+            let effectiveAmount = parseFloat(expense.effective_amount || expense.amount) * (1 + surchargeRate);
+        
+            // Loop through all months up to the selected year and month
             while (currentMonth <= new Date(year, month - 1)) {
                 const formattedRecurringMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
-
-                // Check if there's a change in the amount for this month
+        
+                // Find a matching change log for this month
                 const matchingChangeLog = expense.change_logs.find(log => {
                     const changeDate = new Date(log.effective_date);
                     return changeDate.getFullYear() === currentMonth.getFullYear() &&
                            changeDate.getMonth() === currentMonth.getMonth();
                 });
-
-                // If there's a matching change log, update the effective amount
+        
+                // If a matching change log is found, update the effective amount for this month
                 if (matchingChangeLog) {
                     effectiveAmount = parseFloat(matchingChangeLog.new_amount) * (1 + surchargeRate);
                 }
-
+        
+                // Add the processed expense for this month with the `effective_amount`
                 processedExpenses.push({
                     ...expense,
                     month: formattedRecurringMonth,
-                    amount: effectiveAmount,
+                    amount: effectiveAmount,  // Use `effective_amount` for the recurring amount
                 });
-
-                currentMonth.setMonth(currentMonth.getMonth() + 1); // Move to the next month
+        
+                // Move to the next month
+                currentMonth.setMonth(currentMonth.getMonth() + 1);
             }
         }
     });

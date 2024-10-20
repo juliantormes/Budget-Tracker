@@ -9,9 +9,7 @@ import {
     prepareBarChartData, 
     prepareIncomeChartData, 
     prepareExpenseChartData, 
-    prepareCreditCardChartData, 
-    pieChartOptions, 
-    barChartOptions 
+    prepareCreditCardChartData
 } from '../../utils/chartUtils'; // Adjust the path according to your folder structure
 import { jest } from '@jest/globals';
 
@@ -24,6 +22,10 @@ beforeEach(() => {
     jest.spyOn(Storage.prototype, 'setItem').mockImplementation((key, value) => {
         localStorageMock[key] = value;
     });
+});
+afterEach(() => {
+    localStorageMock = {};  // Clear the mock storage after each test
+    jest.restoreAllMocks(); // Restore original functions after each test
 });
 
 describe('generateVibrantShades', () => {
@@ -117,22 +119,79 @@ describe('calculatePercentages', () => {
 describe('prepareIncomeChartData', () => {
     it('should prepare income chart data correctly', () => {
         const incomes = [
-            { id: 1, category_name: 'Salary', amount: 1000, date: '2024-01-01', is_recurring: false },
-            { id: 2, category_name: 'Bonus', amount: 500, date: '2024-01-01', is_recurring: false },
+            { id: 1, category_name: 'Salary', amount: 1000, date: '2024-01-01T00:00:00Z', is_recurring: false },  // Ensure date is in ISO format
+            { id: 2, category_name: 'Bonus', amount: 500, date: '2024-01-01T00:00:00Z', is_recurring: false },
         ];
         const year = 2024;
         const month = 1;
         const shades = ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)'];
-    
         const result = prepareIncomeChartData(incomes, year, month, shades);
-    
-        console.log(result); // Debugging output
-    
+
+        console.log(result); // Debugging output to inspect the returned result
+
         expect(result.labels).toEqual(['salary', 'bonus']); // Labels are case-insensitive and lowercase
         expect(result.datasets[0].data).toEqual([1000, 500]); // Data sums
         expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
     });
 });
+describe('prepareExpenseChartData', () => {
+    it('should prepare expense chart data correctly', () => {
+        const expenses = [
+            { id: 1, category_name: 'Groceries', amount: 500, date: '2024-01-01', is_recurring: false },
+            { id: 2, category_name: 'Rent', amount: 1500, date: '2024-01-01', is_recurring: true, effective_amount: 1600 },
+        ];
+        const year = 2024;
+        const month = 1;
+        const shades = ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)'];
 
+        const result = prepareExpenseChartData(expenses, year, month, shades);
 
+        console.log(result); // Debugging output to inspect the returned result
+
+        expect(result.labels).toEqual(['groceries', 'rent']); // Labels are case-insensitive and lowercase
+        expect(result.datasets[0].data).toEqual([500, 1600]); // Data should correctly apply the effective amount for recurring
+        expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
+    });
+});
+describe('prepareCreditCardChartData', () => {
+    it('should prepare credit card chart data correctly', () => {
+        const expenses = [
+            { id: 1, category_name: 'Groceries', amount: 500, date: '2024-01-01', credit_card: { brand: 'Visa', last_four_digits: '1234' }, installments: 3, surcharge: '10.00' },
+            { id: 2, category_name: 'Subscriptions', amount: 100, date: '2024-01-15', credit_card: { brand: 'Mastercard', last_four_digits: '5678' }, installments: 1, surcharge: '5.00' },
+        ];
+        const year = 2024;
+        const month = 1;
+        const shades = ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)'];
+
+        const result = prepareCreditCardChartData(expenses, year, month, shades);
+
+        console.log(result); // Debugging output to inspect the returned result
+
+        expect(result.labels).toEqual(['visa ending in 1234', 'mastercard ending in 5678']); // Labels should reflect the credit card brands
+        expect(result.datasets[0].data).toEqual([165.00, 105.00]); // Amounts should include surcharge and be distributed across installments
+        expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
+    });
+});
+
+describe('prepareBarChartData', () => {
+    it('should prepare bar chart data correctly', () => {
+        const percentages = {
+            netPercentage: '40.00',
+            cashFlowPercentage: '30.00',
+            creditCardPercentage: '30.00',
+        };
+
+        const result = prepareBarChartData(percentages);
+
+        console.log(result); // Debugging output to inspect the returned result
+
+        expect(result.labels).toEqual(['Net', 'Cash Flow', 'Credit Card']); // Labels should be correct
+        expect(result.datasets[0].data).toEqual(["40.00", "30.00", "30.00"]); // Data should match percentages
+        expect(result.datasets[0].backgroundColor).toEqual([
+            'rgba([52, 152, 219], 0.6)',
+            'rgba(46, 204, 113, 0.6)',
+            'rgba(231, 76, 60, 0.6)'
+        ]); // Correct colors should be applied
+    });
+});
 

@@ -71,16 +71,28 @@ export const prepareBarChartData = (percentages) => {
 
 export const prepareIncomeChartData = (incomes, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
-    
+
     const nonRecurringIncomes = incomes.filter(income => {
-        const incomeDate = new Date(income.date);
-        const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
+        // Parse the income date in UTC to avoid timezone issues
+        const incomeDate = new Date(Date.UTC(
+            parseInt(income.date.split('-')[0]), // year
+            parseInt(income.date.split('-')[1]) - 1, // month (0-based)
+            parseInt(income.date.split('-')[2]) // day
+        ));
+
+        const incomeMonth = `${incomeDate.getUTCFullYear()}-${String(incomeDate.getUTCMonth() + 1).padStart(2, '0')}`;
         return !income.is_recurring && incomeMonth === formattedMonth;
     });
 
     const recurringIncomes = incomes.filter(income => {
-        const incomeDate = new Date(income.date);
-        const incomeMonth = `${incomeDate.getFullYear()}-${String(incomeDate.getMonth() + 1).padStart(2, '0')}`;
+        // Parse the income date in UTC to avoid timezone issues
+        const incomeDate = new Date(Date.UTC(
+            parseInt(income.date.split('-')[0]), // year
+            parseInt(income.date.split('-')[1]) - 1, // month (0-based)
+            parseInt(income.date.split('-')[2]) // day
+        ));
+
+        const incomeMonth = `${incomeDate.getUTCFullYear()}-${String(incomeDate.getUTCMonth() + 1).padStart(2, '0')}`;
         return income.is_recurring && incomeMonth <= formattedMonth;
     }).map(income => {
         // Determine the correct amount to use based on the effective amount and the original amount
@@ -117,14 +129,26 @@ export const prepareIncomeChartData = (incomes, year, month, shades) => {
 export const prepareExpenseChartData = (expenses, year, month, shades) => {
     const formattedMonth = `${year}-${String(month).padStart(2, '0')}`;
     const nonRecurringExpenses = expenses.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+        // Parse the expense date in UTC
+        const expenseDate = new Date(Date.UTC(
+            parseInt(expense.date.split('-')[0]), 
+            parseInt(expense.date.split('-')[1]) - 1, 
+            parseInt(expense.date.split('-')[2])
+        ));
+
+        const expenseMonth = `${expenseDate.getUTCFullYear()}-${String(expenseDate.getUTCMonth() + 1).padStart(2, '0')}`;
         return !expense.is_recurring && expenseMonth === formattedMonth;
     });
 
     const recurringExpenses = expenses.filter(expense => {
-        const expenseDate = new Date(expense.date);
-        const expenseMonth = `${expenseDate.getFullYear()}-${String(expenseDate.getMonth() + 1).padStart(2, '0')}`;
+        // Parse the expense date in UTC
+        const expenseDate = new Date(Date.UTC(
+            parseInt(expense.date.split('-')[0]), 
+            parseInt(expense.date.split('-')[1]) - 1, 
+            parseInt(expense.date.split('-')[2])
+        ));
+
+        const expenseMonth = `${expenseDate.getUTCFullYear()}-${String(expenseDate.getUTCMonth() + 1).padStart(2, '0')}`;
         return expense.is_recurring && expenseMonth <= formattedMonth;
     }).map(expense => {
         // Determine the correct amount to use based on the effective amount and the original amount
@@ -137,7 +161,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
 
     const processedExpenses = [...nonRecurringExpenses, ...recurringExpenses];
     const sumsByCategory = processedExpenses.reduce((acc, expense) => {
-        const category = (expense.category_name || 'Undefined Category').toLowerCase(); // Ensure consistent formatting
+        const category = (expense.category_name || 'Undefined Category').toLowerCase();
         acc[category] = (acc[category] || 0) + parseFloat(expense.amount || 0);
         return acc;
     }, {});
@@ -151,7 +175,7 @@ export const prepareExpenseChartData = (expenses, year, month, shades) => {
         datasets: [{
             label: 'Expenses',
             data,
-            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]), // Ensure consistent formatting
+            backgroundColor: labels.map(label => colorMap[label.toLowerCase()]),
             borderColor: ['#4b4b4b'],
             borderWidth: 1,
         }]
@@ -164,7 +188,13 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
     const processedExpenses = [];
 
     expenses.forEach(expense => {
-        const expenseDate = new Date(expense.date);
+        // Parse the expense date in UTC
+        const expenseDate = new Date(Date.UTC(
+            parseInt(expense.date.split('-')[0]), 
+            parseInt(expense.date.split('-')[1]) - 1, 
+            parseInt(expense.date.split('-')[2])
+        ));
+
         const closingDay = expense.credit_card.close_card_day;
         const surchargeRate = parseFloat(expense.surcharge || 0) / 100;
         const totalAmountWithSurcharge = parseFloat(expense.amount) * (1 + surchargeRate);
@@ -172,75 +202,83 @@ export const prepareCreditCardChartData = (expenses, year, month, shades) => {
         let startMonth;
 
         // Adjust the start month to reflect the billing cycle based on the closing day
-        if (expenseDate.getDate() <= closingDay) {
-            startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 1, 1);
+        if (expenseDate.getUTCDate() <= closingDay) {
+            startMonth = new Date(Date.UTC(expenseDate.getUTCFullYear(), expenseDate.getUTCMonth() + 1, 1));
         } else {
-            startMonth = new Date(expenseDate.getFullYear(), expenseDate.getMonth() + 2, 1);
+            startMonth = new Date(Date.UTC(expenseDate.getUTCFullYear(), expenseDate.getUTCMonth() + 2, 1));
         }
 
         // Handle multi-installment expenses
         if (expense.installments > 1) {
             for (let i = 0; i < expense.installments; i++) {
                 const installmentMonth = new Date(startMonth);
-                installmentMonth.setMonth(startMonth.getMonth() + i);
+                installmentMonth.setUTCMonth(startMonth.getUTCMonth() + i);
 
-                const formattedInstallmentMonth = `${installmentMonth.getFullYear()}-${String(installmentMonth.getMonth() + 1).padStart(2, '0')}`;
+                const formattedInstallmentMonth = `${installmentMonth.getUTCFullYear()}-${String(installmentMonth.getUTCMonth() + 1).padStart(2, '0')}`;
                 
+                // Add the month property here to the expense object
                 processedExpenses.push({
                     ...expense,
-                    month: formattedInstallmentMonth,
+                    month: formattedInstallmentMonth,  // Ensure the month is assigned
                     amount: totalAmountWithSurcharge / expense.installments,
                 });
             }
         } else {
-            const formattedSinglePaymentMonth = `${startMonth.getFullYear()}-${String(startMonth.getMonth() + 1).padStart(2, '0')}`;
+            const formattedSinglePaymentMonth = `${startMonth.getUTCFullYear()}-${String(startMonth.getUTCMonth() + 1).padStart(2, '0')}`;
+            
+            // Add the month property here for single payments
             processedExpenses.push({
                 ...expense,
-                month: formattedSinglePaymentMonth,
+                month: formattedSinglePaymentMonth,  // Ensure the month is assigned
                 amount: totalAmountWithSurcharge,
             });
         }
 
         if (expense.is_recurring) {
             let currentMonth = new Date(startMonth);
-            
+
             // Skip the initial charge month to avoid duplication
-            currentMonth.setMonth(currentMonth.getMonth() + 1);  // Move to the next month after the original charge
-        
+            currentMonth.setUTCMonth(currentMonth.getUTCMonth() + 1);
+
             // Start with the `effective_amount`, which should already account for any changes
             let effectiveAmount = parseFloat(expense.effective_amount || expense.amount) * (1 + surchargeRate);
-        
+
             // Loop through all months up to the selected year and month
-            while (currentMonth <= new Date(year, month - 1)) {
-                const formattedRecurringMonth = `${currentMonth.getFullYear()}-${String(currentMonth.getMonth() + 1).padStart(2, '0')}`;
-        
+            while (currentMonth <= new Date(Date.UTC(year, month - 1))) {
+                const formattedRecurringMonth = `${currentMonth.getUTCFullYear()}-${String(currentMonth.getUTCMonth() + 1).padStart(2, '0')}`;
+
                 // Find a matching change log for this month
                 const matchingChangeLog = expense.change_logs.find(log => {
-                    const changeDate = new Date(log.effective_date);
-                    return changeDate.getFullYear() === currentMonth.getFullYear() &&
-                           changeDate.getMonth() === currentMonth.getMonth();
+                    const changeDate = new Date(Date.UTC(
+                        parseInt(log.effective_date.split('-')[0]),
+                        parseInt(log.effective_date.split('-')[1]) - 1,
+                        parseInt(log.effective_date.split('-')[2])
+                    ));
+                    return changeDate.getUTCFullYear() === currentMonth.getUTCFullYear() &&
+                           changeDate.getUTCMonth() === currentMonth.getUTCMonth();
                 });
-        
+
                 // If a matching change log is found, update the effective amount for this month
                 if (matchingChangeLog) {
                     effectiveAmount = parseFloat(matchingChangeLog.new_amount) * (1 + surchargeRate);
                 }
-        
-                // Add the processed expense for this month with the `effective_amount`
+
+                // Add the month property here for recurring payments
                 processedExpenses.push({
                     ...expense,
-                    month: formattedRecurringMonth,
-                    amount: effectiveAmount,  // Use `effective_amount` for the recurring amount
+                    month: formattedRecurringMonth,  // Ensure the month is assigned
+                    amount: effectiveAmount,
                 });
-        
+
                 // Move to the next month
-                currentMonth.setMonth(currentMonth.getMonth() + 1);
+                currentMonth.setUTCMonth(currentMonth.getUTCMonth() + 1);
             }
         }
     });
 
     // Filter expenses to include only those for the current month
     const filteredExpenses = processedExpenses.filter(expense => {
+        console.log('Filtering:', expense.month, 'Formatted Month:', formattedMonth);
         return expense.month === formattedMonth;
     });
 

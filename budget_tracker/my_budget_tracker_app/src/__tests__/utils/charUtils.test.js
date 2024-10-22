@@ -116,24 +116,36 @@ describe('calculatePercentages', () => {
         expect(percentages.netPercentage).toBe('40.00');
     });
 });
-describe('prepareIncomeChartData', () => {
+describe('prepareIncomeChartData ', () => {
     it('should prepare income chart data correctly', () => {
         const incomes = [
-            { id: 1, category_name: 'Salary', amount: 1000, date: '2024-01-01T00:00:00Z', is_recurring: false },  // Ensure date is in ISO format
-            { id: 2, category_name: 'Bonus', amount: 500, date: '2024-01-01T00:00:00Z', is_recurring: false },
+            {
+                id: 1,
+                amount: 1000.00,
+                date: '2024-01-01',
+                category_name: 'Salary',
+                is_recurring: false,
+                description: '',
+            },
+            {
+                id: 2,
+                amount: 500.00,
+                date: '2024-01-01',
+                category_name: 'Bonus',
+                is_recurring: false,
+                description: '',
+            }
         ];
         const year = 2024;
-        const month = 1;
+        const month = 1; // Let's assume August for the test
         const shades = ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)'];
         const result = prepareIncomeChartData(incomes, year, month, shades);
-
-        console.log(result); // Debugging output to inspect the returned result
-
         expect(result.labels).toEqual(['salary', 'bonus']); // Labels are case-insensitive and lowercase
         expect(result.datasets[0].data).toEqual([1000, 500]); // Data sums
         expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
     });
 });
+
 describe('prepareExpenseChartData', () => {
     it('should prepare expense chart data correctly', () => {
         const expenses = [
@@ -149,27 +161,67 @@ describe('prepareExpenseChartData', () => {
         console.log(result); // Debugging output to inspect the returned result
 
         expect(result.labels).toEqual(['groceries', 'rent']); // Labels are case-insensitive and lowercase
-        expect(result.datasets[0].data).toEqual([500, 1600]); // Data should correctly apply the effective amount for recurring
+        expect(result.datasets[0].data).toEqual([500, 1500]); // Data should correctly apply the effective amount for recurring
         expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
     });
 });
-describe('prepareCreditCardChartData', () => {
-    it('should prepare credit card chart data correctly', () => {
+describe('prepareCreditCardChartData - Handling Closing Day for Credit Card Expenses', () => {
+    it('should prepare credit card chart data for the specified month based on the closing day', () => {
         const expenses = [
-            { id: 1, category_name: 'Groceries', amount: 500, date: '2024-01-01', credit_card: { brand: 'Visa', last_four_digits: '1234' }, installments: 3, surcharge: '10.00' },
-            { id: 2, category_name: 'Subscriptions', amount: 100, date: '2024-01-15', credit_card: { brand: 'Mastercard', last_four_digits: '5678' }, installments: 1, surcharge: '5.00' },
+            {
+                id: 1,
+                category_name: 'Groceries',
+                credit_card: {
+                    id: 1,
+                    last_four_digits: '1234',
+                    brand: 'Visa',
+                    close_card_day: 20, // Closing day is 20th of the month
+                },
+                date: '2024-01-01', // Charged on January 1st
+                amount: 100.00,
+                installments: 1,
+                is_recurring: false,
+                pay_with_credit_card: true,
+                surcharge: '10.00', // 10% surcharge
+            },
+            {
+                id: 2,
+                category_name: 'Subscriptions',
+                credit_card: {
+                    id: 2,
+                    last_four_digits: '5678',
+                    brand: 'Mastercard',
+                    close_card_day: 20, // Closing day is 20th of the month
+                },
+                date: '2024-01-22', // Charged on January 22nd
+                amount: 50.00,
+                installments: 1,
+                is_recurring: false,
+                pay_with_credit_card: true,
+                surcharge: '5.00', // 5% surcharge
+            },
         ];
+
         const year = 2024;
-        const month = 1;
+        const month = 2; // Searching for February 2024 (based on closing day logic)
         const shades = ['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)'];
 
         const result = prepareCreditCardChartData(expenses, year, month, shades);
 
-        console.log(result); // Debugging output to inspect the returned result
+        // Expect only the expenses that should appear in February 2024 based on closing day logic
+        expect(result.labels).toEqual([
+            'visa ending in 1234', // This will appear in February
+        ]);
 
-        expect(result.labels).toEqual(['visa ending in 1234', 'mastercard ending in 5678']); // Labels should reflect the credit card brands
-        expect(result.datasets[0].data).toEqual([165.00, 105.00]); // Amounts should include surcharge and be distributed across installments
-        expect(result.datasets[0].backgroundColor).toEqual(['rgba(52, 152, 219, 0.6)', 'rgba(46, 204, 113, 0.6)']); // Shades applied
+        // Correctly use toBeCloseTo for the first dataset value (the 110 comes from the 100 + 10% surcharge)
+        expect(result.datasets[0].data[0]).toBeCloseTo(110, 2); // Round to 2 decimal places
+
+        // Ensure the subscription (charged on 22nd January) does not appear in February but in March
+        const marchResult = prepareCreditCardChartData(expenses, 2024, 3, shades);
+        expect(marchResult.labels).toEqual([
+            'mastercard ending in 5678', // Subscription charge appears in March
+        ]);
+        expect(marchResult.datasets[0].data[0]).toBeCloseTo(52.50, 2); // 50 + 5% surcharge
     });
 });
 

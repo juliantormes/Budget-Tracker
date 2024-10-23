@@ -14,6 +14,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         onChange={handleChange}
         fullWidth
         className="text-field"
+        data-testid="credit-card-last-four-digits"
       />
     </TableCell>
     <TableCell>
@@ -23,6 +24,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         onChange={handleChange}
         fullWidth
         className="text-field"
+        data-testid="credit-card-brand"
       />
     </TableCell>
     <TableCell>
@@ -36,6 +38,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         InputLabelProps={{
           shrink: true,
         }}
+        data-testid="credit-card-expire-date"
       />
     </TableCell>
     <TableCell>
@@ -46,6 +49,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         onChange={handleChange}
         fullWidth
         className="text-field"
+        data-testid="credit-card-limit"
       />
     </TableCell>
     <TableCell>
@@ -56,6 +60,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         onChange={handleChange}
         fullWidth
         className="text-field"
+        data-testid="credit-card-payment-day"
       />
     </TableCell>
     <TableCell>
@@ -66,6 +71,7 @@ const EditCreditCardForm = ({ formData, handleChange, handleSaveClick, handleCan
         onChange={handleChange}
         fullWidth
         className="text-field"
+        data-testid="credit-card-close-day"
       />
     </TableCell>
     <TableCell>

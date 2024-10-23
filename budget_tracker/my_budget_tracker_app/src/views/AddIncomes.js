@@ -88,6 +88,15 @@ const AddIncomes = () => {
           handleSubmit={handleSubmit}
           errors={errors} // Pass field-specific errors down to the form
         />
+        {/* Add the data-testid to the button to simplify the tests */}
+        <button
+          data-testid="submit-income"
+          type="submit"
+          className="MuiButtonBase-root MuiButton-root MuiButton-contained MuiButton-containedPrimary"
+          onClick={handleSubmit}
+        >
+          Add Income
+        </button>
       </Container>
     </Layout>
   );

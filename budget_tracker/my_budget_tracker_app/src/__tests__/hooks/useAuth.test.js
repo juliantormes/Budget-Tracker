@@ -1,5 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react';
-import { ProvideAuth, useAuth } from '../../hooks/useAuth';  // Adjust this path
+import { ProvideAuth, useAuth } from '../../hooks/useAuth';  // Adjust this path to where your hook is located
 import axios from 'axios';
 import userEvent from '@testing-library/user-event';
 

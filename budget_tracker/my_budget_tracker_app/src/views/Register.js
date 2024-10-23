@@ -45,7 +45,9 @@ const RegisterForm = () => {
 
             const token = response.data.token;
             localStorage.setItem('token', token);
-            navigate('/home');
+
+            // Redirect to login after successful registration
+            navigate('/login');
         } catch (error) {
             console.error('Registration failed:', error);
 

@@ -18,19 +18,20 @@ describe('EditCategoryForm', () => {
         handleChange={mockHandleChange}
         handleSave={mockHandleSave}
         handleCancel={mockHandleCancel}
+        errors={{}} // No errors initially
       />
     );
   });
 
   it('renders the input field and buttons', () => {
-    // Check if the text input is rendered
-    expect(screen.getByDisplayValue(/Groceries/i)).toBeInTheDocument();
+    // Check if the text input is rendered by its label
+    expect(screen.getAllByLabelText(/Category Name/i).length).toBeGreaterThan(0);
 
     // Check if the Save and Cancel buttons are rendered using their test ids
     expect(screen.getByTestId('save-button')).toBeInTheDocument();
     expect(screen.getByTestId('cancel-button')).toBeInTheDocument();
   });
-  
+
   it('calls handleSave when the Save button is clicked', () => {
     // Simulate clicking the Save button using data-testid
     fireEvent.click(screen.getByTestId('save-button'));

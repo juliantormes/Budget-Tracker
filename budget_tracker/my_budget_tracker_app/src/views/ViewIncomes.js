@@ -88,26 +88,29 @@ const ViewIncomes = () => {
   };
 
   const handleSave = async () => {
-    if (!currentIncome || !currentIncome.id) {
-      setErrorMessage('Error: Cannot update income because the necessary data is missing.');
-      return;
-    }
-  
-    try {
-      const response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/`, currentIncome);
-  
-      if (response.status === 200 || response.status === 201) {
-        refetch();
-        setEditingIncomeId(null);
-        setCurrentIncome(null);
-        setErrorMessage('');
-      } else {
-        throw new Error('Failed to save the income');
+      if (!currentIncome || !currentIncome.id) {
+          setErrorMessage('Error: Cannot update income because the necessary data is missing.');
+          return;
       }
-    } catch (error) {
-      console.error('Error saving income:', error);
-      setErrorMessage('Failed to save the income. Please try again.');
-    }
+  
+      // Update the currentIncome object with the new amount
+      const updatedIncome = { ...currentIncome, amount: parseFloat(newAmount) };
+  
+      try {
+          const response = await axiosInstance.put(`/api/incomes/${updatedIncome.id}/`, updatedIncome);
+  
+          if (response.status === 200 || response.status === 201) {
+              refetch();
+              setEditingIncomeId(null);
+              setCurrentIncome(null);
+              setErrorMessage('');
+          } else {
+              throw new Error('Failed to save the income');
+          }
+      } catch (error) {
+          console.error('Error saving income:', error);
+          setErrorMessage('Failed to save the income. Please try again.');
+      }
   };
 
   const handleEdit = (income) => {

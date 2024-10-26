@@ -3,6 +3,7 @@
 ## Overview
 
 Demo: https://youtu.be/VUTgKNDZ66c
+
 Welcome to the **Budget Tracker Project**! This web application helps individuals efficiently manage their finances by offering a user-friendly platform for tracking income, expenses, and budget goals. Designed with a clean and intuitive interface, this tool is built using Python, Django, and React. PostgreSQL serves as the database, providing reliable data management for a production-level experience.
 
 The Budget Tracker provides users with the tools to monitor their financial health visually and effectively. With features like customizable dashboards, income and expense categorization, credit card installment management, and a calendar view, this project is a comprehensive personal finance assistant.

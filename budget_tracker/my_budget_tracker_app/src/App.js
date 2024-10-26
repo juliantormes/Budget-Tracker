@@ -12,16 +12,16 @@ import AddExpenses from './views/AddExpenses';
 import ViewExpenseCategory from './views/ViewExpenseCategory';
 import ViewCreditCard from './views/ViewCreditCard';
 import AddCreditCard from './views/AddCreditCard';
-import './styles/global.css'; // Import global styles
+import './styles/global.css';
 
 const PrivateRoute = ({ element: Component, ...rest }) => {
   const { user } = useAuth();
-  return user ? <Component {...rest} /> : <Navigate to="/login" />;
+  return user ? <Component {...rest} /> : <Navigate to="/login" replace />;
 };
 
 const PublicRoute = ({ element: Component, ...rest }) => {
   const { user } = useAuth();
-  return !user ? <Component {...rest} /> : <Navigate to="/home" />;
+  return !user ? <Component {...rest} /> : <Navigate to="/home" replace />;
 };
 
 const App = () => {
@@ -29,6 +29,8 @@ const App = () => {
     <ProvideAuth>
       <Router>
         <Routes>
+          {/* Root route now redirects to home if logged in or login if not */}
+          <Route path="/" element={<Navigate to="/home" replace />} />
           <Route path="/home" element={<PrivateRoute element={HomePage} />} />
           <Route path="/login" element={<PublicRoute element={LoginForm} />} />
           <Route path="/register" element={<PublicRoute element={RegisterForm} />} />

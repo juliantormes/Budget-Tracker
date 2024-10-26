@@ -21,7 +21,7 @@ const EditableRow = ({
   creditCards = [],
   isDeleting,
 }) => {
-  const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '' });
+  const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '',effective_amount: item.effective_amount || item.amount });
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
 
@@ -30,6 +30,9 @@ const EditableRow = ({
       setFormData({ ...item, credit_card_id: item.credit_card?.id || '' });
     }
   }, [isEditing, item]);
+
+  useEffect(() => {
+  }, [formData.effective_amount, formData.amount, formData.date]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -71,7 +74,7 @@ const EditableRow = ({
 
   return (
     <>
-      <TableRow key={item.id} className={isEditing ? 'editing' : ''} data-testid="editable-row">
+      <TableRow key={item.id} className={isEditing ? 'editing' : ''} data-testid={`expense-row-${item.id}`}>
         <TableCell style={{ padding: '4px 8px', width: '12%' }}>
           {isEditing ? (
             <FormControl fullWidth sx={commonInputStyle}>
@@ -231,7 +234,9 @@ const EditableRow = ({
                   sx={commonInputStyle}
                 />
               ) : (
-                formData.surcharge || 'N/A'
+                formData.surcharge !== undefined && formData.surcharge !== null && !isNaN(formData.surcharge)
+                ? Number(formData.surcharge).toFixed(2)
+                : 'N/A'
               )}
             </TableCell>
           </>

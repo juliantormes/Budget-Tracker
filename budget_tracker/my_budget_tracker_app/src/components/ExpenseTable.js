@@ -36,7 +36,7 @@ const ExpenseTable = ({
         {expenses.map((expense) => (
           <EditableRow
             key={`${expense.id}-${expense.amount}`}
-            data-testid="editable-row"
+            data-testid={`expense-row-${expense.id}`}
             item={expense}
             isEditing={editingExpenseId === expense.id}
             onEdit={onEdit}

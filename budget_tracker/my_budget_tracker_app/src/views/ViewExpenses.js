@@ -13,7 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewExpenses.css';
 import ExpenseTable from '../components/ExpenseTable';
 
-const ViewExpenses = () => {
+const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp }) => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
@@ -21,15 +21,15 @@ const ViewExpenses = () => {
   const [selectedExpenses, setSelectedExpenses] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingExpenseId, setEditingExpenseId] = useState(null);
-  const [categories, setCategories] = useState([]);
-  const [creditCards, setCreditCards] = useState([]);
+  const [categories, setCategories] = useState(categoriesProp || []);
+  const [creditCards, setCreditCards] = useState(creditCardsProp || []);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [currentExpense, setCurrentExpense] = useState(null);
   const [newAmount, setNewAmount] = useState('');
   const [effectiveDate, setEffectiveDate] = useState(dayjs());
-  const [errorMessage, setErrorMessage] = useState(''); // For error notifications
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (currentExpense) {
@@ -51,22 +51,31 @@ const ViewExpenses = () => {
   }, [dateRange, data, isValidRange, fetchExpenses]);
 
   const fetchCategories = async () => {
-    try {
-      const response = await axiosInstance.get('/api/expense_categories/');
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+    if (!categoriesProp) {
+      try {
+        const response = await axiosInstance.get('/api/expense_categories/');
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
     }
   };
 
   const fetchCreditCards = async () => {
-    try {
-      const response = await axiosInstance.get('/api/credit_cards/');
-      setCreditCards(response.data);
-    } catch (error) {
-      console.error('Error fetching credit cards:', error);
+    if (!creditCardsProp) {
+      try {
+        const response = await axiosInstance.get('/api/credit_cards/');
+        if (response && response.data) {
+          setCreditCards(response.data);
+        } else {
+          console.error('Error: Received undefined or empty response.');
+        }
+      } catch (error) {
+        console.error('Error fetching credit cards:', error);
+      }
     }
   };
+  
 
   useEffect(() => {
     fetchCategories();
@@ -103,10 +112,8 @@ const ViewExpenses = () => {
       setErrorMessage('Error: Cannot update expense because the necessary data is missing.');
       return;
     }
-  
     try {
       const response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/`, currentExpense);
-  
       if (response.status === 200 || response.status === 201) {
         refetch();
         setEditingExpenseId(null);
@@ -129,10 +136,10 @@ const ViewExpenses = () => {
   const handleUpdateRecurring = (expenseId) => {
     const expense = selectedExpenses.find((exp) => exp.id === expenseId);
     if (expense) {
-      setCurrentExpense(expense);  // Set the current expense with the correct ID
+      setCurrentExpense(expense);
       setNewAmount(expense.effective_amount || expense.amount);
       setEffectiveDate(dayjs());
-      setOpenDialog(true);  // Open the dialog for updating recurring expense
+      setOpenDialog(true);
     } else {
       console.error('Expense not found for the given ID:', expenseId);
     }
@@ -142,8 +149,8 @@ const ViewExpenses = () => {
     setIsDeleting(true);
     try {
       const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
-      if (response.status === 204) {  // 204 No Content is typically returned on a successful DELETE
-        refetch();  // Refetch the expenses to update the list
+      if (response.status === 204) {
+        refetch();
       } else {
         throw new Error('Failed to delete the expense');
       }
@@ -160,12 +167,10 @@ const ViewExpenses = () => {
       setErrorMessage('Error: Cannot update recurring expense because the necessary data is missing.');
       return;
     }
-  
     const formData = {
       new_amount: parseFloat(newAmount),
       effective_date: effectiveDate.format('YYYY-MM-DD'),
     };
-  
     try {
       const existingLog = currentExpense.change_logs.find(log =>
         dayjs(log.effective_date).isSame(effectiveDate, 'month')
@@ -189,8 +194,6 @@ const ViewExpenses = () => {
         // Optionally refetch after a slight delay
         await new Promise(resolve => setTimeout(resolve, 500)); 
         refetch();
-  
-        // Reset dialog and state
         setOpenDialog(false);
         setCurrentExpense(null);
         setNewAmount('');
@@ -231,7 +234,7 @@ const ViewExpenses = () => {
             onEdit={handleEdit}
             onCancel={() => setEditingExpenseId(null)}
             onSave={handleSave}
-            onDelete={handleDelete}  // Pass the handleDelete function
+            onDelete={handleDelete}
             onUpdateRecurring={handleUpdateRecurring}
             categories={categories}
             creditCards={creditCards}

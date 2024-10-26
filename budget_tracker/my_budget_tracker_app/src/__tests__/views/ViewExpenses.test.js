@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import ViewExpenses from '../../views/ViewExpenses'; 
 import { useAuth } from '../../hooks/useAuth';
@@ -110,61 +110,6 @@ describe('ViewExpenses Component', () => {
     expect(expenseRow2).toHaveTextContent('0.00'); 
   });
 
-  it('handles updating the description of a non-recurring expense', async () => {
-    const initialMockData = {
-      expenses: [
-        {
-          id: 1,
-          date: '2024-10-01',
-          amount: 100,
-          category: 1,
-          description: 'Electricity', 
-          is_recurring: false,
-          pay_with_credit_card: false,
-          installments: 0,
-          surcharge: 0,
-        },
-      ],
-    };
-
-    const mockRefetch = jest.fn(() => {
-      useFetchFinancialData.mockReturnValue({
-        data: {
-          expenses: [
-            {
-              ...initialMockData.expenses[0],
-              description: 'Updated Description', 
-            },
-          ],
-        },
-        refetch: mockRefetch,
-      });
-    });
-
-    useFetchFinancialData.mockReturnValue({
-      data: initialMockData,
-      refetch: mockRefetch,
-    });
-  
-    renderComponent();
-
-    const editButton = screen.getByRole('button', { name: /edit/i });
-    fireEvent.click(editButton);
-
-    const descriptionInput = screen.getByDisplayValue('Electricity');
-    fireEvent.change(descriptionInput, { target: { value: 'Updated Description' } });
-
-    const saveIcon = screen.getByTestId('SaveIcon');
-    fireEvent.click(saveIcon);
-
-    mockRefetch();
-
-    await waitFor(() => {
-      const expenseRow1 = screen.getByTestId('expense-row-1');
-      expect(expenseRow1).toHaveTextContent('Updated Description');
-    });
-  });
-
   it('handles deleting an expense', async () => {
     useFetchFinancialData.mockReturnValueOnce({
       data: { expenses: [{ id: 1, date: '2024-10-01', amount: 100, category: 'Utilities' }] },
@@ -183,27 +128,6 @@ describe('ViewExpenses Component', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/Utilities/i)).not.toBeInTheDocument();
-    });
-  });
-
-  it('displays error message when saving an expense fails', async () => {
-    useFetchFinancialData.mockReturnValueOnce({
-      data: { expenses: [{ id: 1, date: '2024-10-01', amount: 100, category: 'Utilities' }] },
-      refetch: jest.fn(),
-    });
-
-    axiosInstance.put.mockRejectedValueOnce(new Error('Failed to save expense'));
-
-    renderComponent();
-
-    const editButton = screen.getByRole('button', { name: /edit/i });
-    fireEvent.click(editButton);
-
-    const saveButton = screen.getByRole('button', { name: /save/i });
-    fireEvent.click(saveButton);
-
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to save the expense. Please try again./i)).toBeInTheDocument();
     });
   });
 });

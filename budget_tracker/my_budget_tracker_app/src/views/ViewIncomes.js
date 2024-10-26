@@ -13,7 +13,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewIncomes.css';
 import IncomeTable from '../components/IncomeTable';
 
-const ViewIncomes = () => {
+const ViewIncomes = ({ categories: categoriesProp }) => {
   const { logout } = useAuth();
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
@@ -21,18 +21,18 @@ const ViewIncomes = () => {
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
   const [editingIncomeId, setEditingIncomeId] = useState(null);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(categoriesProp || []);
   const [isDeleting, setIsDeleting] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
   const [currentIncome, setCurrentIncome] = useState(null);
   const [newAmount, setNewAmount] = useState('');
   const [effectiveDate, setEffectiveDate] = useState(dayjs());
-  const [errorMessage, setErrorMessage] = useState(''); // For error notifications
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     if (currentIncome) {
-      setNewAmount(currentIncome.effective_amount || currentIncome.amount);  // Set the default value to the current amount
+      setNewAmount(currentIncome.effective_amount || currentIncome.amount);
     }
   }, [currentIncome]);
 
@@ -50,11 +50,13 @@ const ViewIncomes = () => {
   }, [dateRange, data, isValidRange, fetchIncomes]);
 
   const fetchCategories = async () => {
-    try {
-      const response = await axiosInstance.get('/api/income_categories/');
-      setCategories(response.data);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+    if (!categoriesProp) {
+      try {
+        const response = await axiosInstance.get('/api/income_categories/');
+        setCategories(response.data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
     }
   };
 
@@ -92,10 +94,8 @@ const ViewIncomes = () => {
       setErrorMessage('Error: Cannot update income because the necessary data is missing.');
       return;
     }
-  
     try {
       const response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/`, currentIncome);
-  
       if (response.status === 200 || response.status === 201) {
         refetch();
         setEditingIncomeId(null);
@@ -118,10 +118,10 @@ const ViewIncomes = () => {
   const handleUpdateRecurring = (incomeId) => {
     const income = selectedIncomes.find((inc) => inc.id === incomeId);
     if (income) {
-      setCurrentIncome(income);  // Set the current income with the correct ID
+      setCurrentIncome(income);
       setNewAmount(income.effective_amount || income.amount);
       setEffectiveDate(dayjs());
-      setOpenDialog(true);  // Open the dialog for updating recurring income
+      setOpenDialog(true);
     } else {
       console.error('Income not found for the given ID:', incomeId);
     }
@@ -131,8 +131,8 @@ const ViewIncomes = () => {
     setIsDeleting(true);
     try {
       const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
-      if (response.status === 204) {  // 204 No Content is typically returned on a successful DELETE
-        refetch();  // Refetch the incomes to update the list
+      if (response.status === 204) {
+        refetch();
       } else {
         throw new Error('Failed to delete the income');
       }
@@ -149,37 +149,31 @@ const ViewIncomes = () => {
       setErrorMessage('Error: Cannot update recurring income because the necessary data is missing.');
       return;
     }
-  
     const formData = {
       new_amount: parseFloat(newAmount),
       effective_date: effectiveDate.format('YYYY-MM-DD'),
     };
-  
     try {
       const existingLog = currentIncome.change_logs.find(log =>
         dayjs(log.effective_date).isSame(effectiveDate, 'month')
       );
-  
+
       let response;
       if (existingLog) {
         response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       } else {
         response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
       }
-  
+
       if (response.status === 200 || response.status === 201) {
         const updatedIncome = response.data;
-  
-        // Make sure to create a new array for immutability
-        setSelectedIncomes(prevIncomes => 
+
+        setSelectedIncomes(prevIncomes =>
           prevIncomes.map(inc => (inc.id === updatedIncome.id ? { ...updatedIncome } : inc))
         );
-  
-        // Optionally refetch after a slight delay
-        await new Promise(resolve => setTimeout(resolve, 500)); 
+
+        await new Promise(resolve => setTimeout(resolve, 500));
         refetch();
-  
-        // Reset dialog and state
         setOpenDialog(false);
         setCurrentIncome(null);
         setNewAmount('');

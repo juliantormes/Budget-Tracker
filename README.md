@@ -125,7 +125,19 @@ To set up the development environment, follow these steps:
     python manage.py migrate
     ```
 
-6. **Start Development Servers**
+6. **Load Initial Data for Testing**
+
+    To load pre-existing data (including a test user and sample transactions), use the following command:
+
+    ```bash
+    python manage.py loaddata initial_data.json
+    ```
+
+    This will create a default test user with the following credentials:
+    - **Username**: `testuser`
+    - **Password**: `123`
+
+7. **Start Development Servers**
 
     ```bash
     python manage.py runserver  # Django server

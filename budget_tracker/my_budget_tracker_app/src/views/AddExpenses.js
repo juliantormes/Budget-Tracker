@@ -120,14 +120,10 @@ const AddExpenses = () => {
   return (
     <Layout logout={logout}>
       <div className="form-container">
-        {/* Custom Alert */}
         {message && <AlertMessage message={message} severity={severity} className="custom-alert" />}
 
         <Container className="container-top">
-          {/* Title "Add Expenses" */}
           <Typography variant="h4" gutterBottom>Add Expenses</Typography>
-
-          {/* The rest of the form */}
           <ExpenseForm
             formData={formData}
             categories={categories}

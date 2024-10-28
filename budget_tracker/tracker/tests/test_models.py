@@ -79,7 +79,7 @@ class CreditCardModelTest(TestCase):
 
     def setUp(self):
         # Create test user
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = User.objects.create_user(username='testuser1', password='12345')
 
     def test_credit_card_creation_success(self):
         """Test creating a credit card with valid data"""
@@ -376,7 +376,7 @@ class ExpenseModelTest(TestCase):
     
     def setUp(self):
         # Create a user, a category, and a credit card for testing
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = User.objects.create_user(username='testuser1', password='12345')
         self.category = ExpenseCategory.objects.create(user=self.user, name="Groceries")
         self.credit_card = CreditCard.objects.create(
             user=self.user,
@@ -656,7 +656,7 @@ class IncomeModelTest(TestCase):
 
     def setUp(self):
         # Create test user and income category
-        self.user = User.objects.create_user(username='testuser', password='12345')
+        self.user = User.objects.create_user(username='testuser1', password='12345')
         self.category = IncomeCategory.objects.create(user=self.user, name='Salary')
 
     def test_income_creation(self):
@@ -812,7 +812,7 @@ class IncomeModelTest(TestCase):
 class IncomeRecurringChangeLogModelTest(TestCase):
     def setUp(self):
         # Create a test user
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         
         # Create a test income category and income
         self.income_category = IncomeCategory.objects.create(user=self.user, name="Salary")

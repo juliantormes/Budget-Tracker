@@ -80,7 +80,7 @@ class ExpenseFormTest(TestCase):
 
     def setUp(self):
         """Set up a test user, category, and credit card for the form."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.category = ExpenseCategory.objects.create(name='Test Category', user=self.user)
         self.credit_card = CreditCard.objects.create(
             user=self.user,
@@ -300,7 +300,7 @@ class IncomeFormTest(TestCase):
 
     def setUp(self):
         """Set up a test user and income category for the form."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.category = IncomeCategory.objects.create(name='Salary', user=self.user)
 
     # Test Case 1: Test form is valid with correct data

@@ -84,7 +84,7 @@ const IncomeForm = ({
       }
       label="Recurring Income"
     />
-    <Button type="submit" variant="contained" color="primary" className="submit-button">
+    <Button type="submit" variant="contained" color="primary" className="submit-button" data-testid="submit-income">
       Add Income
     </Button>
   </form>

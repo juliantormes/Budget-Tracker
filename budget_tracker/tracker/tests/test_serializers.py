@@ -16,7 +16,7 @@ class UserSerializerTest(TestCase):
 
     def setUp(self):
         """Set up a user to test serialization."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
 
     def test_user_serializer(self):
         """Test if the UserSerializer correctly serializes data."""
@@ -82,7 +82,7 @@ class LoginSerializerTest(TestCase):
     def test_login_serializer(self):
         """Test if the LoginSerializer validates and returns the correct data."""
         data = {
-            'username': 'testuser',
+            'username': 'testuser1',
             'password': 'password123'
         }
         serializer = LoginSerializer(data=data)
@@ -100,7 +100,7 @@ class LoginSerializerTest(TestCase):
     def test_login_serializer_missing_password(self):
         """Test that LoginSerializer fails when 'password' is missing."""
         data = {
-            'username': 'testuser'
+            'username': 'testuser1'
         }
         serializer = LoginSerializer(data=data)
         self.assertFalse(serializer.is_valid())
@@ -109,7 +109,7 @@ class ExpenseCategorySerializerTest(TestCase):
     
     def setUp(self):
         """Set up a test user and expense category"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.expense_category_data = {'name': 'Food', 'user': self.user}
 
     def test_expense_category_serializer_valid_data(self):
@@ -149,7 +149,7 @@ class IncomeCategorySerializerTest(TestCase):
     
     def setUp(self):
         """Set up a test user and income category"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.income_category_data = {'name': 'Salary', 'user': self.user}
 
     def test_income_category_serializer_valid_data(self):
@@ -340,7 +340,7 @@ class ExpenseRecurringChangeLogSerializerTest(TestCase):
 class IncomeSerializerTestCase(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.category = IncomeCategory.objects.create(name="Salary", user=self.user)
         self.factory = APIRequestFactory()
 
@@ -432,7 +432,7 @@ class IncomeSerializerTestCase(TestCase):
 class ExpenseSerializerTestCase(TestCase):
     
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.category = ExpenseCategory.objects.create(name='Transport', user=self.user)
         self.credit_card = CreditCard.objects.create(
             user=self.user,

@@ -26,7 +26,6 @@ beforeEach(() => {
 
 describe('AddIncomes View', () => {
   it('renders the form correctly', async () => {
-    // Mock the API response for categories
     axiosInstance.get.mockResolvedValueOnce({ data: ['Category 1', 'Category 2'] });
 
     render(
@@ -35,10 +34,8 @@ describe('AddIncomes View', () => {
       </Router>
     );
 
-    // Check if the title is rendered correctly
     expect(screen.getByRole('heading', { name: /Add Income/i })).toBeInTheDocument();
 
-    // Ensure that the form has been rendered
     await waitFor(() => {
       expect(screen.getByLabelText(/Category/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/Amount/i)).toBeInTheDocument();
@@ -48,7 +45,6 @@ describe('AddIncomes View', () => {
   });
 
   it('displays success message on successful income submission', async () => {
-    // Mock the API responses for categories and successful income submission
     axiosInstance.get.mockResolvedValueOnce({ data: ['Category 1', 'Category 2'] });
     axiosInstance.post.mockResolvedValueOnce({ status: 201 });
 
@@ -58,27 +54,20 @@ describe('AddIncomes View', () => {
       </Router>
     );
 
-    // Fill out the form
     fireEvent.change(screen.getByLabelText(/Amount/i), { target: { value: '100' } });
     fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Income' } });
 
-    // Open the category dropdown
     fireEvent.mouseDown(screen.getByLabelText(/Category/i));
-
-    // Select an option from the dropdown
     fireEvent.click(screen.getByText('Category'));
 
-    // Submit the form
     fireEvent.click(screen.getByTestId('submit-income'));
 
-    // Expect success message
     await waitFor(() => {
       expect(screen.getByText(/Income added successfully!/i)).toBeInTheDocument();
     });
   });
 
   it('displays error message on failed submission due to API error', async () => {
-    // Mock the API responses for categories and failed income submission
     axiosInstance.get.mockResolvedValueOnce({ data: ['Category 1', 'Category 2'] });
     axiosInstance.post.mockRejectedValueOnce({
       response: {
@@ -94,19 +83,13 @@ describe('AddIncomes View', () => {
       </Router>
     );
 
-    // Fill out the form
     fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Income' } });
 
-    // Open the category dropdown
     fireEvent.mouseDown(screen.getByLabelText(/Category/i));
-
-    // Select an option from the dropdown
     fireEvent.click(screen.getByText('Category'));
 
-    // Submit the form
     fireEvent.click(screen.getByTestId('submit-income'));
 
-    // Expect error message from API
     await waitFor(() => {
       expect(screen.getByText(/Error adding income. Please check the fields./i)).toBeInTheDocument();
       expect(screen.getByText(/This field is required./i)).toBeInTheDocument();
@@ -114,7 +97,6 @@ describe('AddIncomes View', () => {
   });
 
   it('displays general error message on unexpected error', async () => {
-    // Mock the API responses for categories and network error
     axiosInstance.get.mockResolvedValueOnce({ data: ['Category 1', 'Category 2'] });
     axiosInstance.post.mockRejectedValueOnce(new Error('Network Error'));
 
@@ -124,20 +106,14 @@ describe('AddIncomes View', () => {
       </Router>
     );
 
-    // Fill out the form
     fireEvent.change(screen.getByLabelText(/Amount/i), { target: { value: '100' } });
     fireEvent.change(screen.getByLabelText(/Description/i), { target: { value: 'Test Income' } });
 
-    // Open the category dropdown
     fireEvent.mouseDown(screen.getByLabelText(/Category/i));
-
-    // Select an option from the dropdown
     fireEvent.click(screen.getByText('Category'));
 
-    // Submit the form
     fireEvent.click(screen.getByTestId('submit-income'));
 
-    // Expect general error message
     await waitFor(() => {
       expect(screen.getByText(/An unexpected error occurred. Please try again./i)).toBeInTheDocument();
     });

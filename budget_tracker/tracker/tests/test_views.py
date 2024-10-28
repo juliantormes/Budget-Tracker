@@ -11,7 +11,7 @@ class AuthViewsTest(APITestCase):
 
     def setUp(self):
         """Set up a test user and token for authentication"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.token = Token.objects.create(user=self.user)
     
     def authenticate(self):
@@ -24,7 +24,7 @@ class AuthViewsTest(APITestCase):
 
     def test_login_success(self):
         """Test logging in with valid credentials"""
-        data = {'username': 'testuser', 'password': 'password'}
+        data = {'username': 'testuser1', 'password': 'password'}
         self.unauthenticate()
         response = self.client.post(reverse('login'), data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -41,7 +41,7 @@ class AuthViewsTest(APITestCase):
 
     def test_login_already_authenticated(self):
         """Test logging in when already authenticated"""
-        data = {'username': 'testuser', 'password': 'password'}
+        data = {'username': 'testuser1', 'password': 'password'}
         self.authenticate()
         response = self.client.post(reverse('login'), data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -49,7 +49,7 @@ class AuthViewsTest(APITestCase):
 
     def test_login_missing_fields(self):
         """Test logging in with missing fields"""
-        data = {'username': 'testuser'}
+        data = {'username': 'testuser1'}
         self.unauthenticate()
         response = self.client.post(reverse('login'), data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -65,7 +65,7 @@ class AuthViewsTest(APITestCase):
 
     def test_signup_duplicate_username(self):
         """Test signing up with an existing username"""
-        data = {'username': 'testuser', 'password': 'password'}
+        data = {'username': 'testuser1', 'password': 'password'}
         self.unauthenticate()
         response = self.client.post(reverse('signup'), data)
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
@@ -105,7 +105,7 @@ class AuthViewsTest(APITestCase):
         """Test logging in with an inactive user"""
         self.user.is_active = False
         self.user.save()
-        data = {'username': 'testuser', 'password': 'password'}
+        data = {'username': 'testuser1', 'password': 'password'}
         self.client.credentials()
         response = self.client.post(reverse('login'), data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -113,8 +113,8 @@ class AuthViewsTest(APITestCase):
 class UpdateRecurringExpenseTest(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='password')
-        self.client.login(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
+        self.client.login(username='testuser1', password='password')
         self.expense = Expense.objects.create(user=self.user, amount=100, description='Test Expense', date='2024-09-01')
         self.url = reverse('update_recurring_expense', kwargs={'expense_id': self.expense.id})
 
@@ -190,8 +190,8 @@ class UpdateRecurringExpenseTest(APITestCase):
 class UpdateRecurringIncomeTest(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='password')
-        self.client.login(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
+        self.client.login(username='testuser1', password='password')
         self.income = Income.objects.create(user=self.user, amount=1000, description='Test Income', date='2024-09-01')
         self.url = reverse('update_recurring_income', kwargs={'income_id': self.income.id})
 
@@ -268,7 +268,7 @@ class UpdateRecurringIncomeTest(APITestCase):
 class ExpenseViewSetTestCase(APITestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.other_user = User.objects.create_user(username='otheruser', password='password')
         self.client.force_authenticate(user=self.user)
 
@@ -441,7 +441,7 @@ class IncomeViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user, income categories, and token for authentication"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         self.category = IncomeCategory.objects.create(name='Salary')
 
@@ -552,7 +552,7 @@ class CreditCardViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and two credit cards for that user"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         self.credit_card1 = CreditCard.objects.create(
             user=self.user,
@@ -663,7 +663,7 @@ class ExpenseCategoryViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and categories for the user"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         self.expense_category1 = ExpenseCategory.objects.create(user=self.user, name='Food')
         self.expense_category2 = ExpenseCategory.objects.create(user=self.user, name='Travel')
@@ -731,7 +731,7 @@ class IncomeCategoryViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and categories for the user"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         self.income_category1 = IncomeCategory.objects.create(user=self.user, name='Salary')
         self.income_category2 = IncomeCategory.objects.create(user=self.user, name='Freelance')
@@ -801,7 +801,7 @@ class CreditCardExpenseViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user, credit card, and expenses"""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
 
         self.credit_card = CreditCard.objects.create(
@@ -903,7 +903,7 @@ class IncomeRecurringChangeLogViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and income for recurring change logs."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         IncomeRecurringChangeLog.objects.all().delete()
 
@@ -944,7 +944,7 @@ class ExpenseRecurringChangeLogViewSetTestCase(APITestCase):
 
     def setUp(self):
         """Set up a test user and expense for recurring change logs."""
-        self.user = User.objects.create_user(username='testuser', password='password')
+        self.user = User.objects.create_user(username='testuser1', password='password')
         self.client.force_authenticate(user=self.user)
         ExpenseRecurringChangeLog.objects.all().delete()
 

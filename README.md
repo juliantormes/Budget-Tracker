@@ -80,7 +80,7 @@ To set up the development environment, follow these steps:
 
 ### Prerequisites
 
-- Python 3.8+
+- Python 3.10+ (Im using 3.12)
 - Node.js and npm
 - Pipenv or virtualenv
 

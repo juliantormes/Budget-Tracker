@@ -14,6 +14,11 @@ describe('EditCreditCardForm', () => {
     payment_day: 15,
     close_card_day: 30,
   };
+  const editErrors = {
+    last_four_digits: 'Invalid last four digits',
+    general: 'An error occurred while updating the credit card.',
+  };
+  const successMessage = 'Credit card updated successfully';
 
   beforeEach(() => {
     render(
@@ -22,6 +27,8 @@ describe('EditCreditCardForm', () => {
         handleChange={mockHandleChange}
         handleSaveClick={mockHandleSaveClick}
         handleCancelClick={mockHandleCancelClick}
+        editErrors={editErrors}
+        successMessage={successMessage}
       />
     );
   });
@@ -33,6 +40,18 @@ describe('EditCreditCardForm', () => {
     expect(screen.getByDisplayValue(formData.credit_limit.toString())).toBeInTheDocument();
     expect(screen.getByDisplayValue(formData.payment_day.toString())).toBeInTheDocument();
     expect(screen.getByDisplayValue(formData.close_card_day.toString())).toBeInTheDocument();
+  });
+
+  it('displays success message when provided', () => {
+    expect(screen.getByText(successMessage)).toBeInTheDocument();
+  });
+
+  it('displays general error message when provided', () => {
+    expect(screen.getByText(editErrors.general)).toBeInTheDocument();
+  });
+
+  it('displays field-specific error messages when provided', () => {
+    expect(screen.getByText(editErrors.last_four_digits)).toBeInTheDocument();
   });
 
   it('calls handleChange when input values change', () => {

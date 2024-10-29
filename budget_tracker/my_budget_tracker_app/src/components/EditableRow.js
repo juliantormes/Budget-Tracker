@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { TableCell, TableRow, TextField, IconButton, MenuItem, Select, FormControl, Checkbox } from '@mui/material';
+import {
+  TableCell, TableRow, TextField, IconButton, MenuItem, Select, FormControl, Checkbox, Alert
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SaveIcon from '@mui/icons-material/Save';
@@ -7,6 +9,7 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import MonetizationOnIcon from '@mui/icons-material/MonetizationOn';
 import dayjs from 'dayjs';
 import ConfirmAction from './ConfirmAction';
+import AlertMessage from './AlertMessage';
 
 const EditableRow = ({
   item = {},
@@ -17,11 +20,13 @@ const EditableRow = ({
   onDelete,
   onUpdateRecurring,
   categories = [],
-  type,  // expense or income
+  type, // expense or income
   creditCards = [],
   isDeleting,
 }) => {
   const [formData, setFormData] = useState({ ...item, credit_card_id: item.credit_card?.id || '', effective_amount: item.effective_amount || item.amount });
+  const [errors, setErrors] = useState({});
+  const [generalError, setGeneralError] = useState('');
   const [confirmActionOpen, setConfirmActionOpen] = useState(false);
   const [actionType, setActionType] = useState('');
 
@@ -31,16 +36,38 @@ const EditableRow = ({
     }
   }, [isEditing, item]);
 
+  const validateForm = () => {
+    let newErrors = {};
+
+    if (!formData.category) newErrors.category = 'Category is required';
+    if (!formData.date) newErrors.date = 'Date is required';
+    if (!formData.amount || formData.amount <= 0) newErrors.amount = 'Amount must be greater than 0';
+
+    if (formData.pay_with_credit_card) {
+      if (!formData.credit_card_id) newErrors.credit_card_id = 'Credit card selection is required';
+      if (!formData.installments || formData.installments <= 0) newErrors.installments = 'Installments must be greater than 0';
+      if (!formData.surcharge || formData.surcharge < 0) newErrors.surcharge = 'Surcharge cannot be negative';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+    setErrors((prev) => ({ ...prev, [name]: '' })); // Clear error for the field on change
   };
 
   const handleSave = () => {
-    onSave(formData);
+    if (validateForm()) {
+      onSave(formData);
+    } else {
+      setGeneralError('Please correct the highlighted errors before saving.');
+    }
   };
 
   const handleConfirmAction = () => {
@@ -71,10 +98,12 @@ const EditableRow = ({
 
   return (
     <>
+      {generalError && <AlertMessage message={generalError} severity="error" />}
+
       <TableRow key={item.id} className={isEditing ? 'editing' : ''} data-testid={`${type}-row-${item.id}`}>
         <TableCell style={{ padding: '4px 8px', width: '12%' }}>
           {isEditing ? (
-            <FormControl fullWidth sx={commonInputStyle}>
+            <FormControl fullWidth sx={commonInputStyle} error={!!errors.category}>
               <Select
                 name="category"
                 value={formData.category || ''}
@@ -89,6 +118,7 @@ const EditableRow = ({
                   </MenuItem>
                 ))}
               </Select>
+              {errors.category && <span className="error-text">{errors.category}</span>}
             </FormControl>
           ) : (
             categories.find((category) => category.id === formData.category)?.name || 'N/A'
@@ -105,6 +135,8 @@ const EditableRow = ({
               name="date"
               type="date"
               onChange={handleInputChange}
+              error={!!errors.date}
+              helperText={errors.date}
               sx={commonInputStyle}
             />
           ) : (
@@ -123,6 +155,8 @@ const EditableRow = ({
               onChange={handleInputChange}
               disabled={isRecurring}
               type="number"
+              error={!!errors.amount}
+              helperText={errors.amount}
               sx={commonInputStyle}
             />
           ) : (
@@ -139,7 +173,9 @@ const EditableRow = ({
               value={formData.description || ''}
               name="description"
               onChange={handleInputChange}
-              aria-label='description'
+              error={!!errors.description}
+              helperText={errors.description}
+              aria-label="description"
               sx={commonInputStyle}
             />
           ) : (
@@ -177,7 +213,7 @@ const EditableRow = ({
 
             <TableCell style={{ padding: '4px 8px', width: '12%' }}>
               {isEditing ? (
-                <FormControl fullWidth sx={commonInputStyle}>
+                <FormControl fullWidth sx={commonInputStyle} error={!!errors.credit_card_id}>
                   <Select
                     name="credit_card_id"
                     value={formData.credit_card_id || ''}
@@ -193,6 +229,7 @@ const EditableRow = ({
                       </MenuItem>
                     ))}
                   </Select>
+                  {errors.credit_card_id && <span className="error-text">{errors.credit_card_id}</span>}
                 </FormControl>
               ) : (
                 currentCreditCard ? `${currentCreditCard.brand} **** ${currentCreditCard.last_four_digits}` : 'N/A'
@@ -210,6 +247,8 @@ const EditableRow = ({
                   onChange={handleInputChange}
                   disabled={!formData.pay_with_credit_card}
                   type="number"
+                  error={!!errors.installments}
+                  helperText={errors.installments}
                   sx={commonInputStyle}
                 />
               ) : (
@@ -228,6 +267,8 @@ const EditableRow = ({
                   onChange={handleInputChange}
                   disabled={!formData.pay_with_credit_card}
                   type="number"
+                  error={!!errors.surcharge}
+                  helperText={errors.surcharge}
                   sx={commonInputStyle}
                 />
               ) : (

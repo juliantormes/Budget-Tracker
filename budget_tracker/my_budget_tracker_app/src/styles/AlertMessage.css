@@ -1,0 +1,4 @@
+/* Add this CSS to your stylesheet or CSS module */
+.success-alert .MuiAlert-message, .success-alert .MuiAlertTitle-root {
+    color: #4CAF50 !important; /* Green text color */
+}

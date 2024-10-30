@@ -742,11 +742,19 @@ class IncomeModelTest(TestCase):
             is_recurring=True
         )
         # Create change logs for different past months
-        income.change_logs.create(new_amount=Decimal('5400.00'), effective_date=timezone.now().date().replace(month=1))
-        income.change_logs.create(new_amount=Decimal('5300.00'), effective_date=timezone.now().date().replace(month=2))
+        income.change_logs.create(
+            new_amount=Decimal('5400.00'),
+            effective_date=timezone.now().date().replace(day=1, month=1)
+        )
+        income.change_logs.create(
+            new_amount=Decimal('5300.00'),
+            effective_date=timezone.now().date().replace(day=1, month=2)
+        )
 
         # No exact match for the current month, but should return the closest log from February
-        effective_amount = income.get_effective_amount(timezone.now().date().replace(month=3))
+        effective_amount = income.get_effective_amount(
+            timezone.now().date().replace(day=1, month=3)
+        )
         self.assertEqual(effective_amount, Decimal('5300.00'))
 
     def test_get_effective_amount_no_logs(self):

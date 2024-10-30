@@ -2,85 +2,85 @@
 
 ## Overview
 
-Welcome to the **Budget Tracker Project**! This web application helps individuals efficiently manage their finances by offering a user-friendly platform for tracking income, expenses, and budget goals. Designed with a clean and intuitive interface, this tool is built using Python, Django, and React. PostgreSQL serves as the database, providing reliable data management for a production-level experience.
+Welcome to the **Budget Tracker Project**! This web application provides a straightforward, efficient way for individuals to manage their finances by tracking income, expenses, and budget goals. Built with Python, Django, and React, the application uses PostgreSQL as its database for reliable data handling. Docker is used to streamline development and testing, making the project production-ready and adaptable to different environments.
 
-The Budget Tracker provides users with the tools to monitor their financial health visually and effectively. With features like customizable dashboards, income and expense categorization, credit card installment management, and a calendar view, this project is a comprehensive personal finance assistant.
+With features like customizable dashboards, income and expense categorization, credit card management, and calendar views, the Budget Tracker project is a comprehensive personal finance tool.
 
 ## Key Features
 
-1. **User Authentication**: Users can securely register, log in, and manage their accounts. Each user has a personalized experience, allowing them to securely track their budget over time.
+1. **User Authentication**: Secure user registration, login, and account management provide a personalized, private budgeting experience.
+   
+2. **Dashboard Overview**: A data-driven dashboard with charts and graphs offers insights into income and spending trends, helping users understand their financial health.
 
-2. **Dashboard Overview**: A visually rich dashboard offers insights into spending and income trends. Charts and graphs, implemented via Chart.js, enable users to quickly grasp their financial status and make informed decisions.
+3. **Expense Management**: Users can add, edit, delete, and categorize expenses to track spending patterns and set budget goals effectively.
 
-3. **Expense Management**: Users can add, edit, delete, and categorize expenses, making it easy to track spending patterns and adjust budget goals.
+4. **Income Tracking**: Income logging with categorization allows users to monitor month-over-month income and sources.
 
-4. **Income Tracking**: A streamlined interface allows users to log income sources, categorize them, and review month-over-month income trends.
+5. **Credit Card Management**: This feature supports credit card transaction tracking, including recurring payments and installment handling, for a complete view of financial obligations.
 
-5. **Credit Card Management**: A specialized feature for managing credit card transactions, including recurring payments and installment handling, gives users an accurate representation of ongoing financial commitments.
+6. **Calendar Integration**: The calendar view offers a monthly overview, helping users manage income and expenses on specific dates.
 
-6. **Calendar Integration**: A calendar view offers a holistic view of finances, helping users visualize their monthly cash flow and manage both incoming and outgoing funds on specific dates.
+7. **Comprehensive Testing**: The application includes tests for both backend and frontend code, ensuring a stable and reliable user experience.
 
-7. **Robust Testing**: Both backend and frontend code is thoroughly tested, ensuring a stable, bug-free experience. Testing covers components, views, forms, and database interactions.
-
-## File Structure & Explanation
-
-The project’s main files and directories are organized as follows:
+## Project Structure
 
 ### Backend (Django)
 
-- **`models.py`**: Defines the database models, such as User, Income, Expense, CreditCardExpense, and RecurringChangeLog. These models capture the core data structure, including user data, transaction details, and recurring transaction history.
+- **`models.py`**: Defines core data structures like User, Income, Expense, and CreditCardExpense, capturing user data and transaction details.
   
-- **`views.py`**: Contains logic for handling incoming requests, validating data, and orchestrating the interactions between models and serializers. Key views include `ExpenseViewSet`, `IncomeViewSet`, and `CreditCardViewSet`, each of which exposes endpoints for CRUD operations.
+- **`views.py`**: Handles requests, data validation, and model interactions. Key views include `ExpenseViewSet` and `IncomeViewSet` for CRUD operations.
 
-- **`serializers.py`**: Serializes the data models for API responses, converting complex querysets to JSON and validating incoming data. Custom validation logic, especially for handling installment and recurring payment updates, ensures data integrity.
+- **`serializers.py`**: Converts models to JSON and validates incoming data for API responses, especially for recurring payments and installments.
 
-- **`urls.py`**: Configures URL routing, linking endpoint paths to the corresponding views for a RESTful API experience.
+- **`urls.py`**: Configures API endpoint paths, providing a RESTful experience.
 
-- **`tests.py`**: Implements unit tests using Django’s testing framework, covering models, views, and API endpoints. This file verifies that each feature performs as expected, covering edge cases and validation rules.
+- **`tests.py`**: Contains unit tests for models, views, and endpoints to ensure reliability and accurate functionality.
 
 ### Frontend (React)
 
-- **`App.js`**: The root component that handles overall routing and layout. Contains the logic for rendering pages based on user authentication and role.
-  
-- **`components/`**: Contains reusable components such as `ExpenseForm`, `IncomeForm`, `CalendarView`, and `Dashboard`. Each component is modular, focusing on a single responsibility, such as rendering the expense input form or displaying the calendar.
+- **`App.js`**: Main component managing routing and page layout, including authentication checks.
 
-- **`hooks/`**: Contains custom hooks like `useAuth` for authentication state management and `useMutation` for handling CRUD operations. This approach keeps the codebase clean and ensures separation of concerns.
+- **`components/`**: Reusable components like `ExpenseForm`, `CalendarView`, and `Dashboard`.
 
-- **`services/`**: Centralizes API call logic, reducing redundancy across the frontend by encapsulating HTTP requests in dedicated functions. This directory supports scalability and easier maintenance.
+- **`hooks/`**: Custom hooks such as `useAuth` for state management and `useMutation` for data operations.
 
-- **`tests/`**: Contains Jest tests for frontend components, ensuring that each component renders correctly, handles user input properly, and triggers expected events.
+- **`services/`**: Centralized API call logic, simplifying HTTP request management.
+
+- **`tests/`**: Jest tests for component rendering, user interaction, and event handling.
 
 ### Database
 
-- **PostgreSQL** is the primary database for the project, offering robust data handling capabilities to support complex queries and ensure scalability for production environments.
+- **PostgreSQL**: A robust, production-ready database chosen for handling complex queries and scalability.
 
-## Design Choices
+## Design and Testing Choices
 
-### Authentication
+### Docker for Development and Testing
 
-The authentication system employs Django's built-in user model for backend verification. Frontend components are safeguarded by authentication checks and session persistence, ensuring that users can access their data securely. The login and register pages employ a sleek, Apple-inspired aesthetic with smooth gradient effects, enhancing the user experience.
+Docker is integrated into the development process to simulate production environments, making it easy to run, test, and deploy the application across different systems. With Docker, the application can be tested in isolated containers, ensuring consistency and helping to catch deployment-specific issues early.
+
+### Authentication and Security
+
+Django’s built-in user model is used for authentication, with frontend components safeguarded by authentication checks. The login and registration pages feature a clean, modern design.
 
 ### Testing Strategy
 
-Testing is conducted using **Django's testing framework** for backend and **Jest** for frontend. Each backend endpoint undergoes unit and integration testing, covering CRUD operations, validation logic, and business rules such as recurring transaction updates. Frontend tests verify that components render as expected and handle user interactions correctly.
+Testing is managed with Django’s testing framework for backend and Jest for frontend, ensuring comprehensive validation of functionalities and user interactions.
 
-### User Interface and Accessibility
+### User Interface
 
-The UI is built with responsiveness and accessibility in mind. Material-UI components ensure consistency, while custom styling improves usability across devices. Hover effects, typography choices, and color schemes were thoughtfully designed to make navigation and interaction intuitive.
+Material-UI components ensure a consistent design across pages, and custom styles improve the user experience. The interface is optimized for both responsiveness and accessibility.
 
-### Key Design Challenges
+### Challenges
 
-- **Recurring Transactions**: Managing recurring expenses and incomes required flexibility for updates and changes over time without affecting historical data. The `RecurringChangeLog` model and `getEffectiveAmount` function were implemented to handle this efficiently.
+- **Recurring Transactions**: Recurring expenses and incomes needed flexible updating without altering historical data. This was managed with a `RecurringChangeLog` model.
 
-- **Credit Card Installments**: Handling credit card installments and future transaction distributions across multiple months was achieved by calculating installments and adjusting them based on closing day, surcharges, and installment periods. Past installments are retained for reference, and future installments are distributed correctly across months.
+- **Credit Card Installments**: Distributing installments across future months was achieved through dynamic calculation based on installment periods and surcharges.
 
 ## Getting Started
 
-To set up the development environment, follow these steps:
-
 ### Prerequisites
 
-- Python 3.10+ (Im using 3.12)
+- Python 3.10+ (tested on 3.10 and 3.12)
 - Node.js and npm
 - Pipenv or virtualenv
 
@@ -125,15 +125,12 @@ To set up the development environment, follow these steps:
     python manage.py migrate
     ```
 
-6. **Load Initial Data for Testing**
-
-    To load pre-existing data (including a test user and sample transactions), use the following command:
+6. **Load Initial Data**
 
     ```bash
     python manage.py loaddata initial_data.json
     ```
 
-    This will create a default test user with the following credentials:
     - **Username**: `testuser`
     - **Password**: `123`
 
@@ -149,10 +146,10 @@ To set up the development environment, follow these steps:
 
 ## Contributing
 
-Your contributions are welcome! Whether it’s feature suggestions, bug fixes, or code improvements, feel free to open a pull request. Please open an issue for significant changes to discuss your proposal before implementation.
+Contributions are welcome! For feature suggestions or bug fixes, please open a pull request. For significant changes, open an issue to discuss your proposal.
 
 ## Acknowledgements
 
-Thank you to all contributors and open-source projects that made this application possible. From the Material-UI library to Django REST Framework and Chart.js, your tools and support were invaluable to our success.
+Thanks to the developers and open-source projects that contributed tools and support, including Material-UI, Django REST Framework, and Chart.js.
 
-Enjoy tracking your budget with the **Budget Tracker Project**! 🚀
+Enjoy managing your budget with **Budget Tracker**! 🚀

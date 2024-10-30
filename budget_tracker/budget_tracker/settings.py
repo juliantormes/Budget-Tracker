@@ -13,13 +13,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 from dotenv import load_dotenv
-import warnings
 
-warnings.filterwarnings("ignore", category=UserWarning, module="psycopg")
-
-load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=True)
 
 
 # Quick-start development settings - unsuitable for production

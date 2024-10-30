@@ -49,7 +49,7 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
     }
   }, [dateRange, data, isValidRange, fetchIncomes]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     if (!categoriesProp) {
       try {
         const response = await axiosInstance.get('/api/income_categories/');
@@ -58,11 +58,11 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
         console.error('Error fetching categories:', error);
       }
     }
-  };
-
+  }, [categoriesProp]);
+  
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);

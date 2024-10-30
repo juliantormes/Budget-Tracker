@@ -50,7 +50,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
     }
   }, [dateRange, data, isValidRange, fetchExpenses]);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     if (!categoriesProp) {
       try {
         const response = await axiosInstance.get('/api/expense_categories/');
@@ -59,9 +59,9 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
         console.error('Error fetching categories:', error);
       }
     }
-  };
+  }, [categoriesProp]);
 
-  const fetchCreditCards = async () => {
+  const fetchCreditCards = useCallback(async () => {
     if (!creditCardsProp) {
       try {
         const response = await axiosInstance.get('/api/credit_cards/');
@@ -74,13 +74,13 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
         console.error('Error fetching credit cards:', error);
       }
     }
-  };
+  }, [creditCardsProp]);
   
 
   useEffect(() => {
     fetchCategories();
     fetchCreditCards();
-  }, []);
+  }, [fetchCategories, fetchCreditCards]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);

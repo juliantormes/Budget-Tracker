@@ -3,40 +3,24 @@ import os
 from dotenv import load_dotenv
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Determine which environment file to load
-environment = os.getenv('ENVIRONMENT', 'development')
-if environment == 'production':
-    dotenv_path = os.path.join(BASE_DIR, '.env')
+# Load environment variables based on the environment
+if os.getenv('ENVIRONMENT') == 'production':
+    load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=True)
 else:
-    dotenv_path = os.path.join(BASE_DIR, '.env.local')
+    load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env.local"), override=True)
 
-# Load the appropriate .env file
-load_dotenv(dotenv_path=dotenv_path, override=True)
+
 
 # General settings
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
 ALLOWED_HOSTS = ['*']
 
-# Database configuration
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
-# Fallback for development if DATABASE_URL isn't set
-if environment == 'development' and not os.getenv('DATABASE_URL'):
-    DATABASES['default'] = {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': os.getenv('DB_NAME'),
-        'USER': os.getenv('DB_USER'),
-        'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': os.getenv('DB_HOST'),
-        'PORT': os.getenv('DB_PORT'),
-    }
-
 # Application definition
 INSTALLED_APPS = [
     'tracker',

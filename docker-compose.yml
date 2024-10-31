@@ -14,7 +14,7 @@ services:
 
   frontend:
     build:
-      context: ./my_budget_tracker_app
+      context: ./budget_tracker/my_budget_tracker_app
       dockerfile: Dockerfile.frontend
     ports:
       - "3000:3000"

@@ -17,8 +17,12 @@ RUN pip install -r requirements.txt
 # Copy Django app
 COPY . .
 
-# Copy built React files to Django's static files directory
-COPY --from=build /app/build /app/tracker/static
+# Copy built React files to Django's static directory
+COPY --from=build /app/build /app/templates  # Copy index.html and other React build files
+COPY --from=build /app/build/static /app/staticfiles  # Copy static files
 
-# Run migrations, load data, and start Django server
+# Run collectstatic to ensure all static files are gathered
+RUN python manage.py collectstatic --noinput
+
+# Expose the port and start server
 CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && gunicorn budget_tracker.wsgi:application --bind 0.0.0.0:8000"]

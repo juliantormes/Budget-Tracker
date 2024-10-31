@@ -1,45 +1,24 @@
-services:
-  postgres:
-    image: postgres:13  # PostgreSQL version
-    environment:
-      POSTGRES_DB: budget_tracker_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 6675
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data  # Persist data
+version: '3.8'
 
-  django:
+services:
+  backend:
     build:
-      context: ./budget_tracker  # Points to the Django folder
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py loaddata initial_data.json &&
-             python manage.py runserver 0.0.0.0:8000"
+      context: .
+      dockerfile: Dockerfile.backend
+    command: sh -c "python manage.py migrate && python manage.py loaddata initial_data.json && python manage.py runserver 0.0.0.0:8000"
     ports:
       - "8000:8000"
-    volumes:
-      - ./budget_tracker:/app
-    depends_on:
-      - postgres  # Ensure PostgreSQL starts first
     environment:
-      DB_NAME: budget_tracker_db
-      DB_USER: postgres
-      DB_PASSWORD: 6675
-      DB_HOST: postgres  # Connects to the PostgreSQL service defined above
+      - DB_NAME=budget_tracker_db
+      - DB_USER=postgres
+      - DB_PASSWORD=6675
+      - DB_HOST=postgres
 
-  react:
+  frontend:
     build:
-      context: ./budget_tracker/my_budget_tracker_app  # Points to React inside budget_tracker
-    command: npm start
+      context: ./my_budget_tracker_app
+      dockerfile: Dockerfile.frontend
     ports:
       - "3000:3000"
-    volumes:
-      - ./budget_tracker/my_budget_tracker_app:/app
-      - /app/node_modules  # Prevents conflicts with node_modules
     environment:
-      - CHOKIDAR_USEPOLLING=true  # Required for live reload on some systems
-
-volumes:
-  postgres_data:
+      - CHOKIDAR_USEPOLLING=true

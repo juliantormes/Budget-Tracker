@@ -1,16 +1,24 @@
-# Dockerfile for Django app
+# Stage 1: Build React app
+FROM node:14 as build
+
+WORKDIR /app
+COPY my_budget_tracker_app/package*.json ./
+RUN npm install
+COPY my_budget_tracker_app/ .
+RUN npm run build
+
+# Stage 2: Set up Django app
 FROM python:3.10
 
-# Set working directory
 WORKDIR /app
-
-# Install dependencies
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
-# Copy project files
+# Copy Django app
 COPY . .
 
-# Run migrations, load data, and start the server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && python manage.py runserver 0.0.0.0:8000"]
+# Copy built React files to Django's static files directory
+COPY --from=build /app/build /app/tracker/static
 
+# Run migrations, load data, and start Django server
+CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && gunicorn budget_tracker.wsgi:application --bind 0.0.0.0:8000"]

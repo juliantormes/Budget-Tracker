@@ -1,8 +1,16 @@
 # Dockerfile for Django app
 FROM python:3.10
+
+# Set working directory
 WORKDIR /app
+
+# Install dependencies
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
+
+# Copy project files
 COPY . .
-CMD ["python", "manage.py", "migrate"]
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+# Run migrations, load data, and start the server
+CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && python manage.py runserver 0.0.0.0:8000"]
+

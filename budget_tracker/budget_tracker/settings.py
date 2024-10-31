@@ -15,7 +15,8 @@ else:
 # Security and Debug settings
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
-ALLOWED_HOSTS = ['*']  # Update this for production security
+ALLOWED_HOSTS = ['.railway.app', 'budget-tracker-production-52d0.up.railway.app']
+
 
 # URL Redirection
 LOGIN_REDIRECT_URL = '/home/'  # Redirect to home after login
@@ -58,7 +59,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",  # React app's local address
 ]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000", 'https://budget-tracker-production-52d0.up.railway.app']
 
 # Authentication settings
 AUTHENTICATION_BACKENDS = (

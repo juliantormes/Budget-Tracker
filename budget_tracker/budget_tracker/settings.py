@@ -15,7 +15,7 @@ else:
 # Security and Debug settings
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG') == 'True'
-ALLOWED_HOSTS = ['.railway.app', 'budget-tracker-production-52d0.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1' , '.railway.app', 'budget-tracker-production-52d0.up.railway.app']
 
 
 # URL Redirection
@@ -137,6 +137,7 @@ USE_TZ = True
 # Static files configuration
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'tracker/static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# Ensure the templates directory exists
-mkdir -p /app/templates
-
-# Copy the index.html to templates (optional: in case it didn't get copied in the build)
-cp /app/build/index.html /app/templates/index.html
-
 # Run migrations
 python manage.py migrate
 

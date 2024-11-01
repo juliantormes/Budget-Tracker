@@ -138,10 +138,5 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Folder for collected static files
 
-# Specify the React static files path if needed (only for additional static assets, not for collected files)
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'my_budget_tracker_app', 'build', 'static'),
-]
-
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

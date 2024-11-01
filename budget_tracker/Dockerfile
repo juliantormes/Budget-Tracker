@@ -18,7 +18,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Copy built React files to Django's template and static files directory
-COPY --from=build /app/build /app/templates
+COPY --from=build /app/build/index.html /app/templates/index.html
 COPY --from=build /app/build/static /app/staticfiles
 
 # Run collectstatic to ensure all static files are gathered

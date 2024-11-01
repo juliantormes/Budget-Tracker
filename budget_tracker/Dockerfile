@@ -21,8 +21,8 @@ COPY . .
 COPY --from=build /app/build/index.html /app/templates/index.html
 COPY --from=build /app/build/static /app/staticfiles
 
-# Run collectstatic to ensure all static files are gathered
-RUN python manage.py collectstatic --noinput
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-# Expose the port and start server
-CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && gunicorn budget_tracker.wsgi:application --bind 0.0.0.0:8000"]
+# Expose the port and run the entrypoint script
+CMD ["sh", "/app/entrypoint.sh"]

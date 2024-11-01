@@ -17,9 +17,6 @@ RUN pip install -r requirements.txt
 # Copy Django app
 COPY . .
 
-# Ensure the templates directory exists
-RUN mkdir -p /app/templates
-
 # Copy built React files to Django's template and static files directory
 COPY --from=build /app/build/index.html /app/templates/index.html
 COPY --from=build /app/build/static /app/staticfiles

@@ -7,8 +7,10 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Load environment based on the ENVIRONMENT variable
-env_file = ".env.local" if os.getenv("ENVIRONMENT") == "development" else ".env"
-load_dotenv(os.path.join(BASE_DIR, env_file), override=True)
+if os.getenv('ENVIRONMENT') == 'production':
+    load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"), override=True)
+else:
+    load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env.local"), override=True)
 
 # Security and Debug settings
 SECRET_KEY = os.getenv('SECRET_KEY')

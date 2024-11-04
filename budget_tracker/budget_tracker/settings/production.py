@@ -19,4 +19,4 @@ DATABASES = {
 }
 
 # Static and media files configuration
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR.parent / 'staticfiles'

@@ -41,11 +41,9 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
 ]
 
-
-
 CSRF_TRUSTED_ORIGINS = [
+    "https://budget-tracker-production-c5da.up.railway.app",
     "http://localhost:3000",
-    "https://budget-tracker-production-c5da.up.railway.app"
 ]
 
 # Middleware configuration
@@ -60,11 +58,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-class DisableCSRF(MiddlewareMixin):
-    def process_request(self, request):
-        setattr(request, '_dont_enforce_csrf_checks', True)
-
-MIDDLEWARE.insert(0, 'budget_tracker.settings.base.DisableCSRF')
 
 # URL Configuration
 ROOT_URLCONF = 'budget_tracker.urls'

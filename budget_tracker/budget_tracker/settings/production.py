@@ -11,7 +11,7 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env.production"))  # Load .env 
 DEBUG = env.bool('DEBUG', default=False)
 
 # Allowed hosts for production
-ALLOWED_HOSTS = ['budget-tracker-production-52d0.up.railway.app']
+ALLOWED_HOSTS = ['budget-tracker-production-c5da.up.railway.app']
 
 # Database configuration using dj_database_url
 DATABASES = {

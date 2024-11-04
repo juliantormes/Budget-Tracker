@@ -40,7 +40,7 @@ static/
 
 # Environment variables
 .env.development
-.env.development.docker
+.env.docker
 .env.testing
 .env.production
 

@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 import environ
 
 # Initialize environment variables
@@ -7,8 +6,7 @@ env = environ.Env(
     DEBUG=(bool, False)
 )
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # General Security and Debug settings
 SECRET_KEY = env('SECRET_KEY')
@@ -81,7 +79,7 @@ REST_FRAMEWORK = {
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR.parent / 'templates'],  # Use BASE_DIR.parent to go up one level
+        'DIRS': [BASE_DIR / 'templates'],  # Use BASE_DIR.parent to go up one level
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -134,7 +132,7 @@ USE_TZ = True
 
 # Static files configuration
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR.parent / 'staticfiles'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

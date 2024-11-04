@@ -17,7 +17,7 @@ class HiddenApiRoot(APIView):
     def get(self, request, *args, **kwargs):
         # Only show the API root in development
         if settings.DEBUG:
-            return Response(router.get_urls())
+            return Response({route.name: route.url for route in router.get_urls()})
         # Hide API root in production
         return Response(status=404)
 
@@ -27,7 +27,6 @@ urlpatterns = [
     path('login/', views.login, name='login'),  # Custom login view
     path('signup/', views.signup, name='signup'),  # Custom signup view
     path('logout/', views.logout, name='logout'),  # Custom logout view
-    path('', include(router.urls)),
     path('api-root/', HiddenApiRoot.as_view(), name='api-root'),  # Custom API root view
     # Custom routes for updating recurring incomes and expenses
     path('api/expenses/<int:expense_id>/update_recurring/', views.update_recurring_expense, name='update_recurring_expense'),

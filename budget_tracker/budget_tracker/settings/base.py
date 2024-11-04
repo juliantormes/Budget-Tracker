@@ -36,7 +36,11 @@ INSTALLED_APPS = [
 ]
 
 # CORS and CSRF settings
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOWED_ORIGINS = [
+    "https://budget-tracker-production-c5da.up.railway.app",
+    "http://localhost:3000",
+]
+
 
 
 CSRF_TRUSTED_ORIGINS = [

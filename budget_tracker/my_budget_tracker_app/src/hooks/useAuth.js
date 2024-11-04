@@ -17,7 +17,7 @@ function useProvideAuth() {
 
     const login = async (username, password) => {
         try {
-            const response = await axios.post(`https://budget-tracker-production-c5da.up.railway.app/login/`, {
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}login/`, {
                 username,
                 password,
             });

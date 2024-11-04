@@ -14,7 +14,7 @@ from django.core.wsgi import get_wsgi_application
 
 # Initialize environment variables
 env = environ.Env()
-BASE_DIR = Path(__file__).resolve().parent
+BASE_DIR = Path(__file__).resolve().parent.parent  # Adjusted to point to the project root
 env.read_env(os.path.join(BASE_DIR, '.env.production'))
 
 # Set the default settings module for production

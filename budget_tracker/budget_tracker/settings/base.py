@@ -9,8 +9,6 @@ env = environ.Env(
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-DJANGO_SETTINGS_MODULE = os.getenv('DJANGO_SETTINGS_MODULE')
-
 
 # General Security and Debug settings
 SECRET_KEY = env('SECRET_KEY')
@@ -39,8 +37,15 @@ INSTALLED_APPS = [
 ]
 
 # CORS and CSRF settings
-CORS_ALLOW_ALL_ORIGINS = True
-CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=["http://localhost:3000"])
+CORS_ALLOWED_ORIGINS = [
+    "https://budget-tracker-production-c5da.up.railway.app",
+    "http://localhost:3000"
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+    "https://budget-tracker-production-c5da.up.railway.app"
+]
 
 # Middleware configuration
 MIDDLEWARE = [

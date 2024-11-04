@@ -43,6 +43,7 @@ static/
 .env.docker
 .env.testing
 .env.production
+my_budget_tracker_app/.env
 
 # Virtual environment
 .venv/

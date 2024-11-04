@@ -4,13 +4,15 @@ FROM python:3.10
 # Set working directory
 WORKDIR /app
 
-# Install dependencies
+# Copy requirements and install dependencies
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 
 # Copy project files
 COPY . .
 
+# Load environment variables
+ENV ENVIRONMENT=docker  # Ensures Django uses docker_development.py
+
 # Run migrations, load data, and start the server
 CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && python manage.py runserver 0.0.0.0:8000"]
-

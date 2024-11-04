@@ -39,7 +39,10 @@ jspm_packages/
 static/
 
 # Environment variables
-.env
+.env.development
+.env.development.docker
+.env.testing
+.env.production
 
 # Virtual environment
 .venv/

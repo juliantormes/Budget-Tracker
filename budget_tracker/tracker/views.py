@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import get_object_or_404
 from django.http import Http404
 
+@csrf_exempt
 @api_view(['POST'])
 def login(request):
     if request.user.is_authenticated:
@@ -32,7 +33,7 @@ def login(request):
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@csrf_exempt
 @api_view(['POST'])
 def signup(request):
     if request.user.is_authenticated:
@@ -49,7 +50,7 @@ def signup(request):
     
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])  # Allow access to the view without authentication
 def logout(request):

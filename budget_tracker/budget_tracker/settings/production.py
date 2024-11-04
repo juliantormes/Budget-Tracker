@@ -1,18 +1,16 @@
 from .base import *
+import dj_database_url
 import os
 
 # Ensure DEBUG is set to False in production
 DEBUG = env.bool('DEBUG', default=False)
 
 # Allowed hosts for production
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['https://budget-tracker-production-c5da.up.railway.app'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['your-production-domain.com'])
 
-# Database configuration with explicit ENGINE
+# Database configuration using dj_database_url
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Explicitly specify the engine
-        'DATABASE_URL': env('DATABASE_URL'),  # Use the DATABASE_URL environment variable
-    }
+    'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
 
 # Security settings

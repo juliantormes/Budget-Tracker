@@ -12,7 +12,7 @@ RUN pip install -r requirements.txt
 COPY . .
 
 # Load environment variables
-ENV ENVIRONMENT=docker  # Ensures Django uses docker_development.py
+ENV ENVIRONMENT=docker
 
 # Run migrations, load data, and start the server
 CMD ["sh", "-c", "python manage.py migrate && python manage.py loaddata initial_data.json && python manage.py runserver 0.0.0.0:8000"]

@@ -1,5 +1,6 @@
 from pathlib import Path
 import environ
+from django.utils.deprecation import MiddlewareMixin
 
 # Initialize environment variables
 env = environ.Env(
@@ -35,10 +36,8 @@ INSTALLED_APPS = [
 ]
 
 # CORS and CSRF settings
-CORS_ALLOWED_ORIGINS = [
-    "https://budget-tracker-production-c5da.up.railway.app",
-    "http://localhost:3000"
-]
+CORS_ALLOW_ALL_ORIGINS = True
+
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
@@ -57,6 +56,11 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+class DisableCSRF(MiddlewareMixin):
+    def process_request(self, request):
+        setattr(request, '_dont_enforce_csrf_checks', True)
+
+MIDDLEWARE.insert(0, 'budget_tracker.settings.base.DisableCSRF')
 
 # URL Configuration
 ROOT_URLCONF = 'budget_tracker.urls'

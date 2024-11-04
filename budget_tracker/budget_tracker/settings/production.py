@@ -11,17 +11,12 @@ load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env.production"))  # Load .env 
 DEBUG = env.bool('DEBUG', default=False)
 
 # Allowed hosts for production
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=['budget-tracker-production-c5da.up.railway.app'])
+ALLOWED_HOSTS = ['budget-tracker-production-52d0.up.railway.app']
 
 # Database configuration using dj_database_url
 DATABASES = {
     'default': dj_database_url.config(default=os.getenv('DATABASE_URL'))
 }
-
-# Security settings
-SECURE_SSL_REDIRECT = True
-SESSION_COOKIE_SECURE = True
-X_FRAME_OPTIONS = 'DENY'
 
 # Static and media files configuration
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')

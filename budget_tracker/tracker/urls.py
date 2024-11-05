@@ -21,9 +21,9 @@ router.register(r'credit-card-expenses', views.CreditCardExpenseViewSet, basenam
 urlpatterns = [
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path('login/', views.login, name='login'),  # Custom login view
-    path('signup/', views.signup, name='signup'),  # Custom signup view
-    path('logout/', views.logout, name='logout'),  # Custom logout view
+    path('api/login/', views.login, name='login'),  # Update to use /api/login
+    path('api/signup/', views.signup, name='signup'),
+    path('api/logout/', views.logout, name='logout'),
 
     # Custom routes for updating recurring incomes and expenses
     path('api/expenses/<int:expense_id>/update_recurring/', views.update_recurring_expense, name='update_recurring_expense'),

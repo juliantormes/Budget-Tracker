@@ -53,7 +53,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
   const fetchCategories = useCallback(async () => {
     if (!categoriesProp) {
       try {
-        const response = await axiosInstance.get('/api/expense_categories/');
+        const response = await axiosInstance.get('expense_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -64,7 +64,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
   const fetchCreditCards = useCallback(async () => {
     if (!creditCardsProp) {
       try {
-        const response = await axiosInstance.get('/api/credit_cards/');
+        const response = await axiosInstance.get('credit_cards/');
         if (response && response.data) {
           setCreditCards(response.data);
         } else {
@@ -113,7 +113,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
       return;
     }
     try {
-      const response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/`, currentExpense);
+      const response = await axiosInstance.put(`expenses/${currentExpense.id}/`, currentExpense);
       if (response.status === 200 || response.status === 201) {
         refetch();
         setEditingExpenseId(null);
@@ -148,7 +148,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
   const handleDelete = async (expenseId) => {
     setIsDeleting(true);
     try {
-      const response = await axiosInstance.delete(`/api/expenses/${expenseId}/`);
+      const response = await axiosInstance.delete(`expenses/${expenseId}/`);
       if (response.status === 204) {
         refetch();
       } else {
@@ -178,9 +178,9 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
   
       let response;
       if (existingLog) {
-        response = await axiosInstance.put(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
+        response = await axiosInstance.put(`expenses/${currentExpense.id}/update_recurring/`, formData);
       } else {
-        response = await axiosInstance.post(`/api/expenses/${currentExpense.id}/update_recurring/`, formData);
+        response = await axiosInstance.post(`expenses/${currentExpense.id}/update_recurring/`, formData);
       }
   
       if (response.status === 200 || response.status === 201) {

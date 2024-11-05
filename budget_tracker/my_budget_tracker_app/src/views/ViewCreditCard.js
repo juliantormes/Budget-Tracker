@@ -43,7 +43,7 @@ const ViewCreditCard = () => {
   useEffect(() => {
     const fetchCreditCards = async () => {
       try {
-        const response = await axiosInstance.get('/api/credit_cards/');
+        const response = await axiosInstance.get('credit_cards/');
         setCreditCards(response.data);
       } catch (error) {
         console.error('Error fetching credit cards:', error);
@@ -82,7 +82,7 @@ const ViewCreditCard = () => {
   const handleSaveClick = async () => {
     try {
       setEditErrors({}); // Clear previous errors
-      const response = await axiosInstance.put(`/api/credit_cards/${editingCardId}/`, formData);
+      const response = await axiosInstance.put(`credit_cards/${editingCardId}/`, formData);
       if (response.status === 200) {
         setCreditCards((prevCards) =>
           prevCards.map((card) =>
@@ -112,7 +112,7 @@ const ViewCreditCard = () => {
 
   const handleConfirmDelete = async () => {
     try {
-      const response = await axiosInstance.delete(`/api/credit_cards/${cardToDelete}/`);
+      const response = await axiosInstance.delete(`credit_cards/${cardToDelete}/`);
       if (response.status === 204) {
         setCreditCards((prevCards) => prevCards.filter((card) => card.id !== cardToDelete));
         setOpenDeleteDialog(false);

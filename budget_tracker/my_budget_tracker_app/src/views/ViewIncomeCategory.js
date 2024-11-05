@@ -37,7 +37,7 @@ const ViewIncomeCategory = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/income_categories/');
+        const response = await axiosInstance.get('income_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -74,7 +74,7 @@ const ViewIncomeCategory = () => {
       setErrors({}); // Clear previous errors
       setGeneralError('');
       setSuccessMessage('');
-      const response = await axiosInstance.put(`/api/income_categories/${categoryId}/`, formData);
+      const response = await axiosInstance.put(`income_categories/${categoryId}/`, formData);
       if (response.status === 200) {
         const updatedCategories = categories.map((cat) =>
           cat.id === categoryId ? { ...cat, name: formData.name } : cat
@@ -103,7 +103,7 @@ const ViewIncomeCategory = () => {
   const handleConfirmDelete = async () => {
     try {
       setGeneralError('');
-      const response = await axiosInstance.delete(`/api/income_categories/${categoryToDelete}/`);
+      const response = await axiosInstance.delete(`income_categories/${categoryToDelete}/`);
       if (response.status === 204) {
         setCategories(categories.filter((cat) => cat.id !== categoryToDelete));
         setOpenDeleteDialog(false);
@@ -129,7 +129,7 @@ const ViewIncomeCategory = () => {
     try {
       setErrors({});
       setGeneralError('');
-      const response = await axiosInstance.post('/api/income_categories/', formData);
+      const response = await axiosInstance.post('income_categories/', formData);
       if (response.status === 201) {
         setCategories([...categories, response.data]);
         setSuccessMessage('Category added successfully!');

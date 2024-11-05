@@ -34,7 +34,7 @@ const AddCreditCard = () => {
     setSuccessMessage(''); // Clear previous success message
 
     try {
-      const response = await axiosInstance.post('/api/credit_cards/', formData);
+      const response = await axiosInstance.post('credit_cards/', formData);
       if (response.status === 201) {
         setSuccessMessage('Credit card added successfully');
         setFormData({

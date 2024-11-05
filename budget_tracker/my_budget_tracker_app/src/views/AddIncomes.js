@@ -25,7 +25,7 @@ const AddIncomes = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/income_categories/');
+        const response = await axiosInstance.get('income_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -48,7 +48,7 @@ const AddIncomes = () => {
     setMessage('');
 
     try {
-      const response = await axiosInstance.post('/api/incomes/', formData);
+      const response = await axiosInstance.post('incomes/', formData);
       if (response.status === 201) {
         setMessage('Income added successfully!');
         setSeverity('success');

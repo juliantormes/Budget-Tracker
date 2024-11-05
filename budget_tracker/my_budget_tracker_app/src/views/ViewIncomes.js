@@ -52,7 +52,7 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
   const fetchCategories = useCallback(async () => {
     if (!categoriesProp) {
       try {
-        const response = await axiosInstance.get('/api/income_categories/');
+        const response = await axiosInstance.get('income_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -95,7 +95,7 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
       return;
     }
     try {
-      const response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/`, currentIncome);
+      const response = await axiosInstance.put(`incomes/${currentIncome.id}/`, currentIncome);
       if (response.status === 200 || response.status === 201) {
         refetch();
         setEditingIncomeId(null);
@@ -130,7 +130,7 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
   const handleDelete = async (incomeId) => {
     setIsDeleting(true);
     try {
-      const response = await axiosInstance.delete(`/api/incomes/${incomeId}/`);
+      const response = await axiosInstance.delete(`incomes/${incomeId}/`);
       if (response.status === 204) {
         refetch();
       } else {
@@ -160,9 +160,9 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
 
       let response;
       if (existingLog) {
-        response = await axiosInstance.put(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
+        response = await axiosInstance.put(`incomes/${currentIncome.id}/update_recurring/`, formData);
       } else {
-        response = await axiosInstance.post(`/api/incomes/${currentIncome.id}/update_recurring/`, formData);
+        response = await axiosInstance.post(`incomes/${currentIncome.id}/update_recurring/`, formData);
       }
 
       if (response.status === 200 || response.status === 201) {

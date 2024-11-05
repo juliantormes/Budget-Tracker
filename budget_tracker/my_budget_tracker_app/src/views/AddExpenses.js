@@ -30,7 +30,7 @@ const AddExpenses = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/expense_categories/');
+        const response = await axiosInstance.get('expense_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -39,7 +39,7 @@ const AddExpenses = () => {
 
     const fetchCreditCards = async () => {
       try {
-        const response = await axiosInstance.get('/api/credit_cards/');
+        const response = await axiosInstance.get('credit_cards/');
         setCreditCards(response.data);
       } catch (error) {
         console.error('Error fetching credit cards:', error);
@@ -77,7 +77,7 @@ const AddExpenses = () => {
     };
 
     try {
-      const response = await axiosInstance.post('/api/expenses/', submissionData);
+      const response = await axiosInstance.post('expenses/', submissionData);
       if (response.status === 201) {
         setMessage('Expense added successfully!');
         setSeverity('success');

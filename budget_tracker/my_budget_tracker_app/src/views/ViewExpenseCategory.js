@@ -37,7 +37,7 @@ const ViewExpenseCategory = () => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await axiosInstance.get('/api/expense_categories/');
+        const response = await axiosInstance.get('expense_categories/');
         setCategories(response.data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -74,7 +74,7 @@ const ViewExpenseCategory = () => {
       setErrors({}); // Clear previous errors
       setGeneralError('');
       setSuccessMessage('');
-      const response = await axiosInstance.put(`/api/expense_categories/${categoryId}/`, formData);
+      const response = await axiosInstance.put(`expense_categories/${categoryId}/`, formData);
       if (response.status === 200) {
         const updatedCategories = categories.map((cat) =>
           cat.id === categoryId ? { ...cat, name: formData.name } : cat
@@ -103,7 +103,7 @@ const ViewExpenseCategory = () => {
   const handleConfirmDelete = async () => {
     try {
       setGeneralError('');
-      const response = await axiosInstance.delete(`/api/expense_categories/${categoryToDelete}/`);
+      const response = await axiosInstance.delete(`expense_categories/${categoryToDelete}/`);
       if (response.status === 204) {
         setCategories(categories.filter((cat) => cat.id !== categoryToDelete));
         setOpenDeleteDialog(false);
@@ -129,7 +129,7 @@ const ViewExpenseCategory = () => {
     try {
       setErrors({});
       setGeneralError('');
-      const response = await axiosInstance.post('/api/expense_categories/', formData);
+      const response = await axiosInstance.post('expense_categories/', formData);
       if (response.status === 201) {
         setCategories([...categories, response.data]);
         setSuccessMessage('Category added successfully!');

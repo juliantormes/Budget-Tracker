@@ -20,9 +20,6 @@ router.register(r'credit-card-expenses', views.CreditCardExpenseViewSet, basenam
 
 # Define urlpatterns with the selected router
 urlpatterns = [
-    # Redirect root URL to /api/
-    path('', lambda request: redirect('/api/')),  # Redirect root to /api/
-
     # API endpoints
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

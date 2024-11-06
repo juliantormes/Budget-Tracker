@@ -18,3 +18,5 @@ DATABASES = {
 
 # Load SECRET_KEY from .env.testing
 SECRET_KEY = os.getenv("SECRET_KEY")
+
+MIDDLEWARE += ['budget_tracker.middleware.redirect_to_api.RedirectToApiMiddleware']

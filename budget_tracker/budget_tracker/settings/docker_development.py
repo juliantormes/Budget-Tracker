@@ -20,3 +20,5 @@ DATABASES = {
 # Static files configuration (you may not need this if using Gunicorn)
 STATIC_URL = '/static/'
 STATIC_ROOT = '/app/staticfiles'
+
+MIDDLEWARE += ['budget_tracker.middleware.redirect_to_api.RedirectToApiMiddleware']

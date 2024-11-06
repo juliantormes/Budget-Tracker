@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.urls import path, include
+from django.shortcuts import redirect
 from rest_framework.routers import DefaultRouter, SimpleRouter
 from . import views
 
@@ -19,6 +20,10 @@ router.register(r'credit-card-expenses', views.CreditCardExpenseViewSet, basenam
 
 # Define urlpatterns with the selected router
 urlpatterns = [
+    # Redirect root URL to /api/
+    path('', lambda request: redirect('/api/')),  # Redirect root to /api/
+
+    # API endpoints
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/login/', views.login, name='login'),  # Update to use /api/login

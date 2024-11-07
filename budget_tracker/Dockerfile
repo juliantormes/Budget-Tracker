@@ -4,6 +4,8 @@ FROM node:14 as build
 # Set the working directory
 WORKDIR /app
 
+# Set the API base URL directly
+ENV REACT_APP_API_BASE_URL=https://budget-tracker-production-c5da.up.railway.app/api/
 # Install dependencies and build the React app
 COPY my_budget_tracker_app/package*.json ./
 RUN npm install

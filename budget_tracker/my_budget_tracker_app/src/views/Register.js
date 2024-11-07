@@ -74,7 +74,7 @@ const RegisterForm = () => {
     };
 
     return (
-        <div className="auth-page-container" style={{ backgroundImage: `url('/images/Preview2.png')` }}>
+        <div className="auth-page-container" style={{ backgroundImage: `url('${process.env.REACT_APP_STATIC_URL}images/Preview2.png')` }}>
             <div className="auth-form-overlay">
                 <form onSubmit={handleSubmit} className="form">
                     <h2 className="form-title">Register</h2>

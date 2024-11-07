@@ -15,6 +15,10 @@ const ExpenseTable = ({
   creditCards,
   isDeleting
 }) => {
+  // Log to confirm that ExpenseTable is receiving the props correctly
+  console.log('Rendering ExpenseTable with expenses:', expenses);
+  console.log('Categories:', categories);
+  console.log('Credit Cards:', creditCards);
 
   return (
     <Table className="table">
@@ -33,23 +37,28 @@ const ExpenseTable = ({
         </TableRow>
       </TableHead>
       <TableBody>
-        {expenses.map((expense) => (
-          <EditableRow
-            key={`${expense.id}-${expense.amount}`}
-            data-testid={`expense-row-${expense.id}`}
-            item={expense}
-            isEditing={editingExpenseId === expense.id}
-            onEdit={onEdit}
-            onCancel={onCancel}
-            onSave={onSave}
-            onDelete={onDelete}
-            onUpdateRecurring={onUpdateRecurring}
-            categories={categories}
-            type="expense"
-            creditCards={creditCards}
-            isDeleting={isDeleting}
-          />
-        ))}
+        {expenses.map((expense) => {
+          // Log each expense item to confirm it is being iterated over
+          console.log('Mapping expense:', expense);
+
+          return (
+            <EditableRow
+              key={`${expense.id}-${expense.amount}`}
+              data-testid={`expense-row-${expense.id}`}
+              item={expense}
+              isEditing={editingExpenseId === expense.id}
+              onEdit={onEdit}
+              onCancel={onCancel}
+              onSave={onSave}
+              onDelete={onDelete}
+              onUpdateRecurring={onUpdateRecurring}
+              categories={categories}
+              type="expense"
+              creditCards={creditCards}
+              isDeleting={isDeleting}
+            />
+          );
+        })}
       </TableBody>
     </Table>
   );

@@ -13,10 +13,15 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewExpenses.css';
 import ExpenseTable from '../components/ExpenseTable';
 
-const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp }) => {
+const ViewExpenses = ({ 
+  categories: categoriesProp, 
+  creditCards: creditCardsProp,
+  initialDate = dayjs(),
+  initialDateRange = [dayjs().startOf('month'), dayjs().endOf('month')]
+}) => {
   const { logout } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [dateRange, setDateRange] = useState(initialDateRange);
   const { data, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedExpenses, setSelectedExpenses] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
@@ -33,7 +38,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
 
   useEffect(() => {
     if (currentExpense) {
-      setNewAmount(currentExpense.effective_amount || currentExpense.amount);  // Set the default value to the current amount
+      setNewAmount(currentExpense.effective_amount || currentExpense.amount);
     }
   }, [currentExpense]);
 
@@ -65,17 +70,12 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
     if (!creditCardsProp) {
       try {
         const response = await axiosInstance.get('credit_cards/');
-        if (response && response.data) {
-          setCreditCards(response.data);
-        } else {
-          console.error('Error: Received undefined or empty response.');
-        }
+        setCreditCards(response.data);
       } catch (error) {
         console.error('Error fetching credit cards:', error);
       }
     }
   }, [creditCardsProp]);
-  
 
   useEffect(() => {
     fetchCategories();
@@ -175,23 +175,19 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
       const existingLog = currentExpense.change_logs.find(log =>
         dayjs(log.effective_date).isSame(effectiveDate, 'month')
       );
-  
+
       let response;
       if (existingLog) {
         response = await axiosInstance.put(`expenses/${currentExpense.id}/update_recurring/`, formData);
       } else {
         response = await axiosInstance.post(`expenses/${currentExpense.id}/update_recurring/`, formData);
       }
-  
+
       if (response.status === 200 || response.status === 201) {
         const updatedExpense = response.data;
-  
-        // Make sure to create a new array for immutability
         setSelectedExpenses(prevExpenses => 
           prevExpenses.map(exp => (exp.id === updatedExpense.id ? { ...updatedExpense } : exp))
         );
-  
-        // Optionally refetch after a slight delay
         await new Promise(resolve => setTimeout(resolve, 500)); 
         refetch();
         setOpenDialog(false);
@@ -254,7 +250,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
             value={newAmount}
             onChange={(e) => setNewAmount(e.target.value)}
             InputLabelProps={{
-              style: { color: '#ffffff' }  // Set label color to white
+              style: { color: '#ffffff' }  
             }}
           />
           <TextField
@@ -265,7 +261,7 @@ const ViewExpenses = ({ categories: categoriesProp, creditCards: creditCardsProp
             value={effectiveDate.format('YYYY-MM-DD')}
             onChange={(e) => setEffectiveDate(dayjs(e.target.value))}
             InputLabelProps={{
-              style: { color: '#ffffff' }  // Set label color to white
+              style: { color: '#ffffff' }  
             }}
           />
         </DialogContent>

@@ -5,6 +5,7 @@ import ViewIncomes from '../../views/ViewIncomes';
 import { useAuth } from '../../hooks/useAuth';
 import { useFetchFinancialData } from '../../hooks/useFetchFinancialData';
 import axiosInstance from '../../api/axiosApi';
+import dayjs from 'dayjs';
 
 // Mock hooks and API instance
 jest.mock('../../hooks/useAuth');
@@ -42,7 +43,11 @@ describe('ViewIncomes Component', () => {
   const renderComponent = () => {
     render(
       <Router>
-        <ViewIncomes />
+        <ViewIncomes
+          categories={categoriesMock}
+          initialDate={dayjs('2024-10-01')}
+          initialDateRange={[dayjs('2024-10-01'), dayjs('2024-10-31')]}
+        />
       </Router>
     );
   };

@@ -13,10 +13,14 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import '../styles/ViewIncomes.css';
 import IncomeTable from '../components/IncomeTable';
 
-const ViewIncomes = ({ categories: categoriesProp }) => {
+const ViewIncomes = ({
+  categories: categoriesProp,
+  initialDate = dayjs(),
+  initialDateRange = [dayjs().startOf('month'), dayjs().endOf('month')]
+}) => {
   const { logout } = useAuth();
-  const [selectedDate, setSelectedDate] = useState(dayjs());
-  const [dateRange, setDateRange] = useState([dayjs().startOf('month'), dayjs().endOf('month')]);
+  const [selectedDate, setSelectedDate] = useState(initialDate);
+  const [dateRange, setDateRange] = useState(initialDateRange);
   const { data, refetch } = useFetchFinancialData(selectedDate.year(), selectedDate.month() + 1);
   const [selectedIncomes, setSelectedIncomes] = useState([]);
   const [isValidRange, setIsValidRange] = useState(true);
@@ -167,11 +171,9 @@ const ViewIncomes = ({ categories: categoriesProp }) => {
 
       if (response.status === 200 || response.status === 201) {
         const updatedIncome = response.data;
-
         setSelectedIncomes(prevIncomes =>
           prevIncomes.map(inc => (inc.id === updatedIncome.id ? { ...updatedIncome } : inc))
         );
-
         await new Promise(resolve => setTimeout(resolve, 500));
         refetch();
         setOpenDialog(false);

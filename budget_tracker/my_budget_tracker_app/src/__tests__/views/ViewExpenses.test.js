@@ -1,10 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import ViewExpenses from '../../views/ViewExpenses'; 
 import { useAuth } from '../../hooks/useAuth';
 import { useFetchFinancialData } from '../../hooks/useFetchFinancialData';
 import axiosInstance from '../../api/axiosApi';
+import dayjs from 'dayjs';
 
 // Mock hooks and API instance
 jest.mock('../../hooks/useAuth');
@@ -18,6 +19,11 @@ beforeAll(() => {
         unobserve() {}
         disconnect() {}
     };
+    jest.useFakeTimers().setSystemTime(new Date('2024-10-01').getTime()); // Mock system date to October 1, 2024
+});
+
+afterAll(() => {
+    jest.useRealTimers(); // Restore real timers after the tests
 });
 
 beforeEach(() => {
@@ -45,7 +51,12 @@ describe('ViewExpenses Component', () => {
   const renderComponent = () => {
     render(
       <Router>
-        <ViewExpenses categories={categoriesMock} creditCards={creditCardsMock} />
+        <ViewExpenses 
+          categories={categoriesMock} 
+          creditCards={creditCardsMock} 
+          initialDate={dayjs('2024-10-01')} 
+          initialDateRange={[dayjs('2024-10-01'), dayjs('2024-10-31')]} 
+        />
       </Router>
     );
   };

@@ -2,25 +2,25 @@
 
 ## Overview
 
-Welcome to the **Budget Tracker Project**! This web application provides a straightforward, efficient way for individuals to manage their finances by tracking income, expenses, and budget goals. Built with Python, Django, and React, the application uses PostgreSQL as its database for reliable data handling. Docker is used to streamline development and testing, making the project production-ready and adaptable to different environments.
+Welcome to the **Budget Tracker Project**! This web application provides a streamlined way for individuals to manage their finances by tracking income, expenses, and budget goals. Built with **Python**, **Django**, and **React**, and utilizing **PostgreSQL** as its database, this project is reliable, robust, and production-ready. Both **Railway** and **Docker** are used to facilitate easy deployment, ensuring the app runs consistently across various environments, making it adaptable for any setup.
 
-With features like customizable dashboards, income and expense categorization, credit card management, and calendar views, the Budget Tracker project is a comprehensive personal finance tool.
+With features like customizable dashboards, income and expense categorization, credit card management, and calendar views, the Budget Tracker is a comprehensive personal finance tool.
 
 ## Key Features
 
-1. **User Authentication**: Secure user registration, login, and account management provide a personalized, private budgeting experience.
+1. **User Authentication**: Secure user registration, login, and account management ensure a personalized, private budgeting experience.
    
-2. **Dashboard Overview**: A data-driven dashboard with charts and graphs offers insights into income and spending trends, helping users understand their financial health.
+2. **Dashboard Overview**: A data-driven dashboard with charts and graphs provides insights into income and spending trends, helping users understand their financial health.
 
 3. **Expense Management**: Users can add, edit, delete, and categorize expenses to track spending patterns and set budget goals effectively.
 
-4. **Income Tracking**: Income logging with categorization allows users to monitor month-over-month income and sources.
+4. **Income Tracking**: Income logging with categorization allows users to monitor month-over-month income and income sources.
 
 5. **Credit Card Management**: This feature supports credit card transaction tracking, including recurring payments and installment handling, for a complete view of financial obligations.
 
-6. **Calendar Integration**: The calendar view offers a monthly overview, helping users manage income and expenses on specific dates.
+6. **Calendar Integration**: The calendar view provides a monthly overview, helping users manage income and expenses on specific dates.
 
-7. **Comprehensive Testing**: The application includes tests for both backend and frontend code, ensuring a stable and reliable user experience.
+7. **Comprehensive Testing**: Both frontend and backend are fully tested, ensuring a stable and reliable user experience across all functionalities.
 
 ## Project Structure
 
@@ -46,7 +46,7 @@ With features like customizable dashboards, income and expense categorization, c
 
 - **`services/`**: Centralized API call logic, simplifying HTTP request management.
 
-- **`tests/`**: Jest tests for component rendering, user interaction, and event handling.
+- **`tests/`**: Jest tests for component rendering, user interaction, and event handling, ensuring reliability across all user-facing components.
 
 ### Database
 
@@ -54,9 +54,11 @@ With features like customizable dashboards, income and expense categorization, c
 
 ## Design and Testing Choices
 
-### Docker for Development and Testing
+### Docker and Railway Deployment
 
-Docker is integrated into the development process to simulate production environments, making it easy to run, test, and deploy the application across different systems. With Docker, the application can be tested in isolated containers, ensuring consistency and helping to catch deployment-specific issues early.
+**Docker** is integrated into the development process to simulate production environments, making it easy to run, test, and deploy the application across different systems. With Docker, the application can be tested in isolated containers, ensuring consistency and helping to catch deployment-specific issues early.
+
+The project is deployed on **Railway** for a seamless, cloud-based experience, ensuring that the app is accessible and consistently running across environments. Both Docker and Railway support highlight the project’s production-readiness, critical for real-world deployments.
 
 ### Authentication and Security
 
@@ -64,7 +66,7 @@ Django’s built-in user model is used for authentication, with frontend compone
 
 ### Testing Strategy
 
-Testing is managed with Django’s testing framework for backend and Jest for frontend, ensuring comprehensive validation of functionalities and user interactions.
+Testing is managed with Django’s testing framework for backend and Jest for frontend, ensuring comprehensive validation of functionalities and user interactions. The entire application has been rigorously tested for reliability, covering all core features and user interactions to deliver a seamless, bug-free experience.
 
 ### User Interface
 
@@ -72,7 +74,7 @@ Material-UI components ensure a consistent design across pages, and custom style
 
 ### Challenges
 
-- **Recurring Transactions**: Recurring expenses and incomes needed flexible updating without altering historical data. This was managed with a `RecurringChangeLog` model.
+- **Recurring Transactions**: Recurring expenses and incomes required flexible updating without altering historical data. This was managed with a `RecurringChangeLog` model.
 
 - **Credit Card Installments**: Distributing installments across future months was achieved through dynamic calculation based on installment periods and surcharges.
 
@@ -148,8 +150,6 @@ Material-UI components ensure a consistent design across pages, and custom style
 
 Contributions are welcome! For feature suggestions or bug fixes, please open a pull request. For significant changes, open an issue to discuss your proposal.
 
-## Acknowledgements
-
-Thanks to the developers and open-source projects that contributed tools and support, including Material-UI, Django REST Framework, and Chart.js.
+---
 
 Enjoy managing your budget with **Budget Tracker**! 🚀

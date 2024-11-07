@@ -21,4 +21,4 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 
 MIDDLEWARE += ['budget_tracker.middleware.redirect_to_api.RedirectToApiMiddleware']
 
-ALLOWED_HOSTS = ['testserver']
+ALLOWED_HOSTS += ['testserver']

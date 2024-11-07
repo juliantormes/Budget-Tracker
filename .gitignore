@@ -35,8 +35,6 @@ Thumbs.db
 node_modules/
 jspm_packages/
 
-# Static files
-static/
 
 # Environment variables
 .env.development
@@ -83,3 +81,5 @@ coverage.xml
 # MacOS specific
 .DS_Store
 budget_tracker/.venv/
+
+staticfiles/

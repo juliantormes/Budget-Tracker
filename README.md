@@ -6,7 +6,7 @@ Welcome to the **Budget Tracker Project**! This web application simplifies perso
 
 With a rich feature set—including customizable dashboards, expense categorization, credit card management, and calendar views—Budget Tracker is designed to empower users in achieving their financial goals.
 
-[![Deploy on Railway](https://img.shields.io/badge/Deploy%20on-Railway-blue?logo=railway&style=for-the-badge)](https://github.com/juliantormes/CS50PFinalProject)
+[![Deploy on Railway](https://img.shields.io/badge/Deploy%20on-Railway-blue?logo=railway&style=for-the-badge)](https://railway.app/new/template?referralCode=06Olth&repo=https://github.com/juliantormes/CS50PFinalProject)
 
 Check out the live app: [Budget Tracker on Railway](https://budget-tracker-production-c5da.up.railway.app/)
 

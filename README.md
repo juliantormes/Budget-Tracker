@@ -6,8 +6,6 @@ Welcome to the **Budget Tracker Project**! This web application simplifies perso
 
 With a rich feature set—including customizable dashboards, expense categorization, credit card management, and calendar views—Budget Tracker is designed to empower users in achieving their financial goals.
 
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/xb4Pqe?referralCode=06Olth)
-
 Check out the live app: [Budget Tracker on Railway](https://budget-tracker-production-c5da.up.railway.app/)
 
 ---
@@ -27,6 +25,34 @@ Check out the live app: [Budget Tracker on Railway](https://budget-tracker-produ
 6. **Calendar Integration**: Monthly calendar view for managing income and expenses on specific dates.
 
 7. **Comprehensive Testing**: Fully tested frontend and backend, providing a stable, reliable user experience across all functionalities.
+
+---
+
+## Deploying with Railway
+
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/xb4Pqe?referralCode=06Olth)
+
+To deploy your own instance of this project on Railway:
+
+1. **Click the "Deploy on Railway" button** above to open the deployment page for this template.
+2. **Log in to your Railway account** (or create one if you don’t have it yet).
+3. **Configure Environment Variables**:
+   - Railway will prompt you to enter the required environment variables:
+     - **`DJANGO_SETTINGS_MODULE`**: Set this to `budget_tracker.settings.production`.
+     - **`SECRET_KEY`**: Django’s secret key. You can generate one with Python:
+       ```python
+       import secrets
+       print(secrets.token_urlsafe(50))
+       ```
+     - **`ENVIRONMENT`**: Set to `production`.
+     - **`DEBUG`**: Set to `False`.
+     - **`DATABASE_URL`**: PostgreSQL database URL. If you're using a PostgreSQL service in Railway, this is often filled automatically.
+     - **`REACT_APP_API_BASE_URL`**: Set to your deployed API URL (e.g., `https://your-app-url/api/`).
+     - **`REACT_APP_STATIC_URL`**: Set to your deployed static files URL (e.g., `https://your-app-url/static/`).
+4. **Link a PostgreSQL Database** (if not automatically added):
+   - In Railway, add a **PostgreSQL service** if it’s not set up by default.
+   - Ensure `DATABASE_URL` points to the PostgreSQL instance.
+5. **Click "Deploy Now"** to start deploying the project. Railway will handle the setup and deployment.
 
 ---
 
@@ -79,7 +105,7 @@ Material-UI provides a cohesive design language, while custom styles improve res
 
 ---
 
-## Getting Started
+## Getting Started Locally
 
 ### Prerequisites
 
@@ -149,29 +175,9 @@ Material-UI provides a cohesive design language, while custom styles improve res
 
 ---
 
-## Deploying with Railway
-
-To deploy your own instance of this project on Railway:
-
-1. **Click the "Deploy on Railway" button** above to open the deployment page for this template.
-2. **Log in to your Railway account** (or create one if you don’t have it yet).
-3. **Configure Environment Variables**:
-   - Railway will prompt you to enter the required environment variables.
-   - Fill in values for `DJANGO_SETTINGS_MODULE`, `SECRET_KEY`, `ENVIRONMENT`, `DEBUG`, `DATABASE_URL`, `REACT_APP_API_BASE_URL`, and `REACT_APP_STATIC_URL`.
-4. **Link a PostgreSQL Database** (if not automatically added):
-   - In Railway, add a **PostgreSQL service** if it’s not set up by default.
-   - Make sure `DATABASE_URL` points to the PostgreSQL instance.
-5. **Click "Deploy Now"** to start deploying the project. Railway will handle the setup and deployment.
-
----
-
 ## Contributing
 
 Contributions are welcome! For feature suggestions or bug fixes, please open a pull request. For significant changes, open an issue to discuss your proposal.
-
-## License
-
-This project is licensed under the MIT License.
 
 ---
 

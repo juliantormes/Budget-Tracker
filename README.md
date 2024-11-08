@@ -8,7 +8,6 @@ With a rich feature set—including customizable dashboards, expense categorizat
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/xb4Pqe?referralCode=06Olth)
 
-
 Check out the live app: [Budget Tracker on Railway](https://budget-tracker-production-c5da.up.railway.app/)
 
 ---
@@ -147,6 +146,22 @@ Material-UI provides a cohesive design language, while custom styles improve res
     cd my_budget_tracker_app
     npm start  # React server
     ```
+
+---
+
+## Deploying with Railway
+
+To deploy your own instance of this project on Railway:
+
+1. **Click the "Deploy on Railway" button** above to open the deployment page for this template.
+2. **Log in to your Railway account** (or create one if you don’t have it yet).
+3. **Configure Environment Variables**:
+   - Railway will prompt you to enter the required environment variables.
+   - Fill in values for `DJANGO_SETTINGS_MODULE`, `SECRET_KEY`, `ENVIRONMENT`, `DEBUG`, `DATABASE_URL`, `REACT_APP_API_BASE_URL`, and `REACT_APP_STATIC_URL`.
+4. **Link a PostgreSQL Database** (if not automatically added):
+   - In Railway, add a **PostgreSQL service** if it’s not set up by default.
+   - Make sure `DATABASE_URL` points to the PostgreSQL instance.
+5. **Click "Deploy Now"** to start deploying the project. Railway will handle the setup and deployment.
 
 ---
 
